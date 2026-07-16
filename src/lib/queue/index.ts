@@ -10,6 +10,10 @@ const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', 
   maxRetriesPerRequest: null,
 });
 
+connection.on('error', (err) => {
+  console.warn('⚠️ Redis connection failed. Sync queue features will be offline:', err.message);
+});
+
 // Cast to ConnectionOptions to fix type compatibility
 const connectionOptions = connection as unknown as ConnectionOptions;
 
