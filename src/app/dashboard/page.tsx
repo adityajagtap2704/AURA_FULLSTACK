@@ -126,22 +126,25 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center">
-        <div className="text-2xl text-zinc-600 dark:text-zinc-400">Loading dashboard...</div>
+      <div className="min-h-screen bg-background flex items-center justify-center font-sans text-foreground">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-sm font-medium text-muted-foreground animate-pulse">Loading workspace...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 p-4 md:p-8">
+    <div className="min-h-screen bg-background p-4 md:p-8 font-sans text-foreground">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-black dark:text-white mb-2">
+            <h1 className="text-4xl font-extrabold text-foreground mb-2 tracking-tight">
               Today
             </h1>
-            <p className="text-zinc-600 dark:text-zinc-400">
+            <p className="text-muted-foreground font-medium">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -151,24 +154,24 @@ export default function DashboardPage() {
             </p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2.5">
             <Link
               href="/"
-              className="px-4 py-2 bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-2 bg-white border border-border text-foreground rounded-xl hover:bg-muted font-bold text-sm shadow-sm transition-colors flex items-center"
             >
               ← Home
             </Link>
             <button
               onClick={() => handleSync('google')}
               disabled={syncing}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-[#C17817] to-[#D89A3E] hover:from-[#9C651F] hover:to-[#B7792B] text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] cursor-pointer flex items-center gap-2"
             >
               🔄 Sync Google
             </button>
             <button
               onClick={() => handleSync('notion')}
               disabled={syncing}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 bg-gradient-to-r from-[#C17817] to-[#D89A3E] hover:from-[#9C651F] hover:to-[#B7792B] text-white rounded-xl font-bold text-sm shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.01] cursor-pointer flex items-center gap-2"
             >
               🔄 Sync Notion
             </button>
@@ -176,40 +179,36 @@ export default function DashboardPage() {
         </div>
 
         {syncMessage && (
-          <div className="mt-4 p-4 bg-blue-100 dark:bg-blue-900 text-blue-900 dark:text-blue-100 rounded-lg">
-            {syncMessage}
+          <div className="mt-4 p-4 bg-muted border border-border text-primary rounded-xl text-sm font-semibold flex items-center gap-2 animate-fade-in shadow-sm">
+            <span>{syncMessage}</span>
           </div>
         )}
 
         {/* Stats */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm">
-            <div className="text-3xl font-bold text-blue-600">{data?.stats?.totalEvents || 0}</div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Events</div>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm">
-            <div className="text-3xl font-bold text-green-600">{data?.stats?.totalMessages || 0}</div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Messages</div>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm">
-            <div className="text-3xl font-bold text-purple-600">{data?.stats?.totalTasks || 0}</div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Tasks</div>
-          </div>
-          <div className="bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-sm">
-            <div className="text-3xl font-bold text-orange-600">{data?.stats?.totalDocuments || 0}</div>
-            <div className="text-sm text-zinc-600 dark:text-zinc-400 mt-1">Documents</div>
-          </div>
+        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: 'Events', count: data?.stats?.totalEvents || 0 },
+            { label: 'Messages', count: data?.stats?.totalMessages || 0 },
+            { label: 'Tasks', count: data?.stats?.totalTasks || 0 },
+            { label: 'Documents', count: data?.stats?.totalDocuments || 0 }
+          ].map((stat) => (
+            <div key={stat.label} className="bg-card border border-border p-6 rounded-2xl shadow-[0_8px_30px_rgb(232,221,210,0.15)] flex flex-col justify-between hover:border-[#B7792B]/30 transition-all duration-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{stat.label}</span>
+              <h3 className="text-3.5xl font-extrabold mt-3 tracking-tight text-[#B7792B]">{stat.count}</h3>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
         {/* Calendar Events - Takes 2 columns */}
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm p-6">
-            <h2 className="text-2xl font-semibold text-black dark:text-white mb-4 flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl shadow-[0_8px_30px_rgb(232,221,210,0.15)] p-6">
+            <h2 className="text-2xl font-extrabold text-foreground mb-4 flex items-center gap-2">
               📅 Calendar Events
-              <span className="text-sm text-zinc-500 dark:text-zinc-400 font-normal">
+              <span className="text-sm text-muted-foreground font-normal">
                 (Next 7 days)
               </span>
             </h2>
@@ -219,14 +218,14 @@ export default function DashboardPage() {
                 {data.events.map((event) => (
                   <div
                     key={event.id}
-                    className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="border border-border rounded-xl p-4 hover:bg-muted/40 transition-colors"
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-black dark:text-white">
+                        <h3 className="font-bold text-foreground">
                           {event.title}
                         </h3>
-                        <div className="flex gap-4 mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+                        <div className="flex flex-wrap gap-4 mt-2 text-xs text-muted-foreground font-medium">
                           <span>🕐 {formatTime(event.start_time)}</span>
                           <span>📆 {formatDate(event.start_time)}</span>
                           {event.attendees && event.attendees.length > 0 && (
@@ -234,7 +233,7 @@ export default function DashboardPage() {
                           )}
                         </div>
                       </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-muted px-2.5 py-1 rounded-md">
                         {event.source}
                       </div>
                     </div>
@@ -242,17 +241,19 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-zinc-500 dark:text-zinc-500">
+              <div className="text-center py-12 text-muted-foreground text-sm font-medium">
                 No events found. Click &quot;Sync Google&quot; to fetch your calendar events.
               </div>
             )}
           </div>
         </div>
 
-        {/* Tasks */}
-        <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-2xl font-semibold text-black dark:text-white mb-4">
+        {/* Right column: Tasks & Messages */}
+        <div className="lg:col-span-1 space-y-6">
+          
+          {/* Tasks */}
+          <div className="bg-card border border-border rounded-2xl shadow-[0_8px_30px_rgb(232,221,210,0.15)] p-6">
+            <h2 className="text-2xl font-extrabold text-foreground mb-4">
               ✅ Tasks
             </h2>
             
@@ -261,19 +262,19 @@ export default function DashboardPage() {
                 {data.tasks.map((task) => (
                   <div
                     key={task.id}
-                    className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="border border-border rounded-xl p-3.5 hover:bg-muted/40 transition-colors"
                   >
-                    <h3 className="font-medium text-black dark:text-white text-sm">
+                    <h3 className="font-bold text-foreground text-sm">
                       {task.title}
                     </h3>
-                    <div className="flex gap-2 mt-2 text-xs">
+                    <div className="flex items-center gap-2.5 mt-2.5 text-xs">
                       {task.status && (
-                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-100 px-2 py-1 rounded">
+                        <span className="bg-[#F3E3C9] text-[#B7792B] border border-[#E5DDD0] px-2 py-0.5 rounded-md text-[10px] font-bold">
                           {task.status}
                         </span>
                       )}
                       {task.due_date && (
-                        <span className="text-zinc-500 dark:text-zinc-400">
+                        <span className="text-muted-foreground font-medium">
                           Due: {formatDate(task.due_date)}
                         </span>
                       )}
@@ -282,15 +283,15 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-zinc-500 dark:text-zinc-500 text-sm">
+              <div className="text-center py-8 text-muted-foreground text-sm font-medium">
                 No tasks. Sync Notion to see your tasks here.
               </div>
             )}
           </div>
 
           {/* Messages */}
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm p-6">
-            <h2 className="text-2xl font-semibold text-black dark:text-white mb-4">
+          <div className="bg-card border border-border rounded-2xl shadow-[0_8px_30px_rgb(232,221,210,0.15)] p-6">
+            <h2 className="text-2xl font-extrabold text-foreground mb-4">
               ✉️ Messages
             </h2>
             
@@ -299,18 +300,18 @@ export default function DashboardPage() {
                 {data.messages.slice(0, 5).map((message) => (
                   <div
                     key={message.id}
-                    className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                    className="border border-border rounded-xl p-3.5 hover:bg-muted/40 transition-colors"
                   >
                     <div className="flex items-start gap-2">
-                      {message.flagged && <span className="text-yellow-500">⭐</span>}
+                      {message.flagged && <span className="text-[#B7792B] text-xs">⭐</span>}
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs text-zinc-600 dark:text-zinc-400 truncate">
+                        <div className="text-[10px] font-bold text-muted-foreground truncate uppercase tracking-wider">
                           {message.sender}
                         </div>
-                        <h3 className="font-medium text-black dark:text-white text-sm truncate">
+                        <h3 className="font-bold text-foreground text-sm truncate mt-0.5">
                           {message.subject || '(No subject)'}
                         </h3>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-1 line-clamp-2">
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                           {message.snippet}
                         </p>
                       </div>
@@ -319,7 +320,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-zinc-500 dark:text-zinc-500 text-sm">
+              <div className="text-center py-8 text-muted-foreground text-sm font-medium">
                 No messages found.
               </div>
             )}
@@ -330,36 +331,36 @@ export default function DashboardPage() {
       {/* Sync Status */}
       {data?.syncJobs && data.syncJobs.length > 0 && (
         <div className="max-w-7xl mx-auto mt-6">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-black dark:text-white mb-4">
+          <div className="bg-card border border-border rounded-2xl shadow-[0_8px_30px_rgb(232,221,210,0.15)] p-6">
+            <h2 className="text-xl font-extrabold text-foreground mb-4">
               🔄 Recent Syncs
             </h2>
-            <div className="space-y-2">
+            <div className="space-y-1">
               {data.syncJobs.map((job) => (
                 <div
                   key={job.id}
-                  className="flex justify-between items-center text-sm border-b border-zinc-200 dark:border-zinc-800 py-2 last:border-0"
+                  className="flex justify-between items-center text-sm border-b border-border py-3 last:border-0"
                 >
                   <div className="flex gap-3 items-center">
-                    <span className="font-medium text-black dark:text-white capitalize">
+                    <span className="font-bold text-foreground capitalize">
                       {job.connector}
                     </span>
-                    <span className={`px-2 py-1 rounded text-xs ${
+                    <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold ${
                       job.status === 'completed' 
-                        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100'
+                        ? 'bg-[#22C55E]/10 text-[#22C55E]'
                         : job.status === 'failed'
-                        ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100'
-                        : 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-100'
+                        ? 'bg-[#EF4444]/10 text-[#EF4444]'
+                        : 'bg-[#F59E0B]/10 text-[#F59E0B]'
                     }`}>
                       {job.status}
                     </span>
                     {job.status === 'completed' && (
-                      <span className="text-zinc-600 dark:text-zinc-400">
+                      <span className="text-xs text-muted-foreground font-medium">
                         {job.items_synced} items
                       </span>
                     )}
                   </div>
-                  <span className="text-zinc-500 dark:text-zinc-500 text-xs">
+                  <span className="text-muted-foreground text-xs font-medium">
                     {new Date(job.started_at).toLocaleString()}
                   </span>
                 </div>
