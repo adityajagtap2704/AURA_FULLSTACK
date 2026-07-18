@@ -27,17 +27,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
-          
-          if (session.user.id === '00000000-0000-0000-0000-000000000001') {
-            setRole('ADMIN');
-          } else {
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('role')
-              .eq('id', session.user.id)
-              .single();
-            setRole(profile?.role || 'USER');
-          }
+
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', session.user.id)
+            .single();
+          setRole(profile?.role || 'USER');
         } else {
           setUser(null);
           setRole(null);
@@ -55,17 +51,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setUser(session.user);
-        
-        if (session.user.id === '00000000-0000-0000-0000-000000000001') {
-          setRole('ADMIN');
-        } else {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-          setRole(profile?.role || 'USER');
-        }
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        setRole(profile?.role || 'USER');
       } else {
         setUser(null);
         setRole(null);

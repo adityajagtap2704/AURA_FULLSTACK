@@ -42,6 +42,11 @@ export const authService = {
     return response.data.authUrl as string;
   },
 
+  async getNotionAuthUrl() {
+    const response = await api.get('/api/connectors/notion/authorize');
+    return response.data.authUrl as string;
+  },
+
   async checkTokens() {
     const response = await api.get('/api/admin/check-tokens');
     return response.data.tokens;

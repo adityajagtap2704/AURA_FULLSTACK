@@ -19,7 +19,8 @@ import {
   HelpCircle,
   ExternalLink,
   ChevronRight,
-  Plus
+  Plus,
+  Link2
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -33,10 +34,12 @@ export default function DashboardPage() {
     syncGoogle,
     isSyncingGoogle,
     syncNotion,
-    isSyncingNotion
+    isSyncingNotion,
+    connectorStatus,
+    isLoadingConnectorStatus
   } = useDashboard();
 
-  if (isLoading) {
+  if (isLoading || isLoadingConnectorStatus) {
     return (
       <div className="space-y-6">
         <div className="h-10 w-48 bg-muted rounded animate-pulse" />
@@ -53,7 +56,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (isError || !data) {
+  if (isError || !data || !connectorStatus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-danger mb-4" />
@@ -91,6 +94,8 @@ export default function DashboardPage() {
   const userEmail = user?.email || 'user@aura.space';
   const userName = userEmail.split('@')[0];
 
+  const { google: googleConnected, notion: notionConnected } = connectorStatus;
+
   // AI digest items compiled from real backend data
   const upcomingMeetingsCount = data.events.length;
   const pendingTasksCount = data.tasks.filter(t => t.status !== 'Done').length;
@@ -118,18 +123,28 @@ export default function DashboardPage() {
             <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
             Refresh Data
           </button>
-          <button
-            onClick={() => syncGoogle()}
-            disabled={isSyncingGoogle}
-            className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10 disabled:opacity-50"
-          >
-            {isSyncingGoogle ? (
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="h-3.5 w-3.5" />
-            )}
-            Sync Google
-          </button>
+          {googleConnected ? (
+            <button
+              onClick={() => syncGoogle()}
+              disabled={isSyncingGoogle}
+              className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10 disabled:opacity-50"
+            >
+              {isSyncingGoogle ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              Sync Google
+            </button>
+          ) : (
+            <Link
+              href="/dashboard/integrations"
+              className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10"
+            >
+              <Link2 className="h-3.5 w-3.5" />
+              Connect Google
+            </Link>
+          )}
         </div>
       </div>
 
@@ -237,12 +252,18 @@ export default function DashboardPage() {
               <div className="text-center py-10 border border-dashed border-border rounded-xl">
                 <CalendarIcon className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No upcoming meetings scheduled.</p>
-                <button
-                  onClick={() => syncGoogle()}
-                  className="mt-3 text-xs font-semibold text-primary hover:underline"
-                >
-                  Sync Google Calendar
-                </button>
+                {googleConnected ? (
+                  <button
+                    onClick={() => syncGoogle()}
+                    className="mt-3 text-xs font-semibold text-primary hover:underline"
+                  >
+                    Sync Google Calendar
+                  </button>
+                ) : (
+                  <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+                    Connect Google Calendar
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -286,12 +307,18 @@ export default function DashboardPage() {
               <div className="text-center py-10 border border-dashed border-border rounded-xl">
                 <CheckSquare className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
                 <p className="text-sm text-muted-foreground">No active tasks found.</p>
-                <button
-                  onClick={() => syncNotion()}
-                  className="mt-3 text-xs font-semibold text-primary hover:underline"
-                >
-                  Sync Notion Tasks
-                </button>
+                {notionConnected ? (
+                  <button
+                    onClick={() => syncNotion()}
+                    className="mt-3 text-xs font-semibold text-primary hover:underline"
+                  >
+                    Sync Notion Tasks
+                  </button>
+                ) : (
+                  <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+                    Connect Notion Workspace
+                  </Link>
+                )}
               </div>
             )}
           </div>

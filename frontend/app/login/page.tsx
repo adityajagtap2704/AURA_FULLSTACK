@@ -7,6 +7,7 @@ import * as z from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth';
+import { supabase } from '@/lib/supabase';
 import { Mail, Lock, AlertCircle, Eye, EyeOff, ShieldCheck, Sparkles, Target, Lightbulb, ArrowRight } from 'lucide-react';
 import WorkspaceBackground from '@/components/WorkspaceBackground';
 
@@ -50,14 +51,14 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError(null);
     try {
-      const authUrl = await authService.getGoogleAuthUrl();
-      if (authUrl) {
-        window.location.href = authUrl;
-      } else {
-        throw new Error('Failed to retrieve authorization URL');
-      }
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
+      });
+      if (oauthError) throw oauthError;
+      // Browser is redirected to Google's consent screen from here.
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Google OAuth failed to initiate');
+      setError(err.message || 'Google sign-in failed to start');
       setGoogleLoading(false);
     }
   };

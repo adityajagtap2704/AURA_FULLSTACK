@@ -281,8 +281,8 @@ const syncQueue = new Queue('sync', { connection: redis });
 
 // Add job (from API route)
 await syncQueue.add('google-sync', {
-  userId: '00000000-0000-0000-0000-000000000001',
-  tenantId: '00000000-0000-0000-0000-000000000001',
+  userId: authenticatedUserId,
+  tenantId: authenticatedUserId,
   connector: 'google'
 });
 

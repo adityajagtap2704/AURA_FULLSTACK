@@ -7,43 +7,61 @@ import {
   CanonicalDocument
 } from './base';
 import { syncQueue } from '@/lib/queue';
+import { supabaseServer } from '@/lib/supabase/server';
+import type { Database } from '@/lib/supabase/database.types';
 
-interface NotionRichText {
-  plain_text?: string;
-}
+type OAuthTokenRow = Database['public']['Tables']['oauth_tokens']['Row'];
 
-interface NotionTitleProperty {
-  title?: NotionRichText[];
-}
+const NOTION_OAUTH_AUTHORIZE_URL = 'https://api.notion.com/v1/oauth/authorize';
+const NOTION_OAUTH_TOKEN_URL = 'https://api.notion.com/v1/oauth/token';
 
-interface NotionStatusProperty {
+// Keyed by Notion's `type` discriminator, not by property name — a
+// database's title property is guaranteed to exist exactly once, but the
+// user can name it (and any status/date property) anything they want, so
+// matching by name (the old approach) breaks the moment someone's column
+// isn't literally called "Name"/"Status"/"Due Date".
+interface NotionPropertyValue {
+  type: string;
+  title?: { plain_text?: string }[];
   status?: { name?: string };
   select?: { name?: string };
-}
-
-interface NotionDateProperty {
   date?: { start?: string };
 }
 
 interface NotionDatabaseItem {
   id: string;
-  properties: {
-    Name?: NotionTitleProperty;
-    Title?: NotionTitleProperty;
-    Status?: NotionStatusProperty;
-    'Due Date'?: NotionDateProperty;
-    Date?: NotionDateProperty;
-  };
+  properties: Record<string, NotionPropertyValue>;
 }
 
 interface NotionPage {
   id: string;
   url?: string;
   last_edited_time?: string;
-  properties?: {
-    title?: NotionTitleProperty;
-    Name?: NotionTitleProperty;
-  };
+  properties?: Record<string, NotionPropertyValue>;
+}
+
+function findTitle(properties: Record<string, NotionPropertyValue> | undefined): string {
+  for (const prop of Object.values(properties || {})) {
+    if (prop.type === 'title' && prop.title?.[0]?.plain_text) {
+      return prop.title[0].plain_text;
+    }
+  }
+  return 'Untitled';
+}
+
+function findStatus(properties: Record<string, NotionPropertyValue>): string | undefined {
+  for (const prop of Object.values(properties)) {
+    if (prop.type === 'status' && prop.status?.name) return prop.status.name;
+    if (prop.type === 'select' && prop.select?.name) return prop.select.name;
+  }
+  return undefined;
+}
+
+function findDueDate(properties: Record<string, NotionPropertyValue>): string | undefined {
+  for (const prop of Object.values(properties)) {
+    if (prop.type === 'date' && prop.date?.start) return prop.date.start;
+  }
+  return undefined;
 }
 
 interface NotionFetchResult {
@@ -51,113 +69,150 @@ interface NotionFetchResult {
   pages: NotionPage[];
 }
 
+interface NotionTokenResponse {
+  access_token: string;
+  workspace_id?: string;
+  workspace_name?: string;
+}
+
 export class NotionConnector implements ConnectorInterface {
-  private notion: Client;
-
-  constructor() {
-    this.notion = new Client({
-      auth: process.env.NOTION_TOKEN,
-    });
-  }
-
+  /**
+   * `userId` here is actually the caller's already-signed state string — the
+   * API route signs it before calling this, mirroring GoogleConnector, so
+   * the callback can verify who initiated the flow without a session header.
+   */
   async authorize(userId: string): Promise<{ authUrl: string }> {
-    // For Phase 1, using internal integration token (no OAuth flow needed)
-    // Phase 2 can implement OAuth: https://developers.notion.com/docs/authorization
-    return { authUrl: '' };
+    const clientId = process.env.NOTION_OAUTH_CLIENT_ID;
+    const redirectUri = process.env.NOTION_REDIRECT_URI;
+    if (!clientId || !redirectUri) {
+      throw new Error('NOTION_OAUTH_CLIENT_ID / NOTION_REDIRECT_URI are not configured');
+    }
+
+    const url = new URL(NOTION_OAUTH_AUTHORIZE_URL);
+    url.searchParams.set('client_id', clientId);
+    url.searchParams.set('response_type', 'code');
+    url.searchParams.set('owner', 'user');
+    url.searchParams.set('redirect_uri', redirectUri);
+    url.searchParams.set('state', userId);
+
+    return { authUrl: url.toString() };
   }
 
   async handleCallback(code: string, userId: string): Promise<void> {
-    // Not needed for Phase 1 (using internal integration)
-    // Phase 2: implement OAuth token exchange
+    const clientId = process.env.NOTION_OAUTH_CLIENT_ID;
+    const clientSecret = process.env.NOTION_OAUTH_CLIENT_SECRET;
+    const redirectUri = process.env.NOTION_REDIRECT_URI;
+    if (!clientId || !clientSecret || !redirectUri) {
+      throw new Error('Notion OAuth is not configured');
+    }
+
+    const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const response = await fetch(NOTION_OAUTH_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${basicAuth}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      throw new Error(`Notion token exchange failed: ${response.status} ${errorBody}`);
+    }
+
+    const tokens = (await response.json()) as NotionTokenResponse;
+
+    const { error } = await supabaseServer.from('oauth_tokens').upsert(
+      {
+        user_id: userId,
+        provider: 'notion',
+        access_token: tokens.access_token,
+        refresh_token: null,
+        expires_at: null,
+      },
+      { onConflict: 'user_id,provider' }
+    );
+
+    if (error) throw error;
+  }
+
+  private async getClientForUser(userId: string): Promise<Client> {
+    const { data: tokenData, error } = await supabaseServer
+      .from('oauth_tokens')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('provider', 'notion')
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error || !tokenData || tokenData.length === 0) {
+      throw new Error('No Notion OAuth tokens found for user');
+    }
+
+    const token = tokenData[0] as OAuthTokenRow;
+    return new Client({ auth: token.access_token });
   }
 
   async fetch(userId: string): Promise<NotionFetchResult> {
-    const databaseId = process.env.NOTION_DATABASE_ID!;
+    const notion = await this.getClientForUser(userId);
 
-    // Query database
-    const response = await this.notion.databases.query({
-      database_id: databaseId,
-      filter: {
-        property: 'Status',
-        status: {
-          does_not_equal: 'Done',
-        },
-      },
+    // Only databases/pages the user explicitly shared during the OAuth
+    // consent screen are visible to this token. Take the first shared
+    // database as the Tasks source — same "pulls one connected DB" design
+    // as Phase 1's original shared-token version, just scoped per-user now.
+    const dbSearch = await notion.search({
+      filter: { property: 'object', value: 'database' },
+      page_size: 5,
     });
 
-    // Fetch recent pages (documents)
-    const searchResponse = await this.notion.search({
-      filter: {
-        property: 'object',
-        value: 'page',
-      },
-      sort: {
-        direction: 'descending',
-        timestamp: 'last_edited_time',
-      },
+    let databaseItems: NotionDatabaseItem[] = [];
+    const firstDb = dbSearch.results[0];
+    if (firstDb) {
+      // No status filter here — unlike the old fixed demo database, we
+      // can't assume an arbitrary user's database has a "Status" property
+      // at all, let alone one shaped like Notion's status/select type.
+      const dbResponse = await notion.databases.query({
+        database_id: firstDb.id,
+        page_size: 50,
+      });
+      databaseItems = dbResponse.results as unknown as NotionDatabaseItem[];
+    }
+
+    const pageSearch = await notion.search({
+      filter: { property: 'object', value: 'page' },
+      sort: { direction: 'descending', timestamp: 'last_edited_time' },
       page_size: 20,
     });
 
     return {
-      databaseItems: response.results as unknown as NotionDatabaseItem[],
-      pages: searchResponse.results as unknown as NotionPage[],
+      databaseItems,
+      pages: pageSearch.results as unknown as NotionPage[],
     };
   }
 
   async mapToCanonical(rawData: unknown, tenantId: string): Promise<CanonicalData> {
     const { databaseItems, pages } = rawData as NotionFetchResult;
 
-    const tasks: CanonicalTask[] = databaseItems.map((item) => {
-      // Extract title from properties
-      let title = 'Untitled';
-      if (item.properties.Name?.title?.[0]?.plain_text) {
-        title = item.properties.Name.title[0].plain_text;
-      } else if (item.properties.Title?.title?.[0]?.plain_text) {
-        title = item.properties.Title.title[0].plain_text;
-      }
+    const tasks: CanonicalTask[] = databaseItems.map((item) => ({
+      title: findTitle(item.properties),
+      status: findStatus(item.properties),
+      due_date: findDueDate(item.properties),
+      source: 'notion',
+      source_id: item.id,
+    }));
 
-      // Extract status
-      let status: string | undefined;
-      if (item.properties.Status?.status?.name) {
-        status = item.properties.Status.status.name;
-      } else if (item.properties.Status?.select?.name) {
-        status = item.properties.Status.select.name;
-      }
-
-      // Extract due date
-      let dueDate: string | undefined;
-      if (item.properties['Due Date']?.date?.start) {
-        dueDate = item.properties['Due Date'].date.start;
-      } else if (item.properties.Date?.date?.start) {
-        dueDate = item.properties.Date.date.start;
-      }
-
-      return {
-        title,
-        status,
-        due_date: dueDate,
-        source: 'notion',
-        source_id: item.id,
-      };
-    });
-
-    const documents: CanonicalDocument[] = pages.map((page) => {
-      // Extract title
-      let title = 'Untitled';
-      if (page.properties?.title?.title?.[0]?.plain_text) {
-        title = page.properties.title.title[0].plain_text as string;
-      } else if (page.properties?.Name?.title?.[0]?.plain_text) {
-        title = page.properties.Name.title[0].plain_text as string;
-      }
-
-      return {
-        title,
-        url: page.url,
-        last_modified: page.last_edited_time,
-        source: 'notion',
-        source_id: page.id,
-      };
-    });
+    const documents: CanonicalDocument[] = pages.map((page) => ({
+      title: findTitle(page.properties),
+      url: page.url,
+      last_modified: page.last_edited_time,
+      source: 'notion',
+      source_id: page.id,
+    }));
 
     return {
       tasks,
@@ -182,17 +237,20 @@ export class NotionConnector implements ConnectorInterface {
   }
 
   async disconnect(userId: string): Promise<void> {
-    // Phase 1 uses a single internal integration token shared by all users
-    // (see authorize()), so there's no per-user token to revoke here.
-    // Phase 2 OAuth will store per-user tokens in oauth_tokens and this
-    // should delete that row, mirroring GoogleConnector.disconnect().
+    const { error } = await supabaseServer
+      .from('oauth_tokens')
+      .delete()
+      .eq('user_id', userId)
+      .eq('provider', 'notion');
+
+    if (error) throw error;
   }
 
   async healthCheck(userId: string): Promise<{ status: 'healthy' | 'unhealthy'; message?: string }> {
     try {
-      // Test API connection by fetching user info
-      const response = await this.notion.users.me({});
-      
+      const notion = await this.getClientForUser(userId);
+      const response = await notion.users.me({});
+
       if (response) {
         return { status: 'healthy' };
       }

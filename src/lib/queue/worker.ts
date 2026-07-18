@@ -58,32 +58,43 @@ export const syncWorker = new Worker<SyncJobData>(
       // Persist to database
       let itemsSynced = 0;
 
-      // Insert tasks — delete old ones first to remove stale/deleted tasks
+      // Upsert tasks, then delete anything from this source that's no
+      // longer present upstream (removed in Notion since the last sync).
+      // A prior delete-then-insert pair raced under concurrent syncs for
+      // the same tenant — two overlapping jobs (e.g. rapid repeated "Sync
+      // Now" clicks with worker concurrency: 5) could interleave their
+      // delete and insert, so one job's insert collided with rows the
+      // other had just written (23505 duplicate key). Upsert has no such
+      // window: it's a single atomic statement per row regardless of what
+      // else is running concurrently.
       if (canonicalData.tasks.length > 0) {
-        const sources = [...new Set(canonicalData.tasks.map(t => t.source))];
-
-        // Delete existing tasks from this source to avoid stale data
-        for (const source of sources) {
-          await supabaseServer
-            .from('tasks')
-            .delete()
-            .eq('tenant_id', tenantId)
-            .eq('source', source);
-        }
-
-        const tasksToInsert = canonicalData.tasks.map(task => ({
+        const tasksToUpsert = canonicalData.tasks.map(task => ({
           ...task,
           tenant_id: tenantId,
         }));
 
         const { error } = await supabaseServer
           .from('tasks')
-          .insert(tasksToInsert);
+          .upsert(tasksToUpsert, { onConflict: 'tenant_id,source,source_id' });
 
         if (error) {
-          console.error('[Sync Worker] Error inserting tasks:', error);
+          console.error('[Sync Worker] Error upserting tasks:', error);
         } else {
           itemsSynced += canonicalData.tasks.length;
+
+          const sources = [...new Set(canonicalData.tasks.map(t => t.source))];
+          for (const source of sources) {
+            const currentIds = canonicalData.tasks
+              .filter(t => t.source === source)
+              .map(t => t.source_id);
+
+            await supabaseServer
+              .from('tasks')
+              .delete()
+              .eq('tenant_id', tenantId)
+              .eq('source', source)
+              .not('source_id', 'in', `(${currentIds.join(',')})`);
+          }
         }
       }
 

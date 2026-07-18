@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useDashboard } from '@/hooks/useDashboard';
-import { FileText, Search, ExternalLink, RefreshCw, AlertCircle, Calendar } from 'lucide-react';
+import { FileText, Search, ExternalLink, RefreshCw, AlertCircle, Calendar, Link2 } from 'lucide-react';
 
 export default function DocumentsPage() {
-  const { data, isLoading, isError, refetch, syncNotion, isSyncingNotion } = useDashboard();
+  const { data, isLoading, isError, refetch, syncNotion, isSyncingNotion, connectorStatus, isLoadingConnectorStatus } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
 
-  if (isLoading) {
+  if (isLoading || isLoadingConnectorStatus) {
     return (
       <div className="space-y-6">
         <div className="h-10 w-48 bg-muted rounded animate-pulse" />
@@ -18,7 +19,7 @@ export default function DocumentsPage() {
     );
   }
 
-  if (isError || !data) {
+  if (isError || !data || !connectorStatus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-danger mb-4" />
@@ -27,6 +28,8 @@ export default function DocumentsPage() {
       </div>
     );
   }
+
+  const notionConnected = connectorStatus.notion;
 
   // Filter documents
   const filteredDocs = data.documents.filter((doc) => {
@@ -67,14 +70,24 @@ export default function DocumentsPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => syncNotion()}
-          disabled={isSyncingNotion}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all self-start shadow shadow-primary/10"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${isSyncingNotion ? 'animate-spin' : ''}`} />
-          Sync Notion Documents
-        </button>
+        {notionConnected ? (
+          <button
+            onClick={() => syncNotion()}
+            disabled={isSyncingNotion}
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all self-start shadow shadow-primary/10"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isSyncingNotion ? 'animate-spin' : ''}`} />
+            Sync Notion Documents
+          </button>
+        ) : (
+          <Link
+            href="/dashboard/integrations"
+            className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all self-start shadow shadow-primary/10"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            Connect Notion
+          </Link>
+        )}
       </div>
 
       {/* Filters */}

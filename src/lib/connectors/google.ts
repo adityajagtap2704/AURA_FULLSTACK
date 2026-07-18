@@ -56,13 +56,16 @@ export class GoogleConnector implements ConnectorInterface {
 
     // Store tokens securely in database
     console.log('[Google handleCallback] Inserting into Supabase...');
-    const { error } = await supabaseServer.from('oauth_tokens').upsert({
-      user_id: userId,
-      provider: 'google',
-      access_token: tokens.access_token!,
-      refresh_token: tokens.refresh_token || null,
-      expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
-    });
+    const { error } = await supabaseServer.from('oauth_tokens').upsert(
+      {
+        user_id: userId,
+        provider: 'google',
+        access_token: tokens.access_token!,
+        refresh_token: tokens.refresh_token || null,
+        expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+      },
+      { onConflict: 'user_id,provider' }
+    );
 
     if (error) {
       console.error('[Google handleCallback] Supabase error:', error);

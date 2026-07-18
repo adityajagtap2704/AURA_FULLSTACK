@@ -1,16 +1,60 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDashboard } from '@/hooks/useDashboard';
 import { authService } from '@/services/auth';
 import { Link2, Globe, FileText, CheckCircle2, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 
 export default function IntegrationsPage() {
-  const { data, isLoading, isError, refetch, syncGoogle, isSyncingGoogle, syncNotion, isSyncingNotion } = useDashboard();
+  const {
+    isLoading,
+    isError,
+    refetch,
+    syncGoogle,
+    isSyncingGoogle,
+    syncNotion,
+    isSyncingNotion,
+    connectorStatus,
+    isLoadingConnectorStatus,
+  } = useDashboard();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [notionLoading, setNotionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const handledRedirect = useRef(false);
 
-  if (isLoading) {
+  // The OAuth callback only exchanges/stores the token — it doesn't sync any
+  // data. Landing here with ?connected=<provider> means authorization just
+  // succeeded, so refresh the (now stale) connector-status cache and kick
+  // off the first sync automatically instead of leaving the card stuck on
+  // "Not Configured" until the user notices and clicks Sync Now themselves.
+  useEffect(() => {
+    if (handledRedirect.current) return;
+    const connected = searchParams.get('connected');
+    const oauthError = searchParams.get('error');
+
+    if (connected === 'google') {
+      handledRedirect.current = true;
+      queryClient.invalidateQueries({ queryKey: ['connectorStatus'] });
+      syncGoogle();
+      router.replace('/dashboard/integrations');
+    } else if (connected === 'notion') {
+      handledRedirect.current = true;
+      queryClient.invalidateQueries({ queryKey: ['connectorStatus'] });
+      syncNotion();
+      router.replace('/dashboard/integrations');
+    } else if (oauthError) {
+      handledRedirect.current = true;
+      setError(`Authorization failed: ${oauthError}`);
+      router.replace('/dashboard/integrations');
+    }
+  }, [searchParams, syncGoogle, syncNotion, router, queryClient]);
+
+  if (isLoading || isLoadingConnectorStatus) {
     return (
       <div className="space-y-6">
         <div className="h-10 w-48 bg-muted rounded animate-pulse" />
@@ -19,7 +63,7 @@ export default function IntegrationsPage() {
     );
   }
 
-  if (isError || !data) {
+  if (isError || !connectorStatus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-danger mb-4" />
@@ -29,12 +73,10 @@ export default function IntegrationsPage() {
     );
   }
 
-  // Determine connection status based on recent sync logs or database records
-  const googleConnected = data.syncJobs.some(j => j.connector === 'google' && j.status === 'completed') || 
-                          data.events.length > 0 || data.messages.length > 0;
-  
-  const notionConnected = data.syncJobs.some(j => j.connector === 'notion' && j.status === 'completed') || 
-                          data.tasks.length > 0 || data.documents.length > 0;
+  // Source of truth is whether a token exists, not whether any data happens
+  // to be synced — stale rows from a prior connection would otherwise read
+  // as "connected" even with no valid token.
+  const { google: googleConnected, notion: notionConnected } = connectorStatus;
 
   const handleGoogleConnect = async () => {
     setGoogleLoading(true);
@@ -49,6 +91,22 @@ export default function IntegrationsPage() {
     } catch (err: any) {
       setError(err.response?.data?.error || err.message || 'Google OAuth failed to initiate');
       setGoogleLoading(false);
+    }
+  };
+
+  const handleNotionConnect = async () => {
+    setNotionLoading(true);
+    setError(null);
+    try {
+      const authUrl = await authService.getNotionAuthUrl();
+      if (authUrl) {
+        window.location.href = authUrl;
+      } else {
+        throw new Error('Failed to retrieve authorization URL');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.message || 'Notion OAuth failed to initiate');
+      setNotionLoading(false);
     }
   };
 
@@ -173,10 +231,15 @@ export default function IntegrationsPage() {
               </button>
             ) : (
               <button
-                onClick={() => syncNotion()}
+                onClick={handleNotionConnect}
+                disabled={notionLoading}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10"
               >
-                Connect Notion Database
+                {notionLoading ? (
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  'Connect Notion Workspace'
+                )}
               </button>
             )}
           </div>

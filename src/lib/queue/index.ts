@@ -39,11 +39,24 @@ export const syncQueue = new Queue('sync', {
 export const syncQueueEvents = new QueueEvents('sync', { connection: connectionOptions });
 
 // Health check function
+//
+// BullMQ requires maxRetriesPerRequest: null on the Redis connection, which
+// means ioredis commands queue forever instead of rejecting when Redis is
+// unreachable — without a timeout here, a downed Redis would hang this
+// health check (and any caller awaiting it) indefinitely instead of
+// reporting unhealthy.
 export async function getQueueHealth() {
+  const TIMEOUT_MS = 3000;
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Redis health check timed out')), TIMEOUT_MS)
+  );
+
   try {
-    const jobCounts = await syncQueue.getJobCounts();
-    const workers = await syncQueue.getWorkers();
-    
+    const [jobCounts, workers] = await Promise.race([
+      Promise.all([syncQueue.getJobCounts(), syncQueue.getWorkers()]),
+      timeout,
+    ]);
+
     return {
       status: 'healthy',
       jobCounts,

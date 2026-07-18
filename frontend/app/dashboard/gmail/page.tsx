@@ -1,15 +1,16 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useDashboard } from '@/hooks/useDashboard';
-import { Mail, Search, Star, AlertCircle, RefreshCw, ChevronRight, Inbox, Eye } from 'lucide-react';
+import { Mail, Search, Star, AlertCircle, RefreshCw, ChevronRight, Inbox, Eye, Link2 } from 'lucide-react';
 
 export default function GmailPage() {
-  const { data, isLoading, isError, refetch, syncGoogle, isSyncingGoogle } = useDashboard();
+  const { data, isLoading, isError, refetch, syncGoogle, isSyncingGoogle, connectorStatus, isLoadingConnectorStatus } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
 
-  if (isLoading) {
+  if (isLoading || isLoadingConnectorStatus) {
     return (
       <div className="space-y-6">
         <div className="h-10 w-48 bg-muted rounded animate-pulse" />
@@ -18,7 +19,7 @@ export default function GmailPage() {
     );
   }
 
-  if (isError || !data) {
+  if (isError || !data || !connectorStatus) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <AlertCircle className="h-12 w-12 text-danger mb-4" />
@@ -27,6 +28,8 @@ export default function GmailPage() {
       </div>
     );
   }
+
+  const googleConnected = connectorStatus.google;
 
   // Filter messages
   const filteredMessages = data.messages.filter((msg) => {
@@ -62,14 +65,24 @@ export default function GmailPage() {
           </p>
         </div>
 
-        <button
-          onClick={() => syncGoogle()}
-          disabled={isSyncingGoogle}
-          className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-xs font-semibold rounded-lg hover:bg-accent/95 transition-all self-start shadow shadow-accent/10"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${isSyncingGoogle ? 'animate-spin' : ''}`} />
-          Sync Gmail
-        </button>
+        {googleConnected ? (
+          <button
+            onClick={() => syncGoogle()}
+            disabled={isSyncingGoogle}
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-xs font-semibold rounded-lg hover:bg-accent/95 transition-all self-start shadow shadow-accent/10"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isSyncingGoogle ? 'animate-spin' : ''}`} />
+            Sync Gmail
+          </button>
+        ) : (
+          <Link
+            href="/dashboard/integrations"
+            className="flex items-center gap-2 px-4 py-2 bg-accent text-white text-xs font-semibold rounded-lg hover:bg-accent/95 transition-all self-start shadow shadow-accent/10"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            Connect Google
+          </Link>
+        )}
       </div>
 
       {/* Filters & Search */}
