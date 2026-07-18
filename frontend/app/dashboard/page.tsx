@@ -2,6 +2,8 @@
 
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/providers/AuthProvider';
+import { GmailIcon, GoogleCalendarIcon, GoogleMeetIcon, NotionIcon } from '@/components/icons/ServiceIcons';
+import { getDisplayName } from '@/lib/userDisplay';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -10,17 +12,11 @@ import {
   Mail,
   FileText,
   RefreshCw,
-  Sparkles,
   ArrowRight,
-  TrendingUp,
   AlertCircle,
   CheckCircle2,
-  XCircle,
-  HelpCircle,
-  ExternalLink,
-  ChevronRight,
-  Plus,
-  Link2
+  Link2,
+  Plus
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -34,7 +30,6 @@ export default function DashboardPage() {
     syncGoogle,
     isSyncingGoogle,
     syncNotion,
-    isSyncingNotion,
     connectorStatus,
     isLoadingConnectorStatus
   } = useDashboard();
@@ -42,7 +37,7 @@ export default function DashboardPage() {
   if (isLoading || isLoadingConnectorStatus) {
     return (
       <div className="space-y-6">
-        <div className="h-10 w-48 bg-muted rounded animate-pulse" />
+        <div className="h-32 bg-card border border-border rounded-2xl animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="h-28 bg-card border border-border rounded-xl animate-pulse" />
@@ -74,88 +69,165 @@ export default function DashboardPage() {
     );
   }
 
-  // Format Helper functions
   const formatTime = (dateString?: string | null) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return new Date(dateString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+    return new Date(dateString).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
-  const userEmail = user?.email || 'user@aura.space';
-  const userName = userEmail.split('@')[0];
+  const formatRelativeTime = (dateString?: string | null) => {
+    if (!dateString) return '';
+    const diffMin = Math.floor((Date.now() - new Date(dateString).getTime()) / 60000);
+    if (diffMin < 1) return 'just now';
+    if (diffMin < 60) return `${diffMin} min ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr} hr ago`;
+    return `${Math.floor(diffHr / 24)}d ago`;
+  };
+
+  // "in 2h 15m" style countdown for events later today, matching the
+  // mockup's schedule timeline — only shown for events still upcoming.
+  const formatCountdown = (dateString: string) => {
+    const diffMs = new Date(dateString).getTime() - Date.now();
+    if (diffMs <= 0) return null;
+    const diffMin = Math.round(diffMs / 60000);
+    if (diffMin < 60) return `in ${diffMin} min`;
+    const hrs = Math.floor(diffMin / 60);
+    const mins = diffMin % 60;
+    return mins > 0 ? `in ${hrs} hr ${mins} min` : `in ${hrs} hr`;
+  };
 
   const { google: googleConnected, notion: notionConnected } = connectorStatus;
 
-  // AI digest items compiled from real backend data
-  const upcomingMeetingsCount = data.events.length;
-  const pendingTasksCount = data.tasks.filter(t => t.status !== 'Done').length;
-  const unreadEmailsCount = data.messages.length;
+  // Real Google display name when the user signed in via Google OAuth
+  // (Supabase stores it in user_metadata); falls back to the email prefix
+  // for accounts that only ever used email/password.
+  const userName = getDisplayName(user);
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const todayStr = new Date().toDateString();
+  const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+  // Stats — computed entirely from real synced rows. No priority/read/
+  // important/shared fields exist in the schema, so sub-labels only surface
+  // counts that are genuinely tracked.
+  const tasksDueToday = data.tasks.filter((t) => t.due_date && new Date(t.due_date).toDateString() === todayStr);
+  const tasksDueTodayPending = tasksDueToday.filter((t) => t.status !== 'Done').length;
+
+  const eventsToday = data.events
+    .filter((e) => new Date(e.start_time).toDateString() === todayStr)
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  const upcomingEventsToday = eventsToday.filter((e) => new Date(e.start_time).getTime() > Date.now()).length;
+
+  const flaggedMessagesCount = data.messages.filter((m) => m.flagged).length;
+
+  const documentsUpdatedToday = data.documents.filter(
+    (d) => d.last_modified && new Date(d.last_modified).toDateString() === todayStr
+  ).length;
+
+  const statCards = [
+    { label: 'Tasks Due Today', count: tasksDueToday.length, sub: `${tasksDueTodayPending} pending`, icon: CheckSquare, ring: 'text-orange-600 bg-orange-500/10 border-orange-500/20' },
+    { label: 'Events Today', count: eventsToday.length, sub: `${upcomingEventsToday} upcoming`, icon: CalendarIcon, ring: 'text-blue-600 bg-blue-500/10 border-blue-500/20' },
+    { label: 'Messages', count: data.messages.length, sub: `${flaggedMessagesCount} flagged`, icon: Mail, ring: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/20' },
+    { label: 'Documents', count: data.documents.length, sub: `${documentsUpdatedToday} updated today`, icon: FileText, ring: 'text-violet-600 bg-violet-500/10 border-violet-500/20' },
+  ];
+
+  // Timeline dot colors cycle the same palette as the stat cards, purely
+  // decorative — not tied to any real category field.
+  const dotColors = ['bg-blue-500', 'bg-orange-500', 'bg-emerald-500', 'bg-violet-500'];
+
+  // Recent Items — a real merged activity feed across every synced type.
+  type RecentItem = { key: string; type: 'task' | 'event' | 'message' | 'document'; title: string; meta: string; timestamp: string | null; href: string };
+  const recentItems: RecentItem[] = [
+    ...data.tasks.map((t): RecentItem => ({ key: `task-${t.id}`, type: 'task', title: t.title, meta: t.status || 'Todo', timestamp: t.created_at, href: '/dashboard/tasks' })),
+    ...data.events.map((e): RecentItem => ({ key: `event-${e.id}`, type: 'event', title: e.title, meta: formatDate(e.start_time), timestamp: e.created_at, href: '/dashboard/calendar' })),
+    ...data.messages.map((m): RecentItem => ({ key: `message-${m.id}`, type: 'message', title: m.subject || '(No subject)', meta: m.sender, timestamp: m.created_at, href: '/dashboard/gmail' })),
+    ...data.documents.map((d): RecentItem => ({ key: `document-${d.id}`, type: 'document', title: d.title, meta: 'Notion', timestamp: d.last_modified || d.created_at, href: '/dashboard/documents' })),
+  ]
+    .filter((item) => item.timestamp)
+    .sort((a, b) => new Date(b.timestamp!).getTime() - new Date(a.timestamp!).getTime())
+    .slice(0, 5);
+
+  const recentItemMeta: Record<RecentItem['type'], { label: string; icon: typeof CheckSquare; badge: string }> = {
+    task: { label: 'Task', icon: CheckSquare, badge: 'bg-primary/10 text-primary border-primary/20' },
+    event: { label: 'Calendar', icon: CalendarIcon, badge: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+    message: { label: 'Message', icon: Mail, badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+    document: { label: 'Document', icon: FileText, badge: 'bg-violet-500/10 text-violet-600 border-violet-500/20' },
+  };
+
+  // Google Meet has no real connector/backend in this app — shown as a
+  // static tile at your request, but never labeled "Connected" since that
+  // would misrepresent state nothing here actually tracks.
+  const integrations = [
+    { label: 'Gmail', icon: GmailIcon, connected: googleConnected, real: true },
+    { label: 'Google Calendar', icon: GoogleCalendarIcon, connected: googleConnected, real: true },
+    { label: 'Notion', icon: NotionIcon, connected: notionConnected, real: true },
+    { label: 'Google Meet', icon: GoogleMeetIcon, connected: false, real: false },
+  ];
 
   return (
-    <div className="space-y-8 pb-10">
-      {/* Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground capitalize">
-            Good day, {userName}
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Here is a snapshot of your workspace today.
-          </p>
-        </div>
+    <div className="space-y-6 pb-10">
+      {/* Greeting Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl border border-primary/20"
+      >
+        {/* Free-license photo (Pexels — "Cozy Workspace with Coffee Mug on
+            Desk" by Letícia Alvares), not the mockup's exact source image. */}
+        <img
+          src="https://images.pexels.com/photos/30391091/pexels-photo-30391091.jpeg?cs=srgb&w=1260&h=750&fit=crop"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
 
-        <div className="flex items-center gap-2 self-start md:self-center">
-          <button
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className="flex items-center gap-2 px-3.5 py-2 border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
-            Refresh Data
-          </button>
-          {googleConnected ? (
+        <div className="relative p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+              {greeting}, {userName}!
+            </h1>
+            <p className="text-muted-foreground text-sm mt-1">Let&apos;s make today productive and meaningful.</p>
+          </div>
+
+          <div className="flex items-center gap-2 self-start md:self-center">
             <button
-              onClick={() => syncGoogle()}
-              disabled={isSyncingGoogle}
-              className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10 disabled:opacity-50"
+              onClick={() => refetch()}
+              disabled={isRefetching}
+              className="flex items-center gap-2 px-3.5 py-2 border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
             >
-              {isSyncingGoogle ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <RefreshCw className="h-3.5 w-3.5" />
-              )}
-              Sync Google
+              <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
+              Refresh
             </button>
-          ) : (
-            <Link
-              href="/dashboard/integrations"
-              className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10"
-            >
-              <Link2 className="h-3.5 w-3.5" />
-              Connect Google
-            </Link>
-          )}
+            {googleConnected ? (
+              <button
+                onClick={() => syncGoogle()}
+                disabled={isSyncingGoogle}
+                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10 disabled:opacity-50"
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isSyncingGoogle ? 'animate-spin' : ''}`} />
+                Sync Google
+              </button>
+            ) : (
+              <Link
+                href="/dashboard/integrations"
+                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10"
+              >
+                <Link2 className="h-3.5 w-3.5" />
+                Connect Google
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Analytics Stats Grid */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Calendar Events', count: data.stats.totalEvents, color: 'text-primary bg-primary/10 border-primary/20', icon: CalendarIcon },
-          { label: 'Pending Tasks', count: data.stats.totalTasks, color: 'text-primary bg-primary/10 border-primary/20', icon: CheckSquare },
-          { label: 'Starred Emails', count: data.stats.totalMessages, color: 'text-primary bg-primary/10 border-primary/20', icon: Mail },
-          { label: 'Recent Documents', count: data.stats.totalDocuments, color: 'text-primary bg-primary/10 border-primary/20', icon: FileText }
-        ].map((stat, i) => {
+        {statCards.map((stat, i) => {
           const Icon = stat.icon;
           return (
             <motion.div
@@ -163,276 +235,214 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-all flex items-center justify-between group shadow-sm"
+              className="bg-card border border-border rounded-xl p-5 hover:border-foreground/20 transition-all flex items-center gap-4 shadow-sm"
             >
-              <div>
-                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{stat.label}</span>
-                <h3 className="text-3xl font-extrabold mt-2 tracking-tight group-hover:text-primary transition-colors">{stat.count}</h3>
-              </div>
-              <div className={`p-3 rounded-lg ${stat.color} border`}>
+              <div className={`h-12 w-12 shrink-0 rounded-full flex items-center justify-center border ${stat.ring}`}>
                 <Icon className="h-5 w-5" />
+              </div>
+              <div>
+                <span className="text-xs font-semibold text-muted-foreground">{stat.label}</span>
+                <h3 className="text-2xl font-extrabold tracking-tight">{stat.count}</h3>
+                <p className={`text-[11px] font-semibold ${stat.ring.split(' ')[0]}`}>{stat.sub}</p>
               </div>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Main Grid: Digest, Calendar, Tasks */}
+      {/* Main Grid: Today's Schedule + My Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left/Middle Column (Calendar & Tasks) */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* AI Digest Preview Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-violet-500/5 via-violet-500/3 to-transparent border border-violet-500/20 rounded-2xl p-6 shadow-sm relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-2 text-violet-600">
-              <Sparkles className="h-5 w-5 fill-violet-500 text-violet-600" />
-              <h2 className="text-lg font-bold tracking-tight">AI Digest</h2>
-            </div>
-            
-            <p className="text-foreground text-sm mt-3 leading-relaxed">
-              You have <span className="font-semibold text-violet-700">{upcomingMeetingsCount} upcoming meetings</span> and <span className="font-semibold text-violet-700">{pendingTasksCount} open tasks</span> today. 
-              {unreadEmailsCount > 0 && <> We found <span className="font-semibold text-violet-700">{unreadEmailsCount} recent flagged messages</span> that may require attention.</>}
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-              <div className="bg-card/60 backdrop-blur border border-border p-4 rounded-xl">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Focus Target</span>
-                <p className="text-sm font-semibold mt-1">Complete due tasks</p>
-              </div>
-              <div className="bg-card/60 backdrop-blur border border-border p-4 rounded-xl">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Meeting Preparation</span>
-                <p className="text-sm font-semibold mt-1">Review calendar agendas</p>
-              </div>
-              <div className="bg-card/60 backdrop-blur border border-border p-4 rounded-xl">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground">Inbox Priority</span>
-                <p className="text-sm font-semibold mt-1">Respond to flagged items</p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Today's Schedule Events */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5 text-primary" /> Upcoming Events (Next 7 Days)
-              </h2>
-              <Link href="/dashboard/calendar" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-                View Calendar <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            {data.events.length > 0 ? (
-              <div className="space-y-3">
-                {data.events.slice(0, 4).map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-start justify-between p-4 border border-border rounded-xl hover:bg-muted/40 transition-colors"
-                  >
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-semibold text-foreground">{event.title}</h4>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                        <span>🕐 {formatTime(event.start_time)}</span>
-                        <span>📆 {formatDate(event.start_time)}</span>
-                        {event.attendees && event.attendees.length > 0 && (
-                          <span>👥 {event.attendees.length} participants</span>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20 px-2 py-0.5 rounded capitalize">
-                      {event.source.replace('_', ' ')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10 border border-dashed border-border rounded-xl">
-                <CalendarIcon className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No upcoming meetings scheduled.</p>
-                {googleConnected ? (
-                  <button
-                    onClick={() => syncGoogle()}
-                    className="mt-3 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Sync Google Calendar
-                  </button>
-                ) : (
-                  <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
-                    Connect Google Calendar
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Right Column (Tasks & Recent Actions) */}
-        <div className="space-y-6">
-          {/* Upcoming Tasks */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-                <CheckSquare className="h-5 w-5 text-primary" /> Actionable Tasks
-              </h2>
-              <Link href="/dashboard/tasks" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-                All Tasks <ArrowRight className="h-3 w-3" />
-              </Link>
-            </div>
-
-            {data.tasks.length > 0 ? (
-              <div className="space-y-3">
-                {data.tasks.slice(0, 5).map((task) => (
-                  <div
-                    key={task.id}
-                    className="p-3 border border-border rounded-xl hover:bg-muted/40 transition-colors flex items-center justify-between"
-                  >
-                    <div className="min-w-0 pr-2">
-                      <h4 className="text-xs font-semibold text-foreground truncate">{task.title}</h4>
-                      {task.due_date && (
-                        <p className="text-[10px] text-muted-foreground mt-1">Due: {formatDate(task.due_date)}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 uppercase">
-                        {task.status || 'Todo'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-10 border border-dashed border-border rounded-xl">
-                <CheckSquare className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">No active tasks found.</p>
-                {notionConnected ? (
-                  <button
-                    onClick={() => syncNotion()}
-                    className="mt-3 text-xs font-semibold text-primary hover:underline"
-                  >
-                    Sync Notion Tasks
-                  </button>
-                ) : (
-                  <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
-                    Connect Notion Workspace
-                  </Link>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Sync Health Panel */}
-          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-            <h2 className="text-sm font-bold tracking-tight mb-4 flex items-center gap-2">
-              <RefreshCw className="h-4 w-4 text-accent" /> Recent Sync Health
+        {/* Today's Schedule — timeline */}
+        <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-primary" /> Today&apos;s Schedule
             </h2>
+            <span className="text-xs text-muted-foreground">{todayLabel}</span>
+          </div>
 
-            {data.syncJobs.length > 0 ? (
-              <div className="space-y-3">
-                {data.syncJobs.map((job) => {
-                  const isCompleted = job.status === 'completed';
-                  const isFailed = job.status === 'failed';
+          {eventsToday.length > 0 ? (
+            <div className="relative pl-4">
+              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
+              <div className="space-y-5">
+                {eventsToday.map((event, i) => {
+                  const countdown = formatCountdown(event.start_time);
                   return (
-                    <div key={job.id} className="flex items-center justify-between text-xs py-1.5 border-b border-border last:border-0">
-                      <div className="flex items-center gap-2">
-                        {isCompleted && <CheckCircle2 className="h-4 w-4 text-success" />}
-                        {isFailed && <XCircle className="h-4 w-4 text-danger" />}
-                        {!isCompleted && !isFailed && <RefreshCw className="h-4 w-4 text-warning animate-spin" />}
-                        <span className="font-semibold capitalize text-foreground">{job.connector}</span>
+                    <div key={event.id} className="relative flex items-start gap-4">
+                      <span className={`absolute -left-4 top-1 h-3 w-3 rounded-full ring-4 ring-card ${dotColors[i % dotColors.length]}`} />
+                      <div className="w-16 shrink-0 pt-0.5 text-xs font-semibold text-foreground">
+                        {formatTime(event.start_time)}
                       </div>
-                      <div className="text-right">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                          isCompleted ? 'bg-success/10 text-success' : isFailed ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
-                        }`}>
-                          {job.status}
-                        </span>
-                        <p className="text-[9px] text-muted-foreground mt-1">
-                          {job.completed_at ? formatDate(job.completed_at) : formatDate(job.created_at)}
-                        </p>
+                      <div className="flex-1 min-w-0 flex items-start justify-between gap-3 border-l border-border pl-4">
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-semibold text-foreground truncate">{event.title}</h4>
+                          <p className="text-xs text-muted-foreground capitalize">{event.source.replace('_', ' ')}</p>
+                        </div>
+                        {countdown && (
+                          <span className="text-[10px] font-semibold text-primary shrink-0 pt-0.5">{countdown}</span>
+                        )}
                       </div>
                     </div>
                   );
                 })}
               </div>
-            ) : (
-              <p className="text-xs text-muted-foreground text-center py-6">No recent sync history.</p>
-            )}
+            </div>
+          ) : (
+            <div className="text-center py-10 border border-dashed border-border rounded-xl">
+              <CalendarIcon className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Nothing scheduled today.</p>
+              {googleConnected ? (
+                <button onClick={() => syncGoogle()} className="mt-3 text-xs font-semibold text-primary hover:underline">
+                  Sync Google Calendar
+                </button>
+              ) : (
+                <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+                  Connect Google Calendar
+                </Link>
+              )}
+            </div>
+          )}
+
+          <Link href="/dashboard/calendar" className="mt-5 flex items-center justify-center gap-1 text-xs font-semibold text-primary hover:underline">
+            View full calendar <ArrowRight className="h-3 w-3" />
+          </Link>
+        </div>
+
+        {/* My Tasks */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold tracking-tight">My Tasks</h2>
+            <Link href="/dashboard/tasks" className="text-xs font-semibold text-primary hover:underline">
+              View all
+            </Link>
           </div>
+
+          {data.tasks.length > 0 ? (
+            <div className="space-y-1">
+              {data.tasks.slice(0, 5).map((task) => {
+                const isDone = task.status === 'Done';
+                return (
+                  <Link
+                    key={task.id}
+                    href="/dashboard/tasks"
+                    className="flex items-center gap-3 py-2.5 px-1 rounded-lg hover:bg-muted/40 transition-colors group"
+                  >
+                    {isDone ? (
+                      <CheckCircle2 className="h-4.5 w-4.5 text-success shrink-0" />
+                    ) : (
+                      <span className="h-4.5 w-4.5 rounded-full border-2 border-border shrink-0 group-hover:border-primary/50 transition-colors" />
+                    )}
+                    <span className={`text-sm flex-1 truncate ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                      {task.title}
+                    </span>
+                  </Link>
+                );
+              })}
+              <Link
+                href="/dashboard/tasks"
+                className="flex items-center gap-2 py-2.5 px-1 mt-1 text-xs font-semibold text-primary hover:underline"
+              >
+                <Plus className="h-3.5 w-3.5" /> View task board
+              </Link>
+            </div>
+          ) : (
+            <div className="text-center py-10 border border-dashed border-border rounded-xl">
+              <CheckSquare className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No active tasks found.</p>
+              {notionConnected ? (
+                <button onClick={() => syncNotion()} className="mt-3 text-xs font-semibold text-primary hover:underline">
+                  Sync Notion Tasks
+                </button>
+              ) : (
+                <Link href="/dashboard/integrations" className="mt-3 inline-block text-xs font-semibold text-primary hover:underline">
+                  Connect Notion Workspace
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Flagged Emails & Documents */}
+      {/* Recent Items + Integrations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Flagged Emails */}
+        {/* Recent Items — merged real activity feed */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" /> Flagged Messages
-            </h2>
-            <Link href="/dashboard/gmail" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-              Inbox <ArrowRight className="h-3 w-3" />
-            </Link>
+            <h2 className="text-lg font-bold tracking-tight">Recent Items</h2>
+            <span className="text-xs font-semibold text-primary">View all</span>
           </div>
 
-          {data.messages.length > 0 ? (
-            <div className="space-y-3">
-              {data.messages.slice(0, 4).map((msg) => (
-                <div key={msg.id} className="p-3 border border-border rounded-xl hover:bg-muted/40 transition-colors flex flex-col gap-1.5 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="font-semibold text-foreground truncate max-w-[200px]">{msg.sender}</span>
-                    <span className="text-[10px] text-muted-foreground">{formatDate(msg.created_at)}</span>
-                  </div>
-                  <h4 className="font-bold text-foreground truncate">{msg.subject || '(No Subject)'}</h4>
-                  <p className="text-muted-foreground truncate leading-relaxed">{msg.snippet}</p>
-                </div>
-              ))}
+          {recentItems.length > 0 ? (
+            <div className="space-y-1">
+              {recentItems.map((item) => {
+                const meta = recentItemMeta[item.type];
+                const Icon = meta.icon;
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className="flex items-center justify-between gap-3 p-2.5 rounded-lg hover:bg-muted/40 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`p-2 rounded-lg border ${meta.badge} shrink-0`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{item.meta} &bull; {formatRelativeTime(item.timestamp)}</p>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded border uppercase shrink-0 ${meta.badge}`}>
+                      {meta.label}
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-10">No recent messages retrieved.</p>
+            <p className="text-sm text-muted-foreground text-center py-10">No recent activity yet — connect a tool to get started.</p>
           )}
         </div>
 
-        {/* Documents */}
+        {/* Your Integrations */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" /> Recent Documents
-            </h2>
-            <Link href="/dashboard/documents" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-              All Files <ArrowRight className="h-3 w-3" />
+            <h2 className="text-lg font-bold tracking-tight">Your Integrations</h2>
+            <Link href="/dashboard/integrations" className="text-xs font-semibold text-primary hover:underline">
+              Manage
             </Link>
           </div>
 
-          {data.documents.length > 0 ? (
-            <div className="space-y-3">
-              {data.documents.slice(0, 4).map((doc) => (
-                <div key={doc.id} className="p-3 border border-border rounded-xl hover:bg-muted/40 transition-colors flex items-center justify-between text-xs">
-                  <div className="space-y-0.5">
-                    <h4 className="font-semibold text-foreground">{doc.title}</h4>
-                    <p className="text-[10px] text-muted-foreground">Modified: {formatDate(doc.last_modified)}</p>
-                  </div>
-                  {doc.url ? (
-                    <a
-                      href={doc.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded bg-muted hover:bg-border text-muted-foreground hover:text-foreground transition-all"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  ) : (
-                    <span className="text-[9px] bg-muted text-muted-foreground px-2 py-0.5 rounded uppercase">
-                      {doc.source}
-                    </span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {integrations.map((integration) => {
+              const Icon = integration.icon;
+              const statusLabel = !integration.real ? 'Not integrated' : integration.connected ? 'Connected' : 'Not connected';
+              return (
+                <div
+                  key={integration.label}
+                  className={`flex flex-col items-center gap-2 p-4 border border-border rounded-xl relative ${!integration.real ? 'opacity-60' : ''}`}
+                >
+                  {integration.connected && (
+                    <CheckCircle2 className="h-4 w-4 text-success absolute top-2 right-2" />
                   )}
+                  <div className="h-10 w-10 rounded-lg bg-muted/50 flex items-center justify-center">
+                    <Icon className="h-6 w-6" />
+                  </div>
+                  <span className="text-[11px] font-semibold text-foreground text-center leading-tight">{integration.label}</span>
+                  <span className={`text-[9px] font-bold uppercase ${integration.connected ? 'text-success' : 'text-muted-foreground'}`}>
+                    {statusLabel}
+                  </span>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center py-10">No documents found. Try syncing Notion.</p>
-          )}
+              );
+            })}
+          </div>
+
+          <Link
+            href="/dashboard/integrations"
+            className="mt-4 flex items-center justify-center gap-2 py-2.5 border border-dashed border-border rounded-xl text-xs font-semibold text-muted-foreground hover:text-primary hover:border-primary/40 transition-colors"
+          >
+            <Plus className="h-3.5 w-3.5" /> Connect more tools
+          </Link>
         </div>
       </div>
     </div>

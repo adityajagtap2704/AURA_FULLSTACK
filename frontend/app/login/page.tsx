@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth';
 import { supabase } from '@/lib/supabase';
 import { Mail, Lock, AlertCircle, Eye, EyeOff, ShieldCheck, Sparkles, Target, Lightbulb, ArrowRight } from 'lucide-react';
-import WorkspaceBackground from '@/components/WorkspaceBackground';
+import { GmailIcon, GoogleCalendarIcon, NotionIcon, GoogleMeetIcon } from '@/components/icons/ServiceIcons';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
@@ -64,15 +64,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-[#EDE4D8] font-sans">
-      
+    <div className="relative min-h-screen w-full flex flex-col md:flex-row font-sans overflow-hidden">
+      {/* Full-page photo background (Pexels — "console table with pampas
+          grass" by cottonbro studio), not the exact reference image, chosen
+          for a close match: bright white paneled wall, pampas grass in a
+          vase, framed art, warm wood tones. */}
+      <img
+        src="https://images.pexels.com/photos/9566054/pexels-photo-9566054.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#EDE4D8]/95 via-[#EDE4D8]/75 to-[#EDE4D8]/25" />
+
       {/* LEFT COLUMN: HERO & BRAND DETAILS (55% Width) */}
-      <div className="w-full md:w-[55%] flex flex-col justify-between p-8 md:p-12 lg:p-20 bg-gradient-to-br from-[#EDE4D8] to-[#E8DCC8] border-r border-[#E5DDD0] z-10 relative">
-        
+      <div className="relative z-10 w-full md:w-[55%] flex flex-col justify-between p-8 md:p-12 lg:p-20">
+
         {/* AURA Logo Header */}
         <div className="flex items-center gap-3">
           <div className="p-1">
-            <svg viewBox="0 0 100 100" className="h-10 w-10 text-[#C17817] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <svg viewBox="0 0 100 100" className="h-14 w-14 text-[#C8842B] shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5">
               <circle cx="50" cy="50" r="44" />
               <line x1="15" y1="50" x2="85" y2="50" />
               <path d="M 20 60 Q 35 55 50 60 Q 65 65 80 60" />
@@ -86,7 +96,7 @@ export default function LoginPage() {
               <line x1="80" y1="40" x2="74" y2="40" />
             </svg>
           </div>
-          <span className="text-2xl font-bold tracking-wider text-[#1F1B16]">AURA</span>
+          <span className="text-4xl font-black tracking-wide text-[#C8842B]">AURA</span>
         </div>
 
         {/* Main Hero content */}
@@ -94,9 +104,9 @@ export default function LoginPage() {
           <div className="space-y-3">
             <h1 className="text-3xl lg:text-4xl xl:text-5xl font-extrabold text-[#1F1B16] tracking-tight leading-tight">
               Aura makes your life <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C17817] to-[#D89A3E] relative inline-block">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#C8842B] to-[#D4953A] relative inline-block">
                 easy and fast.
-                <svg viewBox="0 0 200 12" className="absolute left-0 bottom-[-4px] w-full h-2 text-[#D89A3E] shrink-0" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
+                <svg viewBox="0 0 200 12" className="absolute left-0 bottom-[-4px] w-full h-2 text-[#D4953A] shrink-0" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
                   <path d="M 5 6 C 50 2, 150 2, 195 6" />
                 </svg>
               </span>
@@ -106,51 +116,16 @@ export default function LoginPage() {
             AURA is your all-in-one productivity hub that brings your tools, tasks, and insights together — so you can focus on what matters most.
           </p>
 
-          {/* Integrations grid */}
+          {/* Integrations grid — official brand-accurate icons */}
           <div className="grid grid-cols-4 gap-3 max-w-md pt-4">
             {[
-              { 
-                label: 'Gmail', 
-                svg: (
-                  <svg viewBox="0 0 24 24" className="h-6 w-6">
-                    <rect x="2" y="4" width="20" height="16" rx="3" fill="#FFFFFF" stroke="#E5DDD0" strokeWidth="1" />
-                    <path d="M22 6l-10 7L2 6" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                    <path d="M2 6v12h4V8.5l6 4 6-4V18h4V6" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                  </svg>
-                )
-              },
-              { 
-                label: 'Calendar', 
-                svg: (
-                  <svg viewBox="0 0 24 24" className="h-6 w-6">
-                    <rect x="2" y="3" width="20" height="18" rx="4" fill="#FFFFFF" stroke="#E5DDD0" strokeWidth="1" />
-                    <rect x="2" y="3" width="20" height="6" fill="#4285F4" rx="2" />
-                    <text x="12" y="16" fill="#1F1B16" fontSize="8" fontWeight="bold" textAnchor="middle">31</text>
-                  </svg>
-                )
-              },
-              { 
-                label: 'Notion', 
-                svg: (
-                  <svg viewBox="0 0 24 24" className="h-6 w-6" fill="currentColor">
-                    <path d="M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm2.5 4v12h2.5V8.5L15 18h2.5V6H15v9.5L9 6H6.5z" />
-                  </svg>
-                )
-              },
-              { 
-                label: 'Meet', 
-                svg: (
-                  <svg viewBox="0 0 24 24" className="h-6 w-6">
-                    <rect x="2" y="5" width="13" height="14" rx="3" fill="#34A853" />
-                    <path d="M15 10l5-3v10l-5-3" fill="#4285F4" />
-                    <circle cx="6" cy="12" r="1.5" fill="#FFFFFF" />
-                    <circle cx="10" cy="12" r="1.5" fill="#FFFFFF" />
-                  </svg>
-                )
-              }
+              { label: 'Gmail', Icon: GmailIcon },
+              { label: 'Calendar', Icon: GoogleCalendarIcon },
+              { label: 'Notion', Icon: NotionIcon },
+              { label: 'Meet', Icon: GoogleMeetIcon },
             ].map((item) => (
               <div key={item.label} className="bg-white border border-[#E5DDD0] p-3 rounded-xl flex flex-col items-center justify-center gap-1.5 shadow-sm">
-                {item.svg}
+                <item.Icon className="h-6 w-6" />
                 <span className="text-[10px] font-semibold text-[#6B6258]">{item.label}</span>
               </div>
             ))}
@@ -158,28 +133,28 @@ export default function LoginPage() {
         </div>
 
         {/* Feature Rows */}
-        <div className="bg-[#FFFFFF]/45 rounded-2xl p-5 border border-[#E5DDD0] space-y-4 max-w-lg shadow-sm">
+        <div className="bg-[#FDFBF7]/60 backdrop-blur-sm rounded-2xl p-5 space-y-4 max-w-lg shadow-md">
           {[
-            { 
-              title: 'What is AURA?', 
-              desc: 'AURA brings your essential apps into one simple workspace and helps you get more done, effortlessly.', 
-              icon: Target 
+            {
+              title: 'What is AURA?',
+              desc: 'AURA brings your essential apps into one simple workspace and helps you get more done, effortlessly.',
+              icon: Target
             },
-            { 
-              title: 'Why use AURA?', 
-              desc: 'AI-powered summaries, smart prioritization, and a clean dashboard that saves you time every day.', 
-              icon: Sparkles 
+            {
+              title: 'Why use AURA?',
+              desc: 'AI-powered summaries, smart prioritization, and a clean dashboard that saves you time every day.',
+              icon: Sparkles
             },
-            { 
-              title: 'Purpose of AURA', 
-              desc: "AURA's purpose is to simplify your work life by bringing clarity, speed, and focus to everything you do.", 
-              icon: Lightbulb 
+            {
+              title: 'Purpose of AURA',
+              desc: "AURA's purpose is to simplify your work life by bringing clarity, speed, and focus to everything you do.",
+              icon: Lightbulb
             }
           ].map((feature) => {
             const Icon = feature.icon;
             return (
               <div key={feature.title} className="flex gap-3">
-                <div className="h-8 w-8 rounded-full bg-[#F3E3C9] text-[#C17817] flex items-center justify-center shrink-0">
+                <div className="h-8 w-8 rounded-full bg-[#F3E3C9] text-[#C8842B] flex items-center justify-center shrink-0">
                   <Icon className="h-4.5 w-4.5" />
                 </div>
                 <div className="space-y-0.5">
@@ -193,10 +168,9 @@ export default function LoginPage() {
 
       </div>
 
-      {/* RIGHT COLUMN: WORKSPACE PICTURE & AUTH CARD (45% Width) */}
-      <div className="w-full md:w-[45%] flex items-center justify-center p-6 md:p-12 relative min-h-[500px] md:min-h-screen overflow-hidden">
-        <WorkspaceBackground />
-
+      {/* RIGHT COLUMN: AUTH CARD (45% Width) — untouched, just repositioned
+          above the shared full-page background instead of its own panel. */}
+      <div className="relative z-10 w-full md:w-[45%] flex items-center justify-center p-6 md:p-12 min-h-[500px] md:min-h-screen">
         <div className="bg-[#FDFBF7]/95 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-[0_15px_50px_rgba(31,27,22,0.12)] border border-[#E5DDD0] w-full max-w-md space-y-6 z-10">
           <div className="space-y-1.5">
             <h2 className="text-2xl font-bold text-[#1F1B16] tracking-tight">Welcome back!</h2>
