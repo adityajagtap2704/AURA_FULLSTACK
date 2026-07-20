@@ -61,7 +61,7 @@ export default function TasksPage() {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
-        <div className="bg-red-50 p-4 rounded-full mb-4">
+        <div className="bg-danger/15 p-4 rounded-full mb-4">
           <CheckSquare className="h-8 w-8 text-red-500" />
         </div>
         <h2 className="text-xl font-bold text-foreground mb-2">Failed to load tasks</h2>

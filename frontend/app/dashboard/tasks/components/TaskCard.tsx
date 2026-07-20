@@ -8,14 +8,14 @@ interface TaskCardProps {
 
 // 8 vibrant pastel palettes for Medium — each task gets a consistent one based on ID hash
 const MEDIUM_PALETTES: { bg: string; text: string; border: string }[] = [
-  { bg: '#FEF3C7', text: '#D97706', border: '#FDE68A' }, // Amber
-  { bg: '#FFEDD5', text: '#EA580C', border: '#FED7AA' }, // Orange
-  { bg: '#DBEAFE', text: '#2563EB', border: '#BFDBFE' }, // Sky Blue
-  { bg: '#EDE9FE', text: '#7C3AED', border: '#DDD6FE' }, // Purple
-  { bg: '#FCE7F3', text: '#DB2777', border: '#FBCFE8' }, // Pink
-  { bg: '#CCFBF1', text: '#0F766E', border: '#99F6E4' }, // Teal
-  { bg: '#E0E7FF', text: '#4F46E5', border: '#C7D2FE' }, // Indigo
-  { bg: '#CFFAFE', text: '#0891B2', border: '#A5F3FC' }, // Cyan
+  { bg: 'rgba(251,191,36,0.15)', text: '#fbbf24', border: 'rgba(251,191,36,0.3)' },
+  { bg: 'rgba(249,115,22,0.15)', text: '#f97316', border: 'rgba(249,115,22,0.3)' },
+  { bg: 'rgba(59,130,246,0.15)', text: '#3b82f6', border: 'rgba(59,130,246,0.3)' },
+  { bg: 'rgba(139,92,246,0.15)', text: '#8b5cf6', border: 'rgba(139,92,246,0.3)' },
+  { bg: 'rgba(236,72,153,0.15)', text: '#ec4899', border: 'rgba(236,72,153,0.3)' },
+  { bg: 'rgba(20,184,166,0.15)', text: '#14b8a6', border: 'rgba(20,184,166,0.3)' },
+  { bg: 'rgba(99,102,241,0.15)', text: '#6366f1', border: 'rgba(99,102,241,0.3)' },
+  { bg: 'rgba(6,182,212,0.15)', text: '#06b6d4', border: 'rgba(6,182,212,0.3)' },
 ];
 
 function getMediumPalette(taskId: string) {
@@ -31,21 +31,21 @@ export function TaskCard({ task }: TaskCardProps) {
     switch (priority?.toLowerCase()) {
       case 'high':
         return {
-          backgroundColor: '#FEE2E2',
-          color: '#EF4444',
-          borderColor: '#FECACA',
+          backgroundColor: 'rgba(239,68,68,0.15)',
+          color: '#ef4444',
+          borderColor: 'rgba(239,68,68,0.3)',
         };
       case 'low':
         return {
-          backgroundColor: '#DCFCE7',
-          color: '#16A34A',
-          borderColor: '#BBF7D0',
+          backgroundColor: 'rgba(34,197,94,0.15)',
+          color: '#22c55e',
+          borderColor: 'rgba(34,197,94,0.3)',
         };
       case 'critical':
         return {
-          backgroundColor: '#EDE9FE',
-          color: '#7C3AED',
-          borderColor: '#DDD6FE',
+          backgroundColor: 'rgba(139,92,246,0.15)',
+          color: '#8b5cf6',
+          borderColor: 'rgba(139,92,246,0.3)',
         };
       case 'medium':
       default: {

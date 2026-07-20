@@ -9,7 +9,7 @@ interface KanbanColumnProps {
 
 export function KanbanColumn({ id, title, tasks }: KanbanColumnProps) {
   return (
-    <div className="flex flex-col flex-1 min-w-[320px] bg-[#FAF9F6]/50 border border-border/60 rounded-2xl h-[calc(100vh-240px)] overflow-hidden shadow-sm">
+    <div className="flex flex-col flex-1 min-w-[320px] bg-muted/30 border border-border/60 rounded-2xl h-[calc(100vh-240px)] overflow-hidden shadow-sm">
       {/* Column Header */}
       <div className="flex items-center justify-between p-5 border-b border-border/40 bg-card/60 backdrop-blur-sm">
         <div className="flex items-center gap-3">

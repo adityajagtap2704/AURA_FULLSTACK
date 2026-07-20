@@ -112,9 +112,9 @@ const getAvatarColor = (sender: string) => {
       </div>
 
      {/* Gmail Search */}
-<div className="bg-white rounded-2xl border border-gray-200 px-5 py-4">
+<div className="bg-card rounded-2xl border border-border px-5 py-4">
   <div className="relative max-w-xl">
-    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
+    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
 
     <input
       type="text"
@@ -125,14 +125,15 @@ const getAvatarColor = (sender: string) => {
       w-full
       h-12
       rounded-full
-      bg-[#f1f3f4]
+      bg-muted
       pl-12
       pr-5
       outline-none
       text-sm
-      placeholder:text-gray-500
+      text-foreground
+      placeholder:text-muted-foreground
       focus:ring-2
-      focus:ring-[#d2e3fc]
+      focus:ring-primary/30
       transition-all
       "
     />
@@ -147,7 +148,7 @@ const getAvatarColor = (sender: string) => {
     activeMessageId
       ? "lg:col-span-2 hidden lg:block"
       : "lg:col-span-5"
-  } bg-white border border-gray-200 rounded-2xl overflow-hidden`}
+  } bg-card border border-border rounded-2xl overflow-hidden`}
 >
   {filteredMessages.length > 0 ? (
     filteredMessages.map((msg) => (
@@ -158,13 +159,13 @@ const getAvatarColor = (sender: string) => {
           flex items-center
           h-[72px]
           px-5
-          border-b border-gray-200
+          border-b border-border
           cursor-pointer
           transition-all duration-200
           ${
             activeMessageId === msg.id
-              ? "bg-[#e8f0fe]"
-              : "hover:bg-[#f8f9fa] hover:shadow-sm"
+              ? "bg-primary/10"
+              : "hover:bg-muted hover:shadow-sm"
           }
         `}
       >
@@ -198,7 +199,7 @@ const getAvatarColor = (sender: string) => {
             truncate
             text-[14px]
             font-medium
-            text-[#202124]
+            text-foreground
           "
         >
           {msg.sender}
@@ -206,11 +207,11 @@ const getAvatarColor = (sender: string) => {
 
         {/* Subject + Snippet */}
         <div className="flex-1 truncate text-[14px] px-6">
-          <span className="font-medium text-[#202124]">
+          <span className="font-medium text-foreground">
             {msg.subject || "(No Subject)"}
           </span>
 
-          <span className="text-[#5f6368]">
+          <span className="text-muted-foreground">
             {" — "}
             {msg.snippet}
           </span>
@@ -225,7 +226,7 @@ const getAvatarColor = (sender: string) => {
             text-right
             text-xs
             font-medium
-            text-[#5f6368]
+            text-muted-foreground
           "
         >
           {formatDate(msg.created_at)}
@@ -234,13 +235,13 @@ const getAvatarColor = (sender: string) => {
     ))
   ) : (
     <div className="flex flex-col items-center justify-center py-24">
-      <Inbox className="h-12 w-12 text-gray-400 mb-4" />
+      <Inbox className="h-12 w-12 text-muted-foreground/50 mb-4" />
 
-      <h3 className="text-lg font-semibold text-gray-700">
+      <h3 className="text-lg font-semibold text-foreground">
         You're all caught up!
       </h3>
 
-      <p className="text-sm text-gray-500 mt-2">
+      <p className="text-sm text-muted-foreground mt-2">
         No messages match your search.
       </p>
     </div>
