@@ -136,32 +136,32 @@ export default function DashboardPage() {
     count: tasksDueToday.length,
     sub: `${tasksDueTodayPending} pending`,
     icon: CheckSquare,
-    ring: 'text-orange-600 bg-orange-100 border-orange-200',
-    card: 'bg-orange-50 border-orange-100',
+    ring: 'text-orange-500 bg-orange-500/15 border-orange-500/30',
+    card: 'bg-orange-500/5 border-orange-500/10',
   },
   {
     label: 'Events Today',
     count: eventsToday.length,
     sub: `${upcomingEventsToday} upcoming`,
     icon: CalendarIcon,
-    ring: 'text-blue-600 bg-blue-100 border-blue-200',
-    card: 'bg-blue-50 border-blue-100',
+    ring: 'text-blue-500 bg-blue-500/15 border-blue-500/30',
+    card: 'bg-blue-500/5 border-blue-500/10',
   },
   {
     label: 'Messages',
     count: data.messages.length,
     sub: `${flaggedMessagesCount} flagged`,
     icon: Mail,
-    ring: 'text-emerald-600 bg-emerald-100 border-emerald-200',
-    card: 'bg-emerald-50 border-emerald-100',
+    ring: 'text-emerald-500 bg-emerald-500/15 border-emerald-500/30',
+    card: 'bg-emerald-500/5 border-emerald-500/10',
   },
   {
     label: 'Documents',
     count: data.documents.length,
     sub: `${documentsUpdatedToday} updated today`,
     icon: FileText,
-    ring: 'text-violet-600 bg-violet-100 border-violet-200',
-    card: 'bg-violet-50 border-violet-100',
+    ring: 'text-violet-500 bg-violet-500/15 border-violet-500/30',
+    card: 'bg-violet-500/5 border-violet-500/10',
   },
 ];
 
@@ -185,26 +185,26 @@ export default function DashboardPage() {
   task: {
     label: 'Task',
     icon: CheckSquare,
-    badge: 'bg-orange-100 text-orange-700 border-orange-200',
-    card: 'bg-orange-50 hover:bg-orange-100/70'
+    badge: 'bg-orange-500/15 text-orange-500 border-orange-500/30',
+    card: 'bg-orange-500/5 hover:bg-orange-500/10'
   },
   event: {
     label: 'Calendar',
     icon: CalendarIcon,
-    badge: 'bg-blue-100 text-blue-700 border-blue-200',
-    card: 'bg-blue-50 hover:bg-blue-100/70'
+    badge: 'bg-blue-500/15 text-blue-500 border-blue-500/30',
+    card: 'bg-blue-500/5 hover:bg-blue-500/10'
   },
   message: {
     label: 'Message',
     icon: Mail,
-    badge: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    card: 'bg-emerald-50 hover:bg-emerald-100/70'
+    badge: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30',
+    card: 'bg-emerald-500/5 hover:bg-emerald-500/10'
   },
   document: {
     label: 'Document',
     icon: FileText,
-    badge: 'bg-violet-100 text-violet-700 border-violet-200',
-    card: 'bg-violet-50 hover:bg-violet-100/70'
+    badge: 'bg-violet-500/15 text-violet-500 border-violet-500/30',
+    card: 'bg-violet-500/5 hover:bg-violet-500/10'
   },
 };
 
@@ -231,7 +231,7 @@ export default function DashboardPage() {
         <img src="/images/workspace.png"alt="Minimal workspace"width={1600}height={675}
           className="absolute inset-0 h-full w-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30 dark:from-background dark:via-background/90 dark:to-background/50" />
 
         <div className="relative p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -282,7 +282,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-card bclassName={`${stat.card} rounded-2xl border p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5`}order border-border rounded-xl p-5 hover:border-foreground/20 transition-all flex items-center gap-4 shadow-sm"
+              className={`${stat.card} rounded-2xl border p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5`}
             >
               <div
   className={`h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center border ${stat.ring}`}

@@ -116,8 +116,7 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus }: Task
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              style={{ colorScheme: 'light' }}
-              className="w-full bg-white border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors cursor-pointer"
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors cursor-pointer"
             />
           </div>
 
@@ -138,14 +137,9 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus }: Task
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors"
             >
-              Cancel
+              Close
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors shadow-sm"
-            >
-              {task ? 'Save Changes' : 'Create Task'}
-            </button>
+            {/* Create/Save hidden — tasks are read-only when synced from external sources */}
           </div>
         </form>
       </div>

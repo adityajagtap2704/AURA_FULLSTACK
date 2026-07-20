@@ -14,8 +14,6 @@ const GoogleGIcon = () => (
 interface WeekViewProps {
   currentDate: Date;
   events: Event[];
-  onSelectDate: (date: Date) => void;
-  onSelectEvent: (event: Event) => void;
 }
 
 const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, border: string }> = {
@@ -33,8 +31,6 @@ const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, bo
 export default function WeekView({
   currentDate,
   events,
-  onSelectDate,
-  onSelectEvent
 }: WeekViewProps) {
   // Get start of the week (Sunday)
   const getStartOfWeek = (d: Date) => {
@@ -101,10 +97,7 @@ export default function WeekView({
             }`}
           >
             {/* Header */}
-            <div
-              onClick={() => onSelectDate(day)}
-              className="text-center pb-3 border-b border-border cursor-pointer group"
-            >
+            <div className="text-center pb-3 border-b border-border group">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-primary transition-colors">
                 {day.toLocaleDateString('en-US', { weekday: 'short' })}
               </p>
@@ -129,8 +122,7 @@ export default function WeekView({
                   return (
                     <div
                       key={event.id}
-                      onClick={() => onSelectEvent(event)}
-                      className={`p-3 border-0 rounded-xl hover:opacity-95 cursor-pointer shadow-sm transition-all text-left flex flex-col gap-1.5 ${colorMeta.bg} ${colorMeta.border}`}
+                      className={`p-3 border-0 rounded-xl shadow-sm transition-all text-left flex flex-col gap-1.5 ${colorMeta.bg} ${colorMeta.border}`}
                     >
                       <h4 className={`text-[11px] font-bold line-clamp-1 group-hover:opacity-90 flex items-center gap-1.5 leading-none ${colorMeta.text}`}>
                         {event.source === 'google_calendar' && (

@@ -7,14 +7,14 @@ import {
 import { CheckCircle2, Calendar as CalIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const MEDIUM_PALETTES = [
-  { bg: '#FEF3C7', text: '#D97706' },
-  { bg: '#FFEDD5', text: '#EA580C' },
-  { bg: '#DBEAFE', text: '#2563EB' },
-  { bg: '#EDE9FE', text: '#7C3AED' },
-  { bg: '#FCE7F3', text: '#DB2777' },
-  { bg: '#CCFBF1', text: '#0F766E' },
-  { bg: '#E0E7FF', text: '#4F46E5' },
-  { bg: '#CFFAFE', text: '#0891B2' },
+  { bg: 'rgba(251,191,36,0.15)', text: '#fbbf24' },
+  { bg: 'rgba(249,115,22,0.15)', text: '#f97316' },
+  { bg: 'rgba(59,130,246,0.15)', text: '#3b82f6' },
+  { bg: 'rgba(139,92,246,0.15)', text: '#8b5cf6' },
+  { bg: 'rgba(236,72,153,0.15)', text: '#ec4899' },
+  { bg: 'rgba(20,184,166,0.15)', text: '#14b8a6' },
+  { bg: 'rgba(99,102,241,0.15)', text: '#6366f1' },
+  { bg: 'rgba(6,182,212,0.15)', text: '#06b6d4' },
 ];
 
 function getMediumPalette(id: string) {
@@ -24,21 +24,20 @@ function getMediumPalette(id: string) {
 }
 
 function getPillStyle(task: Task): { bg: string; text: string } {
-  if (task.status === 'Done') return { bg: '#DCFCE7', text: '#16A34A' };
+  if (task.status === 'Done') return { bg: 'rgba(34,197,94,0.15)', text: '#22c55e' };
   switch (task.priority?.toLowerCase()) {
-    case 'high': return { bg: '#FEE2E2', text: '#EF4444' };
-    case 'low': return { bg: '#DCFCE7', text: '#16A34A' };
-    case 'critical': return { bg: '#EDE9FE', text: '#7C3AED' };
+    case 'high': return { bg: 'rgba(239,68,68,0.15)', text: '#ef4444' };
+    case 'low': return { bg: 'rgba(34,197,94,0.15)', text: '#22c55e' };
+    case 'critical': return { bg: 'rgba(139,92,246,0.15)', text: '#8b5cf6' };
     default: return getMediumPalette(task.id);
   }
 }
 
 interface TaskCalendarViewProps {
   tasks: Task[];
-  onEdit: (task: Task) => void;
 }
 
-export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
+export function TaskCalendarView({ tasks }: TaskCalendarViewProps) {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
@@ -76,9 +75,9 @@ export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
           </span>
         </div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#FEE2E2] inline-block" />High</span>
-          <span className="flex items-center gap-1 ml-2"><span className="w-2 h-2 rounded-full bg-[#DCFCE7] inline-block" />Done</span>
-          <span className="flex items-center gap-1 ml-2"><span className="w-2 h-2 rounded-full bg-[#DBEAFE] inline-block" />Medium</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-danger/30 inline-block" />High</span>
+          <span className="flex items-center gap-1 ml-2"><span className="w-2 h-2 rounded-full bg-success/30 inline-block" />Done</span>
+          <span className="flex items-center gap-1 ml-2"><span className="w-2 h-2 rounded-full bg-primary/30 inline-block" />Medium</span>
         </div>
       </div>
 
@@ -131,20 +130,19 @@ export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
                   {dayTasks.slice(0, 2).map((t) => {
                     const { bg, text } = getPillStyle(t);
                     return (
-                      <button
+                      <div
                         key={t.id}
-                        onClick={() => onEdit(t)}
                         style={{ backgroundColor: bg, color: text }}
-                        className="w-full text-left rounded px-1 py-px leading-snug transition-opacity hover:opacity-80 shrink-0 no-underline"
+                        className="w-full text-left rounded px-1 py-px leading-snug transition-opacity shrink-0"
                         title={t.title}
-                      >
-                        <span
-                          className="text-[8px] font-semibold block truncate"
-                          style={{ textDecoration: 'none' }}
                         >
-                          {t.title}
-                        </span>
-                      </button>
+                          <span
+                            className="text-[8px] font-semibold block truncate"
+                            style={{ textDecoration: 'none' }}
+                          >
+                            {t.title}
+                          </span>
+                        </div>
                     );
                   })}
                   {dayTasks.length > 2 && (
@@ -167,15 +165,13 @@ export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
           </p>
           <div className="flex flex-wrap gap-1.5">
             {noDateTasks.map((t) => (
-              <button
+              <div
                 key={t.id}
-                onClick={() => onEdit(t)}
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-card border border-border rounded-full text-[11px] font-medium text-foreground hover:border-primary/40 hover:bg-accent/20 transition-all no-underline"
-                style={{ textDecoration: 'none' }}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-card border border-border rounded-full text-[11px] font-medium text-foreground transition-all"
               >
                 {t.status === 'Done' && <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0" />}
                 <span className={t.status === 'Done' ? 'line-through text-muted-foreground' : ''}>{t.title}</span>
-              </button>
+              </div>
             ))}
           </div>
         </div>

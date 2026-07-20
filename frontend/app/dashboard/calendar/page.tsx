@@ -3,12 +3,10 @@ import { useState, useMemo } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useEvents } from '@/hooks/useEvents';
-import { Search, Bell, Plus, ChevronDown, RefreshCw, Calendar, Loader2 } from 'lucide-react';
+import { Search, RefreshCw, Calendar, Loader2 } from 'lucide-react';
 import CalendarView from './components/CalendarView';
 import UpcomingEventsPanel from './components/UpcomingEventsPanel';
-import EventModal from './components/EventModal';
 import { getDisplayName, getAvatarUrl } from '@/lib/userDisplay';
-import { GoogleCalendarIcon } from '@/components/icons/ServiceIcons';
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -18,9 +16,6 @@ export default function CalendarPage() {
     events,
     isLoading: isEventsLoading,
     isError: isEventsError,
-    createEvent,
-    updateEvent,
-    deleteEvent
   } = useEvents();
 
   // Dashboard context for Google Calendar Sync and Connector Statuses
@@ -34,9 +29,6 @@ export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
 
   const userName = getDisplayName(user);
@@ -55,36 +47,6 @@ export default function CalendarPage() {
         event.description?.toLowerCase().includes(q)
     );
   }, [events, searchQuery]);
-
-  const handleSelectDate = (date: Date) => {
-    setSelectedDate(date);
-    setSelectedEvent(null);
-    setIsModalOpen(true);
-  };
-
-  const handleSelectEvent = (event: any) => {
-    setSelectedEvent(event);
-    setSelectedDate(null);
-    setIsModalOpen(true);
-  };
-
-  const handleSaveEvent = async (eventData: any) => {
-    if (selectedEvent) {
-      await updateEvent({ id: selectedEvent.id, ...eventData });
-    } else {
-      await createEvent(eventData);
-    }
-  };
-
-  const handleDeleteEvent = async (id: string) => {
-    await deleteEvent(id);
-  };
-
-  const handleNewEventClick = () => {
-    setSelectedEvent(null);
-    setSelectedDate(new Date());
-    setIsModalOpen(true);
-  };
 
   const handleOutlookSync = () => {
     setIsSyncingOutlook(true);
@@ -174,14 +136,7 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        {/* "+ New Event" Button on Right */}
-        <button
-          onClick={handleNewEventClick}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#F97316] text-white text-xs font-semibold rounded-xl hover:bg-[#F97316]/95 transition-all shadow shadow-orange-500/10 shrink-0"
-        >
-          <Plus className="h-4 w-4" />
-          New Event
-        </button>
+        {/* New Event removed — events are read-only and synced from external sources */}
       </div>
 
       {/* Main Responsive Grid Layout */}
@@ -192,9 +147,6 @@ export default function CalendarPage() {
             events={filteredEvents}
             isLoading={isEventsLoading}
             isError={isEventsError}
-            onSelectDate={handleSelectDate}
-            onSelectEvent={handleSelectEvent}
-            onDeleteEvent={handleDeleteEvent}
             viewMode={viewMode}
             setViewMode={setViewMode}
             currentDate={currentDate}
@@ -206,21 +158,12 @@ export default function CalendarPage() {
         <div className="col-span-12 lg:col-span-4 xl:col-span-3">
           <UpcomingEventsPanel
             events={events}
-            onSelectEvent={handleSelectEvent}
             onViewAllClick={() => setViewMode('agenda')}
           />
         </div>
       </div>
 
       {/* Add / Edit Event Modal */}
-      <EventModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        event={selectedEvent}
-        selectedDate={selectedDate}
-        onSave={handleSaveEvent}
-        onDelete={handleDeleteEvent}
-      />
     </div>
   );
 }

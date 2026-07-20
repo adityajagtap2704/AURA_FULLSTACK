@@ -27,7 +27,12 @@ import {
   Bell,
   HelpCircle,
   Shield,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink,
+  Keyboard,
+  Bug,
+  Mail as MailIcon,
+  Info
 } from 'lucide-react';
 
 const navItems = [
@@ -54,6 +59,8 @@ const [searchQuery, setSearchQuery] = useState("");
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
 const [helpOpen, setHelpOpen] = useState(false);
+const [shortcutsOpen, setShortcutsOpen] = useState(false);
+const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -241,7 +248,7 @@ const [helpOpen, setHelpOpen] = useState(false);
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search across your tools, tasks, messages..."
-                className="w-full rounded-xl bg-card border border-[#E8DDD2] pl-10 pr-12 py-2 text-xs outline-none focus:border-[#F97316] focus:ring-1 focus:ring-[#F97316] transition-all placeholder:text-muted-foreground/50 shadow-sm"
+                className="w-full rounded-xl bg-card border border-border pl-10 pr-12 py-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 shadow-sm"
               />
               <span className="absolute inset-y-0 right-3 flex items-center text-[10px] font-semibold text-muted-foreground/60 border border-border rounded px-1.5 py-0.5">
                 Ctrl K
@@ -322,23 +329,44 @@ const [helpOpen, setHelpOpen] = useState(false);
 
           <div className="py-2">
 
-            <button className="w-full text-left px-4 py-2 hover:bg-muted">
+            <button
+              onClick={() => { setHelpOpen(false); window.open('https://aura.help center', '_blank'); }}
+              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            >
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
               Help Center
+              <ExternalLink className="h-3 w-3 text-muted-foreground ml-auto" />
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-muted">
+            <button
+              onClick={() => { setHelpOpen(false); setShortcutsOpen(true); }}
+              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            >
+              <Keyboard className="h-4 w-4 text-muted-foreground" />
               Keyboard Shortcuts
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-muted">
+            <button
+              onClick={() => { setHelpOpen(false); window.open('mailto:support@aura.space?subject=Bug%20Report&body=Please%20describe%20the%20bug%20you%20encountered:', '_blank'); }}
+              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            >
+              <Bug className="h-4 w-4 text-muted-foreground" />
               Report a Bug
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-muted">
+            <button
+              onClick={() => { setHelpOpen(false); window.open('mailto:support@aura.space?subject=Support%20Request', '_blank'); }}
+              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            >
+              <MailIcon className="h-4 w-4 text-muted-foreground" />
               Contact Support
             </button>
 
-            <button className="w-full text-left px-4 py-2 hover:bg-muted">
+            <button
+              onClick={() => { setHelpOpen(false); setAboutOpen(true); }}
+              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            >
+              <Info className="h-4 w-4 text-muted-foreground" />
               About AURA
             </button>
 
@@ -466,6 +494,94 @@ const [helpOpen, setHelpOpen] = useState(false);
               </div>
               <SidebarContent />
             </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Keyboard Shortcuts Modal */}
+      <AnimatePresence>
+        {shortcutsOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShortcutsOpen(false)}
+              className="fixed inset-0 bg-black z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            >
+              <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Keyboard Shortcuts</h2>
+                  <button onClick={() => setShortcutsOpen(false)} className="p-1 rounded-lg hover:bg-muted">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { keys: 'Ctrl + K', action: 'Open search' },
+                    { keys: 'Ctrl + /', action: 'Toggle shortcuts' },
+                    { keys: 'Esc', action: 'Close modal / dropdown' },
+                    { keys: 'G then D', action: 'Go to Dashboard' },
+                    { keys: 'G then T', action: 'Go to Tasks' },
+                    { keys: 'G then C', action: 'Go to Calendar' },
+                    { keys: 'G then M', action: 'Go to Messages' },
+                    { keys: 'G then S', action: 'Go to Settings' },
+                  ].map((shortcut) => (
+                    <div key={shortcut.keys} className="flex items-center justify-between py-1.5">
+                      <span className="text-sm text-muted-foreground">{shortcut.action}</span>
+                      <kbd className="px-2 py-0.5 text-xs font-mono bg-muted border border-border rounded">{shortcut.keys}</kbd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* About AURA Modal */}
+      <AnimatePresence>
+        {aboutOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setAboutOpen(false)}
+              className="fixed inset-0 bg-black z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            >
+              <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center" onClick={(e) => e.stopPropagation()}>
+                <div className="flex justify-center mb-4">
+                  <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <AuraLogoIcon className="h-10 w-10 text-primary" />
+                  </div>
+                </div>
+                <h2 className="text-xl font-bold mb-1">AURA</h2>
+                <p className="text-sm text-muted-foreground mb-4">Unified Productivity Space</p>
+                <div className="space-y-1.5 text-sm text-muted-foreground">
+                  <p>Version 1.0.0</p>
+                  <p>Your all-in-one workspace for tasks, calendar, messages, and documents.</p>
+                </div>
+                <button
+                  onClick={() => setAboutOpen(false)}
+                  className="mt-6 w-full py-2 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
