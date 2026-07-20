@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-/* ─────────────────────────────── NAVBAR ─────────────────────────────── */
+/* --------------------------------- NAVBAR --------------------------------- */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -76,7 +76,7 @@ function Navbar() {
   );
 }
 
-/* ─────────────────────────────── HERO ─────────────────────────────── */
+/* --------------------------------- HERO --------------------------------- */
 function Hero() {
   return (
     <section className="min-h-screen bg-gradient-to-b from-[#FDFAF6] via-[#FDF8F2] to-[#F8F3EC] flex items-center pt-16 overflow-hidden">
@@ -314,7 +314,7 @@ function Hero() {
   );
 }
 
-/* ─────────────────────────── INTEGRATIONS ─────────────────────────── */
+/* ----------------------------- INTEGRATIONS ----------------------------- */
 const INTEGRATIONS = [
   { name:'Gmail', desc:'Stay on top of your emails effortlessly.', bg:'#FEF2F2', logo:(
     <svg viewBox="0 0 48 48" className="w-10 h-10"><path d="M6 8h36v32H6z" fill="#fff" rx="3"/><path d="M6 8l18 13L42 8" stroke="#EA4335" strokeWidth="2.5" fill="none"/><path d="M6 8h36l-18 13z" fill="#EA4335"/><rect x="6" y="8" width="36" height="32" rx="3" stroke="#EA4335" strokeWidth="1.5" fill="none"/></svg>
@@ -356,7 +356,7 @@ function Integrations() {
   );
 }
 
-/* ─────────────────────────── AI SECTION ─────────────────────────── */
+/* ------------------------------ AI SECTION ------------------------------ */
 function AISection() {
   return (
     <section className="py-6 bg-[#FAFAF8]">
@@ -444,7 +444,7 @@ function AISection() {
   );
 }
 
-/* ────────────────────────── HOW IT WORKS ─────────────────────────── */
+/* ----------------------------- HOW IT WORKS ----------------------------- */
 const STEPS = [
   {icon:(
     <svg className="w-7 h-7 text-[#C17817]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
@@ -511,7 +511,7 @@ function HowItWorks() {
   );
 }
 
-/* ─────────────────────────── TESTIMONIALS ─────────────────────────── */
+/* ----------------------------- TESTIMONIALS ----------------------------- */
 const TESTIMONIALS = [
   {name:'Ananya R.',role:'Product Designer',avatar:'👩🏽',quote:'"AURA completely changed how I manage my work. Everything is in one place now!"'},
   {name:'Rohit S.',role:'Software Engineer',avatar:'👨🏾',quote:'"The AI summary every morning saves me so much time. Super helpful and incredibly smart."'},
@@ -551,7 +551,7 @@ function Testimonials() {
   );
 }
 
-/* ─────────────────────────── CTA BANNER ─────────────────────────── */
+/* ------------------------------ CTA BANNER ------------------------------ */
 function CTABanner() {
   return (
     <section className="py-10 bg-white">
@@ -580,7 +580,7 @@ function CTABanner() {
   );
 }
 
-/* ─────────────────────────── FOOTER ─────────────────────────── */
+/* ------------------------------- FOOTER -------------------------------- */
 function Footer() {
   const col = (title: string, links: string[]) => (
     <div>
@@ -645,7 +645,7 @@ function Footer() {
   );
 }
 
-/* ─────────────────────────── PAGE ─────────────────────────── */
+/* --------------------------------- PAGE --------------------------------- */
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
