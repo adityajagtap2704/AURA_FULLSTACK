@@ -1,13 +1,9 @@
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { Task } from '@/types';
-import { Calendar, CheckCircle2, Clock, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface TaskCardProps {
   task: Task;
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
 }
 
 // 8 vibrant pastel palettes for Medium — each task gets a consistent one based on ID hash
@@ -30,22 +26,7 @@ function getMediumPalette(taskId: string) {
   return MEDIUM_PALETTES[Math.abs(hash) % MEDIUM_PALETTES.length];
 }
 
-export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id, data: { type: 'Task', task } });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  };
-
-  // Returns inline style object for badge — avoids Tailwind purge issues with dynamic hex values
+export function TaskCard({ task }: TaskCardProps) {
   const getBadgeStyle = (priority?: string | null) => {
     switch (priority?.toLowerCase()) {
       case 'high':
@@ -78,25 +59,11 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
     }
   };
 
-  if (isDragging) {
-    return (
-      <div
-        ref={setNodeRef}
-        style={style}
-        className="bg-card/50 border-2 border-dashed border-primary/50 rounded-xl p-4 h-[120px] opacity-50"
-      />
-    );
-  }
-
   const badgeStyle = getBadgeStyle(task.priority);
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="group relative bg-card hover:bg-accent/20 border border-border hover:border-border/80 rounded-xl p-4 transition-all duration-200 cursor-grab active:cursor-grabbing hover:shadow-md hover:-translate-y-0.5"
+      className="group relative bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:shadow-md"
     >
       <div className="flex justify-between items-start mb-2">
         <h4 className="text-sm font-semibold text-foreground pr-8 leading-snug">
@@ -108,18 +75,7 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
 
         {/* Quick Actions — appear on hover */}
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-150 flex items-center gap-1 bg-card/95 backdrop-blur-sm rounded-lg p-1 shadow-md border border-border">
-          <button
-            onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-            className="p-1.5 hover:bg-accent rounded-md text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <Edit2 className="h-3 w-3" />
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-            className="p-1.5 hover:bg-red-50 rounded-md text-muted-foreground hover:text-red-500 transition-colors"
-          >
-            <Trash2 className="h-3 w-3" />
-          </button>
+          {/* Quick edit/delete actions removed — tasks are read-only when synced */}
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 'use client';
 import { Event } from '@/types';
-import { Clock, Video, MapPin, Users, Edit3, Trash2 } from 'lucide-react';
+import { Clock, Video, MapPin, Users } from 'lucide-react';
 
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
@@ -11,8 +11,6 @@ const parseSafeDate = (dateStr: string) => {
 interface DayViewProps {
   currentDate: Date;
   events: Event[];
-  onSelectEvent: (event: Event) => void;
-  onDeleteEvent?: (id: string) => Promise<void>;
 }
 
 const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, border: string, dot: string }> = {
@@ -30,8 +28,6 @@ const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, bo
 export default function DayView({
   currentDate,
   events,
-  onSelectEvent,
-  onDeleteEvent
 }: DayViewProps) {
   const getEventsForDay = (date: Date) => {
     return events.filter(event => {
@@ -54,14 +50,6 @@ export default function DayView({
     });
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (!onDeleteEvent) return;
-    if (confirm('Are you sure you want to delete this event?')) {
-      await onDeleteEvent(id);
-    }
-  };
-
   return (
     <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
       {/* Header */}
@@ -81,8 +69,7 @@ export default function DayView({
             return (
               <div
                 key={event.id}
-                onClick={() => onSelectEvent(event)}
-                className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 border-0 rounded-2xl cursor-pointer hover:opacity-95 transition-all shadow-sm ${colorMeta.bg} ${colorMeta.border}`}
+                className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 border-0 rounded-2xl transition-all shadow-sm ${colorMeta.bg} ${colorMeta.border}`}
               >
                 {/* Left block - Time and Title */}
                 <div className="flex items-start gap-4">
@@ -173,24 +160,7 @@ export default function DayView({
 
                   {/* Actions */}
                   <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => onSelectEvent(event)}
-                      className="p-2 rounded-xl border border-black/5 bg-white/60 hover:bg-white text-muted-foreground hover:text-foreground transition-all animate-none"
-                      title="Edit event"
-                    >
-                      <Edit3 className="h-3.5 w-3.5" />
-                    </button>
-                    {onDeleteEvent && (
-                      <button
-                        type="button"
-                        onClick={(e) => handleDelete(e, event.id)}
-                        className="p-2 rounded-xl border border-black/5 bg-white/60 hover:bg-danger/10 text-muted-foreground hover:text-danger transition-all animate-none"
-                        title="Delete event"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    )}
+                    {/* Edit/Delete removed — calendar is read-only for synced events */}
                   </div>
                 </div>
               </div>
@@ -200,7 +170,7 @@ export default function DayView({
           <div className="text-center py-20 border border-dashed border-border rounded-2xl bg-muted/10">
             <Clock className="h-10 w-10 text-muted-foreground/35 mx-auto mb-3" />
             <h4 className="font-bold text-foreground">No events scheduled today</h4>
-            <p className="text-xs text-muted-foreground mt-1">Click "+ New Event" to schedule a meeting.</p>
+            <p className="text-xs text-muted-foreground mt-1">No events available.</p>
           </div>
         )}
       </div>

@@ -138,14 +138,9 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus }: Task
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-accent rounded-lg transition-colors"
             >
-              Cancel
+              Close
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors shadow-sm"
-            >
-              {task ? 'Save Changes' : 'Create Task'}
-            </button>
+            {/* Create/Save hidden — tasks are read-only when synced from external sources */}
           </div>
         </form>
       </div>

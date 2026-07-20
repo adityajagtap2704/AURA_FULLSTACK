@@ -1,5 +1,5 @@
 import { Task } from '@/types';
-import { Calendar, CheckCircle2, Clock, Edit2, Trash2 } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 
 const MEDIUM_PALETTES = [
@@ -39,13 +39,12 @@ function getBadgeStyle(priority?: string | null, taskId?: string) {
 
 interface TaskListViewProps {
   tasks: Task[];
-  onEdit: (task: Task) => void;
-  onDelete: (taskId: string) => void;
+
   emptyTitle?: string;
   emptyDescription?: string;
 }
 
-export function TaskListView({ tasks, onEdit, onDelete, emptyTitle, emptyDescription }: TaskListViewProps) {
+export function TaskListView({ tasks, emptyTitle, emptyDescription }: TaskListViewProps) {
   if (tasks.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 rounded-2xl bg-card/20" style={{ border: '2px dashed rgba(0,0,0,0.08)' }}>
@@ -69,15 +68,12 @@ export function TaskListView({ tasks, onEdit, onDelete, emptyTitle, emptyDescrip
           return (
             <div
               key={task.id}
-              onClick={() => onEdit(task)}
-              className="group flex items-center justify-between cursor-pointer transition-colors duration-150"
+              className="flex items-center justify-between transition-colors duration-150"
               style={{
                 padding: '10px 16px',
                 borderBottom: isLast ? 'none' : '1px solid rgba(0,0,0,0.05)',
                 background: 'transparent',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.02)')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
             >
               {/* Left: icon + title + meta */}
               <div className="flex items-center gap-3 min-w-0 flex-1 pr-4">
@@ -159,34 +155,8 @@ export function TaskListView({ tasks, onEdit, onDelete, emptyTitle, emptyDescrip
                   </span>
                 )}
 
-                {/* Hover actions */}
-                <div
-                  className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-                >
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onEdit(task); }}
-                    className="p-1.5 rounded-md transition-colors"
-                    style={{ color: 'rgba(0,0,0,0.35)' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                  >
-                    <Edit2 style={{ width: 13, height: 13 }} />
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onDelete(task.id); }}
-                    className="p-1.5 rounded-md transition-colors"
-                    style={{ color: 'rgba(0,0,0,0.35)' }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#fff1f2';
-                      e.currentTarget.style.color = '#ef4444';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.color = 'rgba(0,0,0,0.35)';
-                    }}
-                  >
-                    <Trash2 style={{ width: 13, height: 13 }} />
-                  </button>
+                <div className="text-[10px] text-muted-foreground uppercase tracking-[0.15em] font-semibold">
+                  Read-only
                 </div>
               </div>
             </div>

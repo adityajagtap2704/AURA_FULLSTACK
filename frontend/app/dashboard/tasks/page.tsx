@@ -3,35 +3,25 @@
 import { useState, useMemo } from 'react';
 import { useTasks } from '@/hooks/useTasks';
 import { Task } from '@/types';
-import {
-  CheckSquare, Search, Plus, Calendar as CalendarIcon,
-  Loader2, LayoutGrid, List, CheckCircle, User,
-} from 'lucide-react';
+import { CheckSquare, Search, Loader2, LayoutGrid, List, CheckCircle, User } from 'lucide-react';
 import { KanbanBoard } from './components/KanbanBoard';
-import { TaskModal } from './components/TaskModal';
 import { TaskListView } from './components/TaskListView';
-import { TaskCalendarView } from './components/TaskCalendarView';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type FilterTab = 'All' | 'My Tasks' | 'Kanban' | 'Calendar' | 'Completed';
+type FilterTab = 'All' | 'My Tasks' | 'Kanban' | 'Completed';
 
 const TAB_CONFIG: { id: FilterTab; icon: typeof List }[] = [
   { id: 'All', icon: List },
   { id: 'My Tasks', icon: User },
   { id: 'Kanban', icon: LayoutGrid },
-  { id: 'Calendar', icon: CalendarIcon },
   { id: 'Completed', icon: CheckCircle },
 ];
 
 export default function TasksPage() {
-  const { tasks, isLoading, isError, createTask, updateTask, deleteTask } = useTasks();
+  const { tasks, isLoading, isError } = useTasks();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FilterTab>('Kanban');
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [defaultStatus, setDefaultStatus] = useState<string>('To Do');
 
   // Compute filtered task sets for each tab (search applied to all)
   const searchFiltered = useMemo(() => {
@@ -45,7 +35,6 @@ export default function TasksPage() {
       All: searchFiltered,
       'My Tasks': searchFiltered.filter((t) => t.source === 'local'),
       Kanban: searchFiltered,
-      Calendar: searchFiltered,
       Completed: searchFiltered.filter((t) => t.status === 'Done'),
     };
   }, [searchFiltered]);
@@ -55,7 +44,6 @@ export default function TasksPage() {
     All: searchFiltered.length,
     'My Tasks': searchFiltered.filter((t) => t.source === 'local').length,
     Kanban: searchFiltered.length,
-    Calendar: searchFiltered.filter((t) => t.due_date).length,
     Completed: searchFiltered.filter((t) => t.status === 'Done').length,
   }), [searchFiltered]);
 
@@ -85,32 +73,6 @@ export default function TasksPage() {
     );
   }
 
-  const handleAddTask = (status = 'To Do') => {
-    setDefaultStatus(status);
-    setEditingTask(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  };
-
-  const handleSaveTask = (taskData: Partial<Task>) => {
-    if (editingTask) {
-      updateTask.mutate({ id: editingTask.id, updates: taskData });
-    } else {
-      createTask.mutate(taskData);
-    }
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    deleteTask.mutate(taskId);
-  };
-
-  const handleUpdateTaskStatus = (taskId: string, newStatus: string) => {
-    updateTask.mutate({ id: taskId, updates: { status: newStatus } });
-  };
 
   const currentTasks = tabTasks[activeTab];
 
@@ -144,13 +106,7 @@ export default function TasksPage() {
             <span className="text-[10px] font-semibold text-muted-foreground bg-muted/80 border border-border/80 rounded-md px-2 py-1 shadow-sm">⌘ / Ctrl + K</span>
           </div>
         </div>
-        <button
-          onClick={() => handleAddTask()}
-          className="w-full sm:w-auto ml-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#D97736] text-white text-sm font-semibold rounded-xl hover:bg-[#c2682f] hover:shadow-lg transition-all shadow-md shrink-0"
-        >
-          <Plus className="h-4 w-4" />
-          New Task
-        </button>
+        {/* New Task removed — tasks are read-only and synced from external sources */}
       </div>
 
       {/* Filter Tabs */}
@@ -209,10 +165,8 @@ export default function TasksPage() {
             >
               <TaskListView
                 tasks={currentTasks}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
                 emptyTitle="No tasks yet"
-                emptyDescription="Create your first task using the + New Task button."
+                emptyDescription="Tasks are read-only and synced from external sources."
               />
             </motion.div>
           )}
@@ -229,10 +183,8 @@ export default function TasksPage() {
             >
               <TaskListView
                 tasks={currentTasks}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
                 emptyTitle="No personal tasks"
-                emptyDescription="Tasks you create locally will appear here. Synced tasks from Notion will show in All."
+                emptyDescription="Local tasks are disabled; this view shows synced Notion tasks in All."
               />
             </motion.div>
           )}
@@ -249,27 +201,10 @@ export default function TasksPage() {
             >
               <KanbanBoard
                 tasks={currentTasks}
-                onUpdateTaskStatus={handleUpdateTaskStatus}
-                onAddTask={handleAddTask}
-                onEditTask={handleEditTask}
-                onDeleteTask={handleDeleteTask}
               />
             </motion.div>
           )}
 
-          {/* CALENDAR tab — monthly calendar grid */}
-          {activeTab === 'Calendar' && (
-            <motion.div
-              key="calendar"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-              className="absolute inset-0"
-            >
-              <TaskCalendarView tasks={currentTasks} onEdit={handleEditTask} />
-            </motion.div>
-          )}
 
           {/* COMPLETED tab — done tasks list */}
           {activeTab === 'Completed' && (
@@ -283,24 +218,14 @@ export default function TasksPage() {
             >
               <TaskListView
                 tasks={currentTasks}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
                 emptyTitle="No completed tasks"
-                emptyDescription="Drag tasks to the Done column in Kanban view, or edit a task to mark it complete."
+                emptyDescription="Completed tasks appear here once synced sources mark them done."
               />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
 
-      {/* Task Create/Edit Modal */}
-      <TaskModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveTask}
-        task={editingTask}
-        defaultStatus={defaultStatus}
-      />
     </div>
   );
 }

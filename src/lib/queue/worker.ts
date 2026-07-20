@@ -98,23 +98,52 @@ export const syncWorker = new Worker<SyncJobData>(
         }
       }
 
-      // Insert events
+      // Insert events — be tolerant of missing columns in DB schema (e.g., color)
       if (canonicalData.events.length > 0) {
-        const eventsToInsert = canonicalData.events.map(event => ({
+        let eventsToInsert = canonicalData.events.map((event) => ({
           ...event,
           tenant_id: tenantId,
         }));
 
-        const { error } = await supabaseServer
-          .from('events')
-          .upsert(eventsToInsert, {
-            onConflict: 'tenant_id,source,source_id',
-          });
+        // Try upsert, and if PostgREST reports a missing column (PGRST204),
+        // remove that column from the payload and retry. This makes the
+        // worker resilient to schema drift in development environments.
+        let attempt = 0;
+        while (attempt < 3) {
+          attempt += 1;
+          const { error } = await supabaseServer
+            .from('events')
+            .upsert(eventsToInsert, {
+              onConflict: 'tenant_id,source,source_id',
+            });
 
-        if (error) {
+          if (!error) {
+            itemsSynced += canonicalData.events.length;
+            break;
+          }
+
           console.error('[Sync Worker] Error inserting events:', error);
-        } else {
-          itemsSynced += canonicalData.events.length;
+
+          // If PostgREST reports a missing column, try to parse it and remove
+          // that property from the objects, then retry.
+          if (error.code === 'PGRST204' && typeof error.message === 'string') {
+            const m = error.message.match(/Could not find the '([^']+)' column/);
+            if (m && m[1]) {
+              const missingCol = m[1];
+              console.warn(`[Sync Worker] Detected missing column '${missingCol}', stripping it from events and retrying`);
+              eventsToInsert = eventsToInsert.map((e) => {
+                const copy: Record<string, any> = { ...e };
+                delete copy[missingCol];
+                return copy;
+              });
+              // continue to retry
+              continue;
+            }
+          }
+
+          // For any other error or if we couldn't parse the missing column,
+          // stop retrying to avoid an infinite loop.
+          break;
         }
       }
 

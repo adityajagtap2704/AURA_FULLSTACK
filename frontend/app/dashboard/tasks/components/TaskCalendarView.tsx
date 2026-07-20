@@ -35,10 +35,9 @@ function getPillStyle(task: Task): { bg: string; text: string } {
 
 interface TaskCalendarViewProps {
   tasks: Task[];
-  onEdit: (task: Task) => void;
 }
 
-export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
+export function TaskCalendarView({ tasks }: TaskCalendarViewProps) {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
@@ -131,11 +130,10 @@ export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
                   {dayTasks.slice(0, 2).map((t) => {
                     const { bg, text } = getPillStyle(t);
                     return (
-                      <button
+                      <div
                         key={t.id}
-                        onClick={() => onEdit(t)}
                         style={{ backgroundColor: bg, color: text }}
-                        className="w-full text-left rounded px-1 py-px leading-snug transition-opacity hover:opacity-80 shrink-0 no-underline"
+                        className="w-full text-left rounded px-1 py-px leading-snug transition-opacity shrink-0"
                         title={t.title}
                       >
                         <span
@@ -167,11 +165,9 @@ export function TaskCalendarView({ tasks, onEdit }: TaskCalendarViewProps) {
           </p>
           <div className="flex flex-wrap gap-1.5">
             {noDateTasks.map((t) => (
-              <button
+              <div
                 key={t.id}
-                onClick={() => onEdit(t)}
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-card border border-border rounded-full text-[11px] font-medium text-foreground hover:border-primary/40 hover:bg-accent/20 transition-all no-underline"
-                style={{ textDecoration: 'none' }}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-card border border-border rounded-full text-[11px] font-medium text-foreground transition-all"
               >
                 {t.status === 'Done' && <CheckCircle2 className="h-3 w-3 text-green-500 shrink-0" />}
                 <span className={t.status === 'Done' ? 'line-through text-muted-foreground' : ''}>{t.title}</span>

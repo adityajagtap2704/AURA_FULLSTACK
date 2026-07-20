@@ -4,7 +4,6 @@ import { Event } from '@/types';
 
 interface UpcomingEventsPanelProps {
   events: Event[];
-  onSelectEvent: (event: Event) => void;
   onViewAllClick: () => void;
 }
 
@@ -28,7 +27,6 @@ const GoogleMeetLogo = ({ className = "h-5.5 w-5.5" }: { className?: string }) =
 
 export default function UpcomingEventsPanel({
   events,
-  onSelectEvent,
   onViewAllClick
 }: UpcomingEventsPanelProps) {
   // Sort events by date and filter to only show future events (or today's events)
@@ -101,8 +99,7 @@ export default function UpcomingEventsPanel({
             return (
               <div
                 key={event.id}
-                onClick={() => onSelectEvent(event)}
-                className="group flex items-start gap-4 p-3 border border-border hover:border-primary/30 rounded-2xl cursor-pointer hover:shadow-sm transition-all"
+                className="group flex items-start gap-4 p-3 border border-border rounded-2xl transition-all"
               >
                 {/* Left Side: Category Styled Icon Box */}
                 <div className={`h-11 w-11 rounded-xl shrink-0 flex items-center justify-center border-2 ${colorMeta.border} ${colorMeta.text} bg-transparent`}>

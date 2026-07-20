@@ -12,9 +12,6 @@ interface CalendarViewProps {
   events: Event[];
   isLoading: boolean;
   isError: boolean;
-  onSelectDate: (date: Date) => void;
-  onSelectEvent: (event: Event) => void;
-  onDeleteEvent?: (id: string) => Promise<void>;
   viewMode: 'month' | 'week' | 'day' | 'agenda';
   setViewMode: (mode: 'month' | 'week' | 'day' | 'agenda') => void;
   currentDate: Date;
@@ -25,9 +22,6 @@ export default function CalendarView({
   events,
   isLoading,
   isError,
-  onSelectDate,
-  onSelectEvent,
-  onDeleteEvent,
   viewMode,
   setViewMode,
   currentDate,
@@ -163,31 +157,23 @@ export default function CalendarView({
               <MonthView
                 currentDate={currentDate}
                 events={events}
-                onSelectDate={onSelectDate}
-                onSelectEvent={onSelectEvent}
               />
             )}
             {viewMode === 'week' && (
               <WeekView
                 currentDate={currentDate}
                 events={events}
-                onSelectDate={onSelectDate}
-                onSelectEvent={onSelectEvent}
               />
             )}
             {viewMode === 'day' && (
               <DayView
                 currentDate={currentDate}
                 events={events}
-                onSelectEvent={onSelectEvent}
-                onDeleteEvent={onDeleteEvent}
               />
             )}
             {viewMode === 'agenda' && (
               <AgendaView
                 events={events}
-                onSelectEvent={onSelectEvent}
-                onDeleteEvent={onDeleteEvent}
               />
             )}
           </motion.div>

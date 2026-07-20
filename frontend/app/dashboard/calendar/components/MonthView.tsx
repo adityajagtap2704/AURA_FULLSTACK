@@ -13,8 +13,6 @@ const GoogleGIcon = () => (
 interface MonthViewProps {
   currentDate: Date;
   events: Event[];
-  onSelectDate: (date: Date) => void;
-  onSelectEvent: (event: Event) => void;
 }
 
 const COLOR_MAP: Record<string, { dot: string, text: string }> = {
@@ -27,8 +25,6 @@ const COLOR_MAP: Record<string, { dot: string, text: string }> = {
 export default function MonthView({
   currentDate,
   events,
-  onSelectDate,
-  onSelectEvent
 }: MonthViewProps) {
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -123,8 +119,7 @@ export default function MonthView({
           return (
             <div
               key={idx}
-              onClick={() => onSelectDate(cellDate)}
-              className={`p-2 flex flex-col group min-h-[110px] transition-all cursor-pointer relative ${
+              className={`p-2 flex flex-col group min-h-[110px] transition-all ${
                 isCurrentMonth 
                   ? 'bg-card hover:bg-muted/10' 
                   : 'bg-muted/10 text-muted-foreground/50 hover:bg-muted/15'
@@ -157,14 +152,10 @@ export default function MonthView({
                     event.title.toLowerCase().includes('google meeting') ||
                     event.meeting_link?.toLowerCase().includes('meet.google');
                   
-                  return (
+                      return (
                     <div
                       key={event.id}
-                      onClick={(e) => {
-                        e.stopPropagation(); // prevent opening create modal
-                        onSelectEvent(event);
-                      }}
-                      className="text-left p-1.5 rounded-lg hover:bg-muted/60 transition-all select-none group/event"
+                      className="text-left p-1.5 rounded-lg transition-all select-none group/event"
                       title={`${event.title} (${formatEventTime(event.start_time)})`}
                     >
                       <div className="flex items-center gap-1.5 min-w-0">

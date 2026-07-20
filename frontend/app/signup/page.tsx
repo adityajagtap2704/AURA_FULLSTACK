@@ -27,6 +27,7 @@ export default function SignupPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
 
@@ -292,15 +293,23 @@ export default function SignupPage() {
                   <Lock className="h-4 w-4" />
                 </span>
                 <input
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-4 text-xs outline-none transition-all placeholder:text-[#6B6258]/50 ${
+                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-[#6B6258]/50 ${
                     errors.confirmPassword 
                       ? 'border-red-400 focus:ring-1 focus:ring-red-400' 
                       : 'border-[#E5DDD0] focus:border-[#C17817] focus:ring-1 focus:ring-[#C17817]'
                   }`}
                   {...register('confirmPassword')}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#6B6258]/70 hover:text-[#1F1B16] transition-colors"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </div>
               {errors.confirmPassword && (
                 <p className="mt-1 text-[10px] text-red-600 font-semibold">{errors.confirmPassword.message}</p>

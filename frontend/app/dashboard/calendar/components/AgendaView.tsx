@@ -10,7 +10,6 @@ const parseSafeDate = (dateStr: string) => {
 
 interface AgendaViewProps {
   events: Event[];
-  onSelectEvent: (event: Event) => void;
   onDeleteEvent?: (id: string) => Promise<void>;
 }
 
@@ -28,7 +27,6 @@ const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, bo
 
 export default function AgendaView({
   events,
-  onSelectEvent,
   onDeleteEvent
 }: AgendaViewProps) {
   // Group events by day
@@ -93,8 +91,7 @@ export default function AgendaView({
                   return (
                     <div
                       key={event.id}
-                      onClick={() => onSelectEvent(event)}
-                      className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 border-0 rounded-2xl cursor-pointer hover:opacity-95 transition-all shadow-sm ${colorMeta.bg} ${colorMeta.border}`}
+                      className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 border-0 rounded-2xl transition-all shadow-sm ${colorMeta.bg} ${colorMeta.border}`}
                     >
                       {/* Event Details */}
                       <div className="flex items-start gap-4">
@@ -176,24 +173,7 @@ export default function AgendaView({
                         )}
  
                         <div className="flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() => onSelectEvent(event)}
-                            className="p-2 rounded-xl border border-black/5 bg-white/60 hover:bg-white text-muted-foreground hover:text-foreground transition-all animate-none"
-                            title="Edit event"
-                          >
-                            <Edit3 className="h-3.5 w-3.5" />
-                          </button>
-                          {onDeleteEvent && (
-                            <button
-                              type="button"
-                              onClick={(e) => handleDelete(e, event.id)}
-                              className="p-2 rounded-xl border border-black/5 bg-white/60 hover:bg-danger/10 text-muted-foreground hover:text-danger transition-all animate-none"
-                              title="Delete event"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          )}
+                          {/* Edit/Delete removed — calendar is read-only for synced events */}
                         </div>
                       </div>
                     </div>
