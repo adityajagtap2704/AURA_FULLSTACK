@@ -102,6 +102,17 @@ const INTEGRATIONS = [
   },
 ];
 
+const basePathX = [0, 4.2, 6, 4.2, 0, -4.2, -6, -4.2];
+const basePathY = [-6, -4.2, 0, 4.2, 6, 4.2, 0, -4.2];
+
+const getOrbitPath = (offset: number) => {
+  const x = [...basePathX.slice(offset), ...basePathX.slice(0, offset)];
+  const y = [...basePathY.slice(offset), ...basePathY.slice(0, offset)];
+  x.push(x[0]);
+  y.push(y[0]);
+  return { x, y };
+};
+
 export default function FeaturesSection() {
   return (
     <section id="integrations" className="py-24 bg-white">
@@ -128,19 +139,47 @@ export default function FeaturesSection() {
           {INTEGRATIONS.map((integration, i) => (
             <motion.div
               key={integration.name}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial="initial"
+              whileInView="inView"
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.07 }}
-              whileHover={{ y: -6, scale: 1.02 }}
+              whileHover="hover"
+              variants={{
+                initial: { opacity: 0, y: 24 },
+                inView: { opacity: 1, y: 0, transition: { duration: 0.5, delay: i * 0.07 } },
+                hover: { y: -6, scale: 1.02, transition: { duration: 0.3 } }
+              }}
               className="group relative bg-white rounded-2xl p-6 border border-[#F0EBE3] hover:border-transparent hover:shadow-xl hover:shadow-[#1F1B16]/10 transition-all duration-300 cursor-pointer"
             >
               <div className="flex flex-col items-center text-center gap-3">
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-300"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-sm"
                   style={{ backgroundColor: integration.bg }}
                 >
-                  {integration.icon}
+                  <motion.div
+                    custom={i}
+                    variants={{
+                      inView: (i: number) => ({
+                        x: getOrbitPath(i % 8).x,
+                        y: getOrbitPath(i % 8).y,
+                        transition: {
+                          duration: 8 + (i % 3) * 2,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }
+                      }),
+                      hover: {
+                        x: 0,
+                        y: 0,
+                        transition: {
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25
+                        }
+                      }
+                    }}
+                  >
+                    {integration.icon}
+                  </motion.div>
                 </div>
                 <div>
                   <h3 className="font-bold text-[#1F1B16] text-sm">{integration.name}</h3>

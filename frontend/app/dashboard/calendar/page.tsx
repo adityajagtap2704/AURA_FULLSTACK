@@ -27,7 +27,7 @@ export default function CalendarPage() {
 
   // Calendar States
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('month');
+  const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('day');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
 

@@ -26,6 +26,57 @@ const TESTIMONIALS = [
   },
 ];
 
+/* Per-avatar float paths — each traces a unique slow organic loop */
+const FLOAT_KEYFRAMES = [
+  // Avatar 0: gentle diagonal drift
+  {
+    x: [0, 3, 7, 5, 0, -4, -7, -3, 0],
+    y: [0, -6, -3, 4, 8, 5, -2, -7, 0],
+    duration: 11,
+    shadow: ['0 2px 8px rgba(0,0,0,0.10)', '0 6px 18px rgba(0,0,0,0.16)', '0 2px 8px rgba(0,0,0,0.10)'],
+  },
+  // Avatar 1: slow vertical bob with horizontal sway
+  {
+    x: [0, -5, -8, -4, 0, 5, 8, 4, 0],
+    y: [0, -4, 0, 5, 8, 4, 0, -5, 0],
+    duration: 14,
+    shadow: ['0 2px 8px rgba(0,0,0,0.10)', '0 4px 14px rgba(0,0,0,0.14)', '0 2px 8px rgba(0,0,0,0.10)'],
+  },
+  // Avatar 2: wide lazy circular path
+  {
+    x: [0, 6, 9, 6, 0, -6, -9, -6, 0],
+    y: [0, -5, 0, 6, 9, 6, 0, -6, 0],
+    duration: 17,
+    shadow: ['0 2px 8px rgba(0,0,0,0.10)', '0 8px 22px rgba(0,0,0,0.18)', '0 2px 8px rgba(0,0,0,0.10)'],
+  },
+];
+
+function AvatarFloat({ index, avatar }: { index: number; avatar: string }) {
+  const kf = FLOAT_KEYFRAMES[index % FLOAT_KEYFRAMES.length];
+
+  return (
+    <motion.div
+      className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FDF6EC] to-[#F5E8D0] border border-[#E8D5B0] flex items-center justify-center text-xl shrink-0 cursor-default"
+      initial={{ x: 0, y: 0 }}
+      animate={{ x: kf.x, y: kf.y, boxShadow: kf.shadow }}
+      transition={{
+        duration: kf.duration,
+        repeat: Infinity,
+        ease: 'easeInOut',
+        times: [0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1],
+      }}
+      whileHover={{
+        x: 0,
+        y: 0,
+        boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+        transition: { type: 'spring', stiffness: 380, damping: 28 },
+      }}
+    >
+      {avatar}
+    </motion.div>
+  );
+}
+
 export default function DashboardPreview() {
   return (
     <section className="py-24 bg-white">
@@ -65,9 +116,7 @@ export default function DashboardPreview() {
 
               {/* Author */}
               <div className="flex items-center gap-3 pt-2 border-t border-[#F0EBE3]">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FDF6EC] to-[#F5E8D0] border border-[#E8D5B0] flex items-center justify-center text-xl">
-                  {t.avatar}
-                </div>
+                <AvatarFloat index={i} avatar={t.avatar} />
                 <div>
                   <div className="text-sm font-bold text-[#1F1B16]">{t.name}</div>
                   <div className="text-xs text-[#9B8F85]">{t.role}</div>
