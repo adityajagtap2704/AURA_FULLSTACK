@@ -191,7 +191,7 @@ function Hero() {
                 {/* Greeting */}
                 <div className="mb-4">
                   <h3 className="text-[13px] font-bold text-[#1F1B16]">Good morning, Bhargavi 🌟</h3>
-                  <p className="text-[10px] text-[#9B8F85]">Here's what's happening today.</p>
+                  <p className="text-[10px] text-[#9B8F85]">Here&apos;s what&apos;s happening today.</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3">
@@ -211,7 +211,7 @@ function Hero() {
 
                   {/* Schedule */}
                   <div className="bg-[#FDFBF8] rounded-xl p-3 border border-[#F0EBE3]">
-                    <div className="text-[9px] font-bold text-[#4A3F35] mb-1.5">Today's Schedule</div>
+                    <div className="text-[9px] font-bold text-[#4A3F35] mb-1.5">Today&apos;s Schedule</div>
                     <div className="space-y-1.5">
                       {[{t:'10:00 AM',l:'Project Standup',c:'#C17817'},{t:'12:30 PM',l:'Lunch – Team Charlotte',c:'#22C55E'},{t:'3:00 PM',l:'Design Review + G-Meet',c:'#3B82F6'}].map(e=>(
                         <div key={e.l} className="flex gap-1.5 items-center">
