@@ -90,6 +90,10 @@
   border-color: var(--border);
 }
 
+html {
+  scroll-padding-top: 5rem;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -127,3 +131,130 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted-foreground);
 }
+
+/* ── Integration icon floating animations (GPU-accelerated, transform only) ── */
+
+/* Gmail — tiny figure-8 path */
+@keyframes int-float-0 {
+  0%   { transform: translate(0px, 0px); }
+  25%  { transform: translate(3px, -4px); }
+  50%  { transform: translate(0px, 0px); }
+  75%  { transform: translate(-3px, 4px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* Google Calendar — slow circular drift */
+@keyframes int-float-1 {
+  0%   { transform: translate(0px, -3px); }
+  25%  { transform: translate(4px, 0px); }
+  50%  { transform: translate(0px, 3px); }
+  75%  { transform: translate(-4px, 0px); }
+  100% { transform: translate(0px, -3px); }
+}
+
+/* Notion — subtle horizontal sway */
+@keyframes int-float-2 {
+  0%   { transform: translate(-4px, 0px); }
+  50%  { transform: translate(4px, 0px); }
+  100% { transform: translate(-4px, 0px); }
+}
+
+/* Google Meet — gentle vertical float */
+@keyframes int-float-3 {
+  0%   { transform: translate(0px, 0px); }
+  50%  { transform: translate(0px, -5px); }
+  100% { transform: translate(0px, 0px); }
+}
+
+/* ── How It Works — Neural Pulse Flow ── */
+
+@keyframes neural-breathe {
+  0%, 100% { box-shadow: 0 0 12px rgba(193,120,23,0.12), 0 2px 8px rgba(0,0,0,0.04); }
+  50% { box-shadow: 0 0 24px rgba(193,120,23,0.22), 0 2px 12px rgba(0,0,0,0.06); }
+}
+
+@keyframes neural-glow-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.neural-stroke {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: neural-draw 1.2s ease-out forwards;
+}
+
+@keyframes neural-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* ── Premium floating avatar animations ── */
+@keyframes av-float-0 {
+  0%, 100% { transform: translate(0px, 0px); }
+  14% { transform: translate(3px, -6px); }
+  28% { transform: translate(7px, -3px); }
+  42% { transform: translate(5px, 4px); }
+  57% { transform: translate(0px, 8px); }
+  71% { transform: translate(-4px, 5px); }
+  85% { transform: translate(-7px, -2px); }
+}
+@keyframes av-float-1 {
+  0%, 100% { transform: translate(0px, 0px); }
+  14% { transform: translate(-5px, -4px); }
+  28% { transform: translate(-8px, 0px); }
+  42% { transform: translate(-4px, 5px); }
+  57% { transform: translate(0px, 8px); }
+  71% { transform: translate(5px, 4px); }
+  85% { transform: translate(8px, 0px); }
+}
+@keyframes av-float-2 {
+  0%, 100% { transform: translate(0px, 0px); }
+  14% { transform: translate(6px, -5px); }
+  28% { transform: translate(9px, 0px); }
+  42% { transform: translate(6px, 6px); }
+  57% { transform: translate(0px, 9px); }
+  71% { transform: translate(-6px, 6px); }
+  85% { transform: translate(-9px, 0px); }
+}
+
+.animate-av-float-0 {
+  animation: av-float-0 11s ease-in-out infinite;
+}
+.animate-av-float-1 {
+  animation: av-float-1 14s ease-in-out infinite;
+}
+.animate-av-float-2 {
+  animation: av-float-2 17s ease-in-out infinite;
+}
+
+/* ── Premium circular orbit animations for icons ── */
+@keyframes icon-orbit-0 { 
+  0%, 100% { transform: translate(0px, -4px); } 
+  25% { transform: translate(6px, 0px); } 
+  50% { transform: translate(0px, 5px); } 
+  75% { transform: translate(-6px, 0px); } 
+}
+@keyframes icon-orbit-1 { 
+  0%, 100% { transform: translate(0px, -5px); } 
+  25% { transform: translate(7px, 0px); } 
+  50% { transform: translate(0px, 6px); } 
+  75% { transform: translate(-7px, 0px); } 
+}
+@keyframes icon-orbit-2 { 
+  0%, 100% { transform: translate(0px, -6px); } 
+  25% { transform: translate(8px, 0px); } 
+  50% { transform: translate(0px, 7px); } 
+  75% { transform: translate(-8px, 0px); } 
+}
+@keyframes icon-orbit-3 { 
+  0%, 100% { transform: translate(0px, -5px); } 
+  25% { transform: translate(-7px, 0px); } 
+  50% { transform: translate(0px, 6px); } 
+  75% { transform: translate(7px, 0px); } 
+}
+
+.animate-icon-orbit-0 { animation: icon-orbit-0 10s ease-in-out infinite; }
+.animate-icon-orbit-1 { animation: icon-orbit-1 12s ease-in-out infinite; }
+.animate-icon-orbit-2 { animation: icon-orbit-2 9s ease-in-out infinite; }
+.animate-icon-orbit-3 { animation: icon-orbit-3 14s ease-in-out infinite; }
+
