@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase/server';
 import { getAuthContext, AuthError } from '@/lib/auth/getAuthContext';
 import { GoogleConnector } from '@/lib/connectors/google';
+import { triggerBackgroundSync } from '@/lib/sync/autoSync';
 
 // Helper to unpack packed JSONB metadata from attendees if present
 function processEvents(events: any[]) {
@@ -38,7 +39,10 @@ function processEvents(events: any[]) {
 // Fetch events for the authenticated tenant with optional date range parameters
 export async function GET(request: NextRequest) {
   try {
-    const { tenantId } = await getAuthContext(request);
+    const { userId, tenantId } = await getAuthContext(request);
+    
+    // Rate-limited background sync triggered asynchronously (does not block HTTP response)
+    await triggerBackgroundSync(userId, tenantId);
     
     const url = new URL(request.url);
     const startTimeParam = url.searchParams.get('start_time');

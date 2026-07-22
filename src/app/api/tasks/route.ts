@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase/server';
 import { getAuthContext, AuthError } from '@/lib/auth/getAuthContext';
+import { triggerBackgroundSync } from '@/lib/sync/autoSync';
 
 export async function GET(request: NextRequest) {
   try {
-    const { tenantId } = await getAuthContext(request);
+    const { userId, tenantId } = await getAuthContext(request);
+
+    // Rate-limited background sync triggered asynchronously (does not block HTTP response)
+    await triggerBackgroundSync(userId, tenantId);
 
     const { data: tasks, error } = await supabaseServer
       .from('tasks')
@@ -43,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     const { data: task, error } = await supabaseServer
       .from('tasks')
-      .insert(fullPayload)
+      .insert(fullPayload as any)
       .select()
       .single();
 

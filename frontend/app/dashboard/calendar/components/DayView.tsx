@@ -4,8 +4,19 @@ import { Clock, Video, MapPin, Users } from 'lucide-react';
 
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
-  const formatted = dateStr.replace(' ', 'T');
-  return new Date(formatted);
+  try {
+    const parts = dateStr.replace(' ', 'T').split('T');
+    const datePart = parts[0];
+    let timePart = parts[1] || '00:00:00';
+    timePart = timePart.split(/[Z+]/)[0];
+    const lastMinus = timePart.lastIndexOf('-');
+    if (lastMinus > timePart.lastIndexOf(':')) {
+      timePart = timePart.substring(0, lastMinus);
+    }
+    return new Date(`${datePart}T${timePart}`);
+  } catch {
+    return new Date(dateStr);
+  }
 };
 
 interface DayViewProps {
