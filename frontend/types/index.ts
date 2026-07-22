@@ -95,3 +95,16 @@ export interface UserProfile {
   role: string;
   created_at: string;
 }
+
+export interface Notification {
+  id: string;
+  tenant_id: string;
+  title: string;
+  description: string;
+  type: 'task' | 'calendar' | 'gmail' | 'message' | 'document' | 'ai' | 'integration' | 'profile' | 'settings' | 'admin';
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+  updated_at: string;
+}
+

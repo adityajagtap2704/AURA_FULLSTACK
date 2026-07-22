@@ -119,6 +119,30 @@ export const syncWorker = new Worker<SyncJobData>(
 
           if (!error) {
             itemsSynced += canonicalData.events.length;
+            
+            // Clean up Google Calendar events that were deleted upstream within the sync window
+            const googleEvents = canonicalData.events.filter(e => e.source === 'google_calendar');
+            if (googleEvents.length > 0) {
+              const currentIds = googleEvents.map(e => e.source_id);
+              const now = new Date();
+              const thirtyDaysAgo = new Date(now);
+              thirtyDaysAgo.setDate(now.getDate() - 30);
+              const ninetyDaysFromNow = new Date(now);
+              ninetyDaysFromNow.setDate(now.getDate() + 90);
+
+              const { error: deleteError } = await supabaseServer
+                .from('events')
+                .delete()
+                .eq('tenant_id', tenantId)
+                .eq('source', 'google_calendar')
+                .gte('start_time', thirtyDaysAgo.toISOString())
+                .lte('start_time', ninetyDaysFromNow.toISOString())
+                .not('source_id', 'in', `(${currentIds.join(',')})`);
+
+              if (deleteError) {
+                console.error('[Sync Worker] Error deleting removed Google Calendar events:', deleteError);
+              }
+            }
             break;
           }
 
@@ -132,10 +156,10 @@ export const syncWorker = new Worker<SyncJobData>(
               const missingCol = m[1];
               console.warn(`[Sync Worker] Detected missing column '${missingCol}', stripping it from events and retrying`);
               eventsToInsert = eventsToInsert.map((e) => {
-                const copy: Record<string, any> = { ...e };
+                const copy = { ...e } as any;
                 delete copy[missingCol];
                 return copy;
-              });
+              }) as any;
               // continue to retry
               continue;
             }
@@ -164,6 +188,22 @@ export const syncWorker = new Worker<SyncJobData>(
           console.error('[Sync Worker] Error inserting messages:', error);
         } else {
           itemsSynced += canonicalData.messages.length;
+          
+          // Clean up Gmail messages that are no longer returned by the active sync queries (meaning they were deleted or unstarred/unmarked)
+          const gmailMessages = canonicalData.messages.filter(m => m.source === 'gmail');
+          if (gmailMessages.length > 0) {
+            const currentIds = gmailMessages.map(m => m.source_id);
+            const { error: deleteError } = await supabaseServer
+              .from('messages')
+              .delete()
+              .eq('tenant_id', tenantId)
+              .eq('source', 'gmail')
+              .not('source_id', 'in', `(${currentIds.join(',')})`);
+
+            if (deleteError) {
+              console.error('[Sync Worker] Error deleting removed Gmail messages:', deleteError);
+            }
+          }
         }
       }
 

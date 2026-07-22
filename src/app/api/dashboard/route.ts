@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase/server';
 import { getAuthContext, AuthError } from '@/lib/auth/getAuthContext';
+import { triggerBackgroundSync } from '@/lib/sync/autoSync';
 
 // Helper to unpack packed JSONB metadata from attendees if present
 function processEvents(events: any[]) {
@@ -35,7 +36,10 @@ function processEvents(events: any[]) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { tenantId } = await getAuthContext(request);
+    const { userId, tenantId } = await getAuthContext(request);
+
+    // Rate-limited background sync triggered asynchronously (does not block HTTP response)
+    await triggerBackgroundSync(userId, tenantId);
 
     // Get today's date range
     const now = new Date();

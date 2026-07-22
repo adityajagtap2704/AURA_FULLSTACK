@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
@@ -13,6 +13,8 @@ import KeyboardShortcutsModal from '@/components/help/KeyboardShortcutsModal';
 import ReportBugModal from '@/components/help/ReportBugModal';
 import ContactSupportModal from '@/components/help/ContactSupportModal';
 import AboutAuraModal from '@/components/help/AboutAuraModal';
+import { useNotifications } from '@/hooks/useNotifications';
+import NotificationDropdown from '@/components/dashboard/NotificationDropdown';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -50,7 +52,8 @@ const navItems = [
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, role } = useAuth();
   const { theme, setTheme, resolvedTheme } = useTheme();
- const { connectorStatus, data } = useDashboard();
+  const { connectorStatus, data } = useDashboard();
+  const { unreadCount } = useNotifications();
   const router = useRouter();
 
   const finalNavItems = [
@@ -58,11 +61,45 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ...(role === 'ADMIN' ? [{ href: '/dashboard/admin', label: 'Admin Panel', icon: Shield }] : [])
   ];
   const pathname = usePathname();
-const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-const [helpOpen, setHelpOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  // States to track incoming notifications for visual chime/ring effect
+  const [prevUnreadCount, setPrevUnreadCount] = useState(unreadCount);
+  const [isRinging, setIsRinging] = useState(false);
+
+  useEffect(() => {
+    if (unreadCount > prevUnreadCount) {
+      setIsRinging(true);
+      const timer = setTimeout(() => setIsRinging(false), 1000);
+      return () => clearTimeout(timer);
+    }
+    setPrevUnreadCount(unreadCount);
+  }, [unreadCount, prevUnreadCount]);
+
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const helpRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (notificationRef.current && !notificationRef.current.contains(target)) {
+        setNotificationOpen(false);
+      }
+      if (helpRef.current && !helpRef.current.contains(target)) {
+        setHelpOpen(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
 const [shortcutsOpen, setShortcutsOpen] = useState(false);
 const [aboutOpen, setAboutOpen] = useState(false);
@@ -87,8 +124,8 @@ if (
 ) {
   return;
 }
-    // Ctrl + K → Focus Search
-    if (e.ctrlKey && e.key.toLowerCase() === "k") {
+    // Ctrl + K or Cmd + K → Focus Search
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
       e.preventDefault();
 
       const input = document.querySelector(
@@ -253,10 +290,10 @@ case "o":
   const SidebarContent = () => (
     <>
       {/* Brand */}
-      <div className="h-16 flex items-center px-6 gap-2.5 border-b border-border">
+      <Link href="/dashboard" className="h-16 flex items-center px-6 gap-2.5 border-b border-border hover:opacity-80 transition-opacity">
         <AuraLogoIcon className="h-8 w-8 text-primary shrink-0" />
         <span className="font-bold tracking-wide text-lg">AURA</span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="px-4 pt-6 space-y-1.5">
@@ -266,10 +303,10 @@ case "o":
           return (
             <Link key={item.href} href={item.href}>
               <div
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-out cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02] ${
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow shadow-primary/20'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-primary text-primary-foreground shadow shadow-primary/20 hover:shadow-md hover:shadow-primary/30'
+                    : 'text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground'
                 }`}
               >
                 <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-white' : 'text-muted-foreground'}`} />
@@ -290,7 +327,7 @@ case "o":
               <Link
                 key={integration.label}
                 href={integration.connected ? integration.href : '/dashboard/integrations'}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
               >
                 <Icon className="h-4.5 w-4.5 shrink-0" />
                 <span className="flex-1 truncate">{integration.label}</span>
@@ -307,7 +344,7 @@ case "o":
       <div className="p-4 border-t border-border">
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
         >
           <Settings className="h-4.5 w-4.5" />
           <span>Settings</span>
@@ -319,7 +356,7 @@ case "o":
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row relative">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-card border-r border-border shrink-0 z-30">
+      <aside className="hidden md:flex flex-col w-64 bg-[#F9FAFB] border-r border-border shrink-0 z-30">
         <SidebarContent />
       </aside>
 
@@ -344,8 +381,11 @@ case "o":
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search across your tools, tasks, messages..."
-                className="w-full rounded-xl bg-card border border-border pl-10 pr-12 py-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 shadow-sm"
+                className="w-full rounded-xl bg-card border border-border pl-10 pr-[90px] py-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground/50 shadow-sm"
               />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center bg-[#FAF7F2] border border-[#EAE3D5] rounded-full px-2.5 py-0.5 text-[9px] font-bold text-[#475569] shadow-sm select-none pointer-events-none">
+                ⌘ / Ctrl + K
+              </div>
               {searchQuery.trim() && (
   <div className="absolute left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
 
@@ -388,54 +428,47 @@ case "o":
 
   </div>
 )}
-              
-              <span className="absolute inset-y-0 right-3 flex items-center text-[10px] font-semibold text-muted-foreground/60 border border-border rounded px-1.5 py-0.5">
-                Ctrl K
-              </span>
             </div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-           <div className="relative">
-  <button
-    onClick={() => {
-      setNotificationOpen(!notificationOpen);
-      setHelpOpen(false);
-      setProfileMenuOpen(false);
-    }}
-    className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-    title="Notifications"
-  >
-    <Bell className="h-4.5 w-4.5" />
-  </button>
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={() => {
+                  setNotificationOpen(!notificationOpen);
+                  setHelpOpen(false);
+                  setProfileMenuOpen(false);
+                }}
+                className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors relative outline-none focus:outline-none"
+                title="Notifications"
+              >
+                <motion.div
+                  animate={isRinging ? {
+                    rotate: [0, -18, 15, -12, 10, -5, 0],
+                  } : {}}
+                  transition={{ duration: 0.6, ease: "easeInOut" }}
+                >
+                  <Bell className="h-4.5 w-4.5" />
+                </motion.div>
+                {unreadCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.12 }}
+                    className="absolute top-[2px] right-[2px] flex h-[15px] min-w-[15px] px-1.5 items-center justify-center rounded-full bg-[#EF4444] text-[8px] font-bold text-white shadow-sm ring-[1.5px] ring-white select-none pointer-events-none"
+                  >
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </motion.span>
+                )}
+              </button>
 
-  <AnimatePresence>
-    {notificationOpen && (
-      <>
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setNotificationOpen(false)}
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="absolute right-0 top-12 w-80 bg-card border border-border rounded-xl shadow-xl z-50"
-        >
-          <div className="p-4 border-b border-border">
-            <h3 className="font-semibold">Notifications</h3>
-          </div>
-
-          <div className="p-4 text-sm text-muted-foreground">
-            No new notifications.
-          </div>
-        </motion.div>
-      </>
-    )}
-  </AnimatePresence>
-</div>
-            <div className="relative">
+              <AnimatePresence>
+                {notificationOpen && (
+                  <NotificationDropdown onClose={() => setNotificationOpen(false)} />
+                )}
+              </AnimatePresence>
+            </div>
+            <div className="relative" ref={helpRef}>
   <button
     onClick={() => {
       setHelpOpen(!helpOpen);
@@ -450,83 +483,76 @@ case "o":
 
   <AnimatePresence>
     {helpOpen && (
-      <>
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setHelpOpen(false)}
-        />
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="absolute right-0 top-12 w-72 bg-card border border-border rounded-xl shadow-xl z-50"
+      >
+        <div className="p-4 border-b border-border">
+          <h3 className="font-semibold">Help</h3>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="absolute right-0 top-12 w-72 bg-card border border-border rounded-xl shadow-xl z-50"
-        >
-          <div className="p-4 border-b border-border">
-            <h3 className="font-semibold">Help</h3>
-          </div>
+        <div className="py-2">
 
-          <div className="py-2">
-
-            <button
-             onClick={() => {
+          <button
+           onClick={() => {
   setHelpOpen(false);
   setHelpCenterOpen(true);
 }}
-              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
-            >
-              <HelpCircle className="h-4 w-4 text-muted-foreground" />
-              Help Center
-             
-            </button>
-
-            <button
-              onClick={() => { setHelpOpen(false); setShortcutsOpen(true); }}
-              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
-            >
-              <Keyboard className="h-4 w-4 text-muted-foreground" />
-              Keyboard Shortcuts
-            </button>
+            className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+          >
+            <HelpCircle className="h-4.5 w-4.5 text-muted-foreground" />
+            Help Center
+           
+          </button>
 
           <button
-  onClick={() => {
-    setHelpOpen(false);
-    setReportBugOpen(true);
-  }}
-  className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+            onClick={() => { setHelpOpen(false); setShortcutsOpen(true); }}
+            className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+          >
+            <Keyboard className="h-4 w-4 text-muted-foreground" />
+            Keyboard Shortcuts
+          </button>
+
+        <button
+onClick={() => {
+  setHelpOpen(false);
+  setReportBugOpen(true);
+}}
+className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
 >
-  <Bug className="h-4 w-4 text-muted-foreground" />
-  Report a Bug
+<Bug className="h-4 w-4 text-muted-foreground" />
+Report a Bug
 </button>
 
-           <button
-  onClick={() => {
-    setHelpOpen(false);
-    setContactSupportOpen(true);
-  }}
-  className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+         <button
+onClick={() => {
+  setHelpOpen(false);
+  setContactSupportOpen(true);
+}}
+className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
 >
-  <MailIcon className="h-4 w-4 text-muted-foreground" />
-  Contact Support
+<MailIcon className="h-4 w-4 text-muted-foreground" />
+Contact Support
 </button>
 
-            <button
-              onClick={() => { setHelpOpen(false); setAboutOpen(true); }}
-              className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
-            >
-              <Info className="h-4 w-4 text-muted-foreground" />
-              About AURA
-            </button>
+          <button
+            onClick={() => { setHelpOpen(false); setAboutOpen(true); }}
+            className="w-full text-left px-4 py-2 hover:bg-muted flex items-center gap-2 text-sm"
+          >
+            <Info className="h-4 w-4 text-muted-foreground" />
+            About AURA
+          </button>
 
-          </div>
-        </motion.div>
-      </>
+        </div>
+      </motion.div>
     )}
   </AnimatePresence>
 </div>
 
             {/* Profile menu */}
-            <div className="relative">
+            <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-lg hover:bg-muted transition-colors"
@@ -546,14 +572,12 @@ case "o":
 
               <AnimatePresence>
                 {profileMenuOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setProfileMenuOpen(false)} />
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      className="absolute top-12 right-0 w-56 bg-card border border-border rounded-xl shadow-xl py-2 z-50"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="absolute top-12 right-0 w-56 bg-card border border-border rounded-xl shadow-xl py-2 z-50"
+                  >
                       <div className="px-3.5 py-2 border-b border-border flex items-center gap-2.5">
                         {avatarUrl ? (
                           <img src={avatarUrl} alt={userName} className="h-8 w-8 rounded-full object-cover shrink-0" referrerPolicy="no-referrer" />
@@ -601,7 +625,6 @@ case "o":
                         </button>
                       </div>
                     </motion.div>
-                  </>
                 )}
               </AnimatePresence>
             </div>
@@ -630,7 +653,7 @@ case "o":
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-72 bg-card border-r border-border flex flex-col z-50 md:hidden"
+              className="fixed inset-y-0 left-0 w-72 bg-[#F9FAFB] border-r border-border flex flex-col z-50 md:hidden"
             >
               <div className="flex items-center justify-end px-4 pt-4">
                 <button

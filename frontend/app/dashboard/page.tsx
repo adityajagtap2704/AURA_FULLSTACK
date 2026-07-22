@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/providers/AuthProvider';
@@ -34,6 +35,14 @@ export default function DashboardPage() {
     connectorStatus,
     isLoadingConnectorStatus
   } = useDashboard();
+
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    if (isRefetching || isSyncingGoogle) {
+      setRefreshKey((prev) => prev + 1);
+    }
+  }, [isRefetching, isSyncingGoogle]);
 
   if (isLoading || isLoadingConnectorStatus) {
     return (
@@ -219,23 +228,29 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6 pb-10">
+    <motion.div
+      key={refreshKey}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="space-y-6 pb-10"
+    >
       {/* Greeting Banner */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-2xl border border-primary/20"
+        className="relative overflow-hidden rounded-2xl border border-primary/20 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 hover:border-primary/40 hover:scale-[1.002] group/banner"
       >
         {/* Free-license photo (Pexels — "Cozy Workspace with Coffee Mug on
             Desk" by Letícia Alvares), not the mockup's exact source image. */}
         <img src="/images/workspace.png"alt="Minimal workspace"width={1600}height={675}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover/banner:scale-[1.03]"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30 dark:from-background dark:via-background/90 dark:to-background/50" />
 
         <div className="relative p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground transition-all duration-300 group-hover/banner:text-primary">
               {greeting}, {userName}!
             </h1>
             <p className="text-muted-foreground text-sm mt-1">Let&apos;s make today productive and meaningful.</p>
@@ -245,7 +260,7 @@ export default function DashboardPage() {
             <button
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="flex items-center gap-2 px-3.5 py-2 border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
+              className="flex items-center gap-2 px-3.5 py-2 border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold rounded-lg transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-sm disabled:opacity-50"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefetching ? 'animate-spin' : ''}`} />
               Refresh
@@ -254,7 +269,7 @@ export default function DashboardPage() {
               <button
                 onClick={() => syncGoogle()}
                 disabled={isSyncingGoogle}
-                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10 disabled:opacity-50"
+                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md hover:shadow-primary/20 disabled:opacity-50"
               >
                 <RefreshCw className={`h-3.5 w-3.5 ${isSyncingGoogle ? 'animate-spin' : ''}`} />
                 Sync Google
@@ -262,7 +277,7 @@ export default function DashboardPage() {
             ) : (
               <Link
                 href="/dashboard/integrations"
-                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all shadow shadow-primary/10"
+                className="flex items-center gap-2 px-3.5 py-2 bg-primary text-white text-xs font-semibold rounded-lg hover:bg-primary/95 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-md hover:shadow-primary/20"
               >
                 <Link2 className="h-3.5 w-3.5" />
                 Connect Google
@@ -282,7 +297,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`${stat.card} rounded-2xl border p-5 flex items-center gap-4 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5`}
+              className={`${stat.card} rounded-2xl border p-5 flex items-center gap-4 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-primary/30`}
             >
               <div
   className={`h-14 w-14 shrink-0 rounded-2xl flex items-center justify-center border ${stat.ring}`}
@@ -310,7 +325,7 @@ export default function DashboardPage() {
       {/* Main Grid: Today's Schedule + My Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Today's Schedule — timeline */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
               <CalendarIcon className="h-5 w-5 text-primary" /> Today&apos;s Schedule
@@ -365,7 +380,7 @@ export default function DashboardPage() {
           </Link>
         </div>
           {/* ===================== Messages Card ===================== */}
-  <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+  <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
     <div className="flex items-center justify-between mb-4">
       <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
         <Mail className="h-5 w-5 text-primary" />
@@ -386,7 +401,7 @@ export default function DashboardPage() {
           <Link
             key={message.id}
             href="/dashboard/gmail"
-            className="block rounded-xl border border-border p-3 hover:bg-muted/40 transition-colors"
+            className="block rounded-xl border border-border p-3 hover:bg-white hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-200"
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
@@ -429,7 +444,7 @@ export default function DashboardPage() {
 
 
         {/* My Tasks */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight">My Tasks</h2>
             <Link href="/dashboard/tasks" className="text-xs font-semibold text-primary hover:underline">
@@ -486,7 +501,7 @@ export default function DashboardPage() {
       {/* Recent Items + Integrations */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Items — merged real activity feed */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight">Recent Items</h2>
             <span className="text-xs font-semibold text-primary">View all</span>
@@ -501,7 +516,7 @@ export default function DashboardPage() {
                   <Link
                     key={item.key}
                     href={item.href}
-                    className={`${meta.card} flex items-center justify-between gap-3 p-2.5 rounded-xl transition-colors`}
+                    className={`${meta.card} flex items-center justify-between gap-3 p-2.5 rounded-xl transition-all duration-200 hover:shadow-[0_2px_8px_rgba(0,0,0,0.02)] hover:-translate-y-0.5`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className={`p-2 rounded-lg border ${meta.badge} shrink-0`}>
@@ -525,7 +540,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Your Integrations */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold tracking-tight">Your Integrations</h2>
             <Link href="/dashboard/integrations" className="text-xs font-semibold text-primary hover:underline">
@@ -540,7 +555,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={integration.label}
-                  className={`flex flex-col items-center gap-2 p-4 border border-border rounded-xl relative ${!integration.real ? 'opacity-60' : ''}`}
+                  className={`flex flex-col items-center gap-2 p-4 border border-border rounded-xl relative transition-all duration-250 hover:bg-white hover:shadow-md hover:-translate-y-1 hover:border-primary/40 ${!integration.real ? 'opacity-60' : ''}`}
                 >
                   {integration.connected && (
                     <CheckCircle2 className="h-4 w-4 text-success absolute top-2 right-2" />
@@ -565,6 +580,6 @@ export default function DashboardPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
