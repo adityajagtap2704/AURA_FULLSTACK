@@ -131,7 +131,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
   const currentTimelinePos = getTimelinePosition();
 
   return (
-    <div className="flex flex-col border border-[#EAECEF] rounded-2xl bg-[#FAFAF8] p-4 shadow-sm overflow-hidden select-none h-[550px] min-w-[760px] md:min-w-full">
+    <div className="flex flex-col border border-[#EAECEF] dark:border-border rounded-2xl bg-[#FAFAF8] dark:bg-card p-4 shadow-sm overflow-hidden select-none h-[550px] min-w-[760px] md:min-w-full">
       
       {/* Self-contained custom scrollbar styling matching specs (thin rounded thumb) */}
       <style jsx global>{`
@@ -155,12 +155,12 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
       `}</style>
 
       {/* Main Calendar Grid Block */}
-      <div className="flex flex-col bg-white border border-[#EAECEF] rounded-[16px] overflow-hidden flex-1 shadow-xs">
+      <div className="flex flex-col bg-white dark:bg-background border border-[#EAECEF] dark:border-border rounded-[16px] overflow-hidden flex-1 shadow-xs">
         
         {/* 1. Header Row */}
-        <div className="flex bg-white border-b border-[#EAECEF] shrink-0 z-10">
+        <div className="flex bg-white dark:bg-background border-b border-[#EAECEF] dark:border-border shrink-0 z-10">
           {/* Top-left Timezone block */}
-          <div className="w-[70px] sm:w-[80px] shrink-0 border-r border-[#EAECEF] flex items-center justify-center text-[10px] font-bold text-gray-400 uppercase select-none">
+          <div className="w-[70px] sm:w-[80px] shrink-0 border-r border-[#EAECEF] dark:border-border flex items-center justify-center text-[10px] font-bold text-gray-400 dark:text-muted-foreground uppercase select-none">
             {tzString}
           </div>
 
@@ -175,12 +175,12 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
               return (
                 <div 
                   key={idx} 
-                  className={`py-2 text-center flex flex-col items-center justify-center border-r border-[#EAECEF] last:border-r-0 ${
-                    isToday ? 'bg-[#FFF7ED]/40' : ''
+                  className={`py-2 text-center flex flex-col items-center justify-center border-r border-[#EAECEF] dark:border-border last:border-r-0 ${
+                    isToday ? 'bg-[#FFF7ED]/40 dark:bg-[#C97A3D]/10' : ''
                   }`}
                 >
                   <span className={`text-[10px] font-extrabold uppercase tracking-wider ${
-                    isToday ? 'text-[#C97A3D]' : 'text-gray-400'
+                    isToday ? 'text-[#C97A3D]' : 'text-gray-400 dark:text-muted-foreground'
                   }`}>
                     {day.toLocaleDateString('en-US', { weekday: 'short' })}
                   </span>
@@ -188,7 +188,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                     className={`text-[14px] font-extrabold mt-1 flex items-center justify-center h-7 w-7 rounded-full ${
                       isToday
                         ? 'bg-[#C97A3D] text-white shadow-sm shadow-[#C97A3D]/25'
-                        : 'text-gray-700'
+                        : 'text-gray-700 dark:text-foreground'
                     }`}
                   >
                     {day.getDate()}
@@ -202,18 +202,18 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
         {/* 2. Scrollable Time Grid Area */}
         <div 
           ref={scrollRef}
-          className="flex-1 overflow-y-auto relative calendar-scrollbar bg-white"
+          className="flex-1 overflow-y-auto relative calendar-scrollbar bg-white dark:bg-background"
         >
           <div className="flex w-full relative" style={{ height: `${totalHours * hourHeight + 20}px` }}>
             
             {/* A. Left Time labels */}
-            <div className="w-[70px] sm:w-[80px] shrink-0 border-r border-[#EAECEF] relative bg-white select-none">
+            <div className="w-[70px] sm:w-[80px] shrink-0 border-r border-[#EAECEF] dark:border-border relative bg-white dark:bg-background select-none">
               {hours.map((hour, idx) => {
                 const displayTime = hour === 12 ? '12 PM' : hour > 12 ? `${hour - 12} PM` : `${hour} AM`;
                 return (
                   <div 
                     key={hour} 
-                    className="absolute left-0 right-2.5 text-right text-[10px] font-bold text-gray-400/80"
+                    className="absolute left-0 right-2.5 text-right text-[10px] font-bold text-gray-400/80 dark:text-muted-foreground/60"
                     style={{ top: `${idx === 0 ? 4 : idx * hourHeight - 7}px` }}
                   >
                     {displayTime}
@@ -230,7 +230,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                 {hours.map((_, idx) => (
                   <div 
                     key={idx} 
-                    className="border-b border-[#EAECEF]/80 w-full"
+                    className="border-b border-[#EAECEF]/80 dark:border-border/40 w-full"
                     style={{ height: `${hourHeight}px` }}
                   />
                 ))}
@@ -246,8 +246,8 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                   return (
                     <div 
                       key={idx} 
-                      className={`border-r border-[#EAECEF]/60 last:border-r-0 h-full ${
-                        isToday ? 'bg-[#FFF7ED]' : ''
+                      className={`border-r border-[#EAECEF]/60 dark:border-border/30 last:border-r-0 h-full ${
+                        isToday ? 'bg-[#FFF7ED] dark:bg-[#C97A3D]/5' : ''
                       }`}
                     />
                   );
@@ -341,7 +341,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                             <div className="flex flex-col gap-0.5 min-w-0 flex-1 justify-center">
                               <h4 className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1 shrink-0">
                                 {card.source === 'google_calendar' && (
-                                  <span className="h-3.5 w-3.5 rounded bg-white flex items-center justify-center shrink-0 shadow-xs border border-black/5">
+                                  <span className="h-3.5 w-3.5 rounded bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-xs border border-black/5 dark:border-slate-700/50">
                                     <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -391,7 +391,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                   style={{ top: `${currentTimelinePos}px` }}
                 >
                   {/* Circle indicator on Left axis */}
-                  <div className="absolute -left-[5px] h-2.5 w-2.5 bg-[#C97A3D] rounded-full shadow-sm ring-2 ring-white" />
+                  <div className="absolute -left-[5px] h-2.5 w-2.5 bg-[#C97A3D] rounded-full shadow-sm ring-2 ring-white dark:ring-background" />
                   {/* Horizontal line indicator */}
                   <div className="w-full h-[1.5px] bg-[#C97A3D]/70" />
                 </div>

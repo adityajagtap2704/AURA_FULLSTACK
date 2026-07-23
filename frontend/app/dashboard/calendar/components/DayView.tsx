@@ -25,14 +25,14 @@ interface DayViewProps {
 }
 
 const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, border: string, dot: string }> = {
-  orange: { bg: 'bg-[#FFE8CC]', text: 'text-orange-800', timeText: 'text-orange-700', border: 'border-l-[6px] border-[#F97316] border-y-0 border-r-0', dot: 'bg-[#F97316]' },
-  blue:   { bg: 'bg-[#DBEAFE]', text: 'text-blue-800',   timeText: 'text-blue-700',   border: 'border-l-[6px] border-[#3B82F6] border-y-0 border-r-0', dot: 'bg-[#3B82F6]' },
-  green:  { bg: 'bg-[#DCFCE7]', text: 'text-green-800',  timeText: 'text-green-700',  border: 'border-l-[6px] border-[#10B981] border-y-0 border-r-0', dot: 'bg-[#10B981]' },
-  purple: { bg: 'bg-[#EDE9FE]', text: 'text-purple-800', timeText: 'text-purple-700', border: 'border-l-[6px] border-[#8B5CF6] border-y-0 border-r-0', dot: 'bg-[#8B5CF6]' },
-  yellow: { bg: 'bg-[#FEF3C7]', text: 'text-yellow-800', timeText: 'text-yellow-700', border: 'border-l-[6px] border-[#F59E0B] border-y-0 border-r-0', dot: 'bg-[#F59E0B]' },
-  red:    { bg: 'bg-[#FEE2E2]', text: 'text-red-800',    timeText: 'text-red-700',    border: 'border-l-[6px] border-[#EF4444] border-y-0 border-r-0', dot: 'bg-[#EF4444]' },
-  pink:   { bg: 'bg-[#FCE7F3]', text: 'text-pink-800',   timeText: 'text-pink-700',   border: 'border-l-[6px] border-[#EC4899] border-y-0 border-r-0', dot: 'bg-[#EC4899]' },
-  grey:   { bg: 'bg-[#F1F5F9]', text: 'text-gray-800',   timeText: 'text-gray-600',   border: 'border-l-[6px] border-[#6B7280] border-y-0 border-r-0', dot: 'bg-[#6B7280]' },
+  orange: { bg: 'bg-[#FFE8CC] dark:bg-[#F97316]/15', text: 'text-orange-800 dark:text-[#FFA366]', timeText: 'text-orange-700 dark:text-[#FFA366]/85', border: 'border-l-[6px] border-[#F97316] border-y-0 border-r-0', dot: 'bg-[#F97316]' },
+  blue:   { bg: 'bg-[#DBEAFE] dark:bg-[#3B82F6]/15', text: 'text-blue-800 dark:text-[#93C5FD]',   timeText: 'text-blue-700 dark:text-[#93C5FD]/85',   border: 'border-l-[6px] border-[#3B82F6] border-y-0 border-r-0', dot: 'bg-[#3B82F6]' },
+  green:  { bg: 'bg-[#DCFCE7] dark:bg-[#10B981]/15', text: 'text-green-800 dark:text-[#A7F3D0]',  timeText: 'text-green-700 dark:text-[#A7F3D0]/85',  border: 'border-l-[6px] border-[#10B981] border-y-0 border-r-0', dot: 'bg-[#10B981]' },
+  purple: { bg: 'bg-[#EDE9FE] dark:bg-[#8B5CF6]/15', text: 'text-purple-800 dark:text-[#C7D2FE]', timeText: 'text-purple-700 dark:text-[#C7D2FE]/85', border: 'border-l-[6px] border-[#8B5CF6] border-y-0 border-r-0', dot: 'bg-[#8B5CF6]' },
+  yellow: { bg: 'bg-[#FEF3C7] dark:bg-[#F59E0B]/15', text: 'text-yellow-800 dark:text-[#FDE68A]', timeText: 'text-yellow-700 dark:text-[#FDE68A]/85', border: 'border-l-[6px] border-[#F59E0B] border-y-0 border-r-0', dot: 'bg-[#F59E0B]' },
+  red:    { bg: 'bg-[#FEE2E2] dark:bg-[#EF4444]/15', text: 'text-red-800 dark:text-[#FCA5A5]',    timeText: 'text-red-700 dark:text-[#FCA5A5]/85',    border: 'border-l-[6px] border-[#EF4444] border-y-0 border-r-0', dot: 'bg-[#EF4444]' },
+  pink:   { bg: 'bg-[#FCE7F3] dark:bg-[#EC4899]/15', text: 'text-pink-800 dark:text-[#FBCFE8]',   timeText: 'text-pink-700 dark:text-[#FBCFE8]/85',   border: 'border-l-[6px] border-[#EC4899] border-y-0 border-r-0', dot: 'bg-[#EC4899]' },
+  grey:   { bg: 'bg-[#F1F5F9] dark:bg-[#6B7280]/15', text: 'text-gray-800 dark:text-[#D1D5DB]',   timeText: 'text-gray-600 dark:text-[#D1D5DB]/85',   border: 'border-l-[6px] border-[#6B7280] border-y-0 border-r-0', dot: 'bg-[#6B7280]' },
 };
 
 
@@ -85,7 +85,7 @@ export default function DayView({
                 {/* Left block - Time and Title */}
                 <div className="flex items-start gap-4">
                   {event.source === 'google_calendar' ? (
-                    <div className="h-4.5 w-4.5 rounded bg-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                    <div className="h-4.5 w-4.5 rounded bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 mt-0.5 shadow-sm border border-black/5 dark:border-slate-700/50">
                       <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -156,13 +156,13 @@ export default function DayView({
                         <div
                           key={idx}
                           title={att.email}
-                          className="h-6 w-6 rounded-full bg-white/70 border border-black/5 flex items-center justify-center text-[9px] font-bold text-foreground/80 uppercase"
+                          className="h-6 w-6 rounded-full bg-white/70 dark:bg-slate-800/80 border border-black/5 dark:border-slate-700/30 flex items-center justify-center text-[9px] font-bold text-foreground/80 dark:text-slate-200 uppercase"
                         >
                           {att.displayName ? att.displayName.slice(0, 2) : att.email?.slice(0, 2)}
                         </div>
                       ))}
                       {event.attendees.length > 3 && (
-                        <div className="h-6 w-6 rounded-full bg-white/85 border border-black/5 flex items-center justify-center text-[9px] font-bold text-foreground/80">
+                        <div className="h-6 w-6 rounded-full bg-white/85 dark:bg-slate-800 border border-black/5 dark:border-slate-700/30 flex items-center justify-center text-[9px] font-bold text-foreground/80 dark:text-slate-200">
                           +{event.attendees.length - 3}
                         </div>
                       )}

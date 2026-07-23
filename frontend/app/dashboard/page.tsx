@@ -37,12 +37,36 @@ export default function DashboardPage() {
   } = useDashboard();
 
   const [refreshKey, setRefreshKey] = useState(0);
+  const [greeting, setGreeting] = useState('Good Morning');
 
   useEffect(() => {
     if (isRefetching || isSyncingGoogle) {
       setRefreshKey((prev) => prev + 1);
     }
   }, [isRefetching, isSyncingGoogle]);
+
+  useEffect(() => {
+    const getGreeting = () => {
+      const currentHour = new Date().getHours();
+      if (currentHour >= 5 && currentHour < 12) {
+        return 'Good Morning';
+      } else if (currentHour >= 12 && currentHour < 17) {
+        return 'Good Afternoon';
+      } else if (currentHour >= 17 && currentHour < 21) {
+        return 'Good Evening';
+      } else {
+        return 'Good Night';
+      }
+    };
+
+    setGreeting(getGreeting());
+
+    const interval = setInterval(() => {
+      setGreeting(getGreeting());
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   if (isLoading || isLoadingConnectorStatus) {
     return (
@@ -117,8 +141,6 @@ export default function DashboardPage() {
   // (Supabase stores it in user_metadata); falls back to the email prefix
   // for accounts that only ever used email/password.
   const userName = getDisplayName(user);
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const todayStr = new Date().toDateString();
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
