@@ -149,32 +149,21 @@ export class GoogleConnector implements ConnectorInterface {
 
     console.log(`[Google fetch] Fetched ${calendarResponse.data.items?.length || 0} calendar events`);
 
-    // Fetch Gmail messages (starred OR important/recent)
+    // Fetch Gmail messages (inbox OR starred)
     const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
     
-    // Try to fetch starred messages first
+    // Fetch recent inbox and starred messages together to avoid skipping recent emails if starred ones exist
     let gmailResponse = await gmail.users.messages.list({
       userId: 'me',
-      q: 'is:starred',
+      q: 'in:inbox OR is:starred',
       maxResults: 50,
     });
 
-    // If no starred messages, fetch recent important/unread messages
+    // Fallback: if no messages found, fetch any recent messages
     if (!gmailResponse.data.messages || gmailResponse.data.messages.length === 0) {
-      console.log(`[Google fetch] No starred messages, fetching recent important messages instead`);
+      console.log(`[Google fetch] No inbox/starred messages, fetching any recent messages`);
       gmailResponse = await gmail.users.messages.list({
         userId: 'me',
-        q: 'is:important OR is:unread',
-        maxResults: 50,
-      });
-    }
-
-    // If still nothing, fetch just recent messages from inbox
-    if (!gmailResponse.data.messages || gmailResponse.data.messages.length === 0) {
-      console.log(`[Google fetch] No important messages, fetching recent inbox messages`);
-      gmailResponse = await gmail.users.messages.list({
-        userId: 'me',
-        q: 'in:inbox',
         maxResults: 50,
       });
     }

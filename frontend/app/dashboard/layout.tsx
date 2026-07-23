@@ -292,7 +292,7 @@ case "o":
       {/* Brand */}
       <Link href="/dashboard" className="h-16 flex items-center px-6 gap-2.5 border-b border-border hover:opacity-80 transition-opacity">
         <AuraLogoIcon className="h-8 w-8 text-primary shrink-0" />
-        <span className="font-bold tracking-wide text-lg">AURA</span>
+        <span className="font-bold tracking-wide text-lg text-foreground">AURA</span>
       </Link>
 
       {/* Navigation */}
@@ -306,7 +306,7 @@ case "o":
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ease-out cursor-pointer hover:-translate-y-0.5 hover:scale-[1.02] ${
                   isActive
                     ? 'bg-primary text-primary-foreground shadow shadow-primary/20 hover:shadow-md hover:shadow-primary/30'
-                    : 'text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground'
+                    : 'text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground dark:hover:bg-muted dark:hover:shadow-none'
                 }`}
               >
                 <Icon className={`h-4.5 w-4.5 ${isActive ? 'text-white' : 'text-muted-foreground'}`} />
@@ -327,7 +327,7 @@ case "o":
               <Link
                 key={integration.label}
                 href={integration.connected ? integration.href : '/dashboard/integrations'}
-                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
+                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white dark:hover:bg-muted hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-none hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
               >
                 <Icon className="h-4.5 w-4.5 shrink-0" />
                 <span className="flex-1 truncate">{integration.label}</span>
@@ -344,7 +344,7 @@ case "o":
       <div className="p-4 border-t border-border">
         <Link
           href="/dashboard/settings"
-          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
+          className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-white dark:hover:bg-muted hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-none hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
         >
           <Settings className="h-4.5 w-4.5" />
           <span>Settings</span>
@@ -356,7 +356,7 @@ case "o":
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col md:flex-row relative">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#F9FAFB] border-r border-border shrink-0 z-30">
+      <aside className="hidden md:flex flex-col w-64 bg-[#F9FAFB] dark:bg-background border-r border-border shrink-0 z-30">
         <SidebarContent />
       </aside>
 
@@ -653,7 +653,7 @@ Contact Support
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-72 bg-[#F9FAFB] border-r border-border flex flex-col z-50 md:hidden"
+              className="fixed inset-y-0 left-0 w-72 bg-[#F9FAFB] dark:bg-background border-r border-border flex flex-col z-50 md:hidden"
             >
               <div className="flex items-center justify-end px-4 pt-4">
                 <button
