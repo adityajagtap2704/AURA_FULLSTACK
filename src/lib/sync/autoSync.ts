@@ -1,87 +1,191 @@
 import { GoogleConnector } from '@/lib/connectors/google';
 import { NotionConnector } from '@/lib/connectors/notion';
+import { indexTenantEmbeddings } from '@/lib/embeddings/index-tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 
 /**
- * Triggers background synchronization for connected providers if a sync hasn't run recently.
- * This runs completely asynchronously and does not block the caller API response.
+ * Triggers background synchronization for connected providers
+ * when a recent sync has not already run.
  *
- * @param userId - The user ID to sync for
- * @param tenantId - The tenant ID (currently equal to userId)
+ * Phase 1:
+ * tenantId should be the same as userId.
+ *
+ * @param userId - Authenticated user ID
+ * @param tenantId - Tenant ID, currently equal to userId
  */
-export async function triggerBackgroundSync(userId: string, tenantId: string): Promise<void> {
-  // Execute in background using setTimeout/IIFE to make sure it doesn't block the caller thread
-  (async () => {
+export async function triggerBackgroundSync(
+  userId: string,
+  tenantId: string,
+): Promise<void> {
+  void (async () => {
     try {
-      // 1. Check Google Connector Status
-      const { data: googleToken } = await supabaseServer
-        .from('oauth_tokens')
-        .select('created_at')
-        .eq('user_id', userId)
-        .eq('provider', 'google')
-        .limit(1);
+      let syncCompleted = false;
 
-      if (googleToken && googleToken.length > 0) {
-        // Query the most recent sync job for Google
-        const { data: recentJobs } = await supabaseServer
-          .from('sync_jobs')
-          .select('started_at, status')
-          .eq('tenant_id', tenantId)
-          .eq('connector', 'google')
-          .order('created_at', { ascending: false })
+      /*
+       * Google sync
+       */
+      const { data: googleToken, error: googleTokenError } =
+        await supabaseServer
+          .from('oauth_tokens')
+          .select('created_at')
+          .eq('user_id', userId)
+          .eq('provider', 'google')
           .limit(1);
 
-        // Auto-sync if no job exists, last job failed/completed > 60 seconds ago,
-        // or a running job got stuck (> 5 minutes ago)
-        const startedAt = recentJobs?.[0]?.started_at;
-        const needsSync =
-          !recentJobs ||
-          recentJobs.length === 0 ||
-          recentJobs[0].status === 'failed' ||
-          !startedAt ||
-          (Date.now() - new Date(startedAt).getTime() > 60000);
+      if (googleTokenError) {
+        console.error(
+          '[AutoSync] Failed to check Google connection:',
+          googleTokenError,
+        );
+      } else if (googleToken && googleToken.length > 0) {
+        const { data: recentJobs, error: googleJobsError } =
+          await supabaseServer
+            .from('sync_jobs')
+            .select('started_at, status')
+            .eq('tenant_id', tenantId)
+            .eq('connector', 'google')
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-        if (needsSync) {
-          console.log(`[AutoSync] Triggering background Google sync for tenant ${tenantId}`);
-          const googleConnector = new GoogleConnector();
-          await googleConnector.sync(userId, tenantId);
+        if (googleJobsError) {
+          console.error(
+            '[AutoSync] Failed to check recent Google sync jobs:',
+            googleJobsError,
+          );
+        } else {
+          const latestJob = recentJobs?.[0];
+          const startedAt = latestJob?.started_at;
+
+          const needsSync =
+            !latestJob ||
+            latestJob.status === 'failed' ||
+            !startedAt ||
+            Date.now() - new Date(startedAt).getTime() > 60_000;
+
+          if (needsSync) {
+            console.log(
+              `[AutoSync] Triggering Google sync for tenant ${tenantId}`,
+            );
+
+            try {
+              const googleConnector = new GoogleConnector();
+
+              await googleConnector.sync(userId, tenantId);
+
+              syncCompleted = true;
+
+              console.log(
+                `[AutoSync] Google sync completed for tenant ${tenantId}`,
+              );
+            } catch (error) {
+              console.error(
+                `[AutoSync] Google sync failed for tenant ${tenantId}:`,
+                error,
+              );
+            }
+          }
         }
       }
 
-      // 2. Check Notion Connector Status
-      const { data: notionToken } = await supabaseServer
-        .from('oauth_tokens')
-        .select('created_at')
-        .eq('user_id', userId)
-        .eq('provider', 'notion')
-        .limit(1);
-
-      if (notionToken && notionToken.length > 0) {
-        // Query the most recent sync job for Notion
-        const { data: recentJobs } = await supabaseServer
-          .from('sync_jobs')
-          .select('started_at, status')
-          .eq('tenant_id', tenantId)
-          .eq('connector', 'notion')
-          .order('created_at', { ascending: false })
+      /*
+       * Notion sync
+       */
+      const { data: notionToken, error: notionTokenError } =
+        await supabaseServer
+          .from('oauth_tokens')
+          .select('created_at')
+          .eq('user_id', userId)
+          .eq('provider', 'notion')
           .limit(1);
 
-        const startedAt = recentJobs?.[0]?.started_at;
-        const needsSync =
-          !recentJobs ||
-          recentJobs.length === 0 ||
-          recentJobs[0].status === 'failed' ||
-          !startedAt ||
-          (Date.now() - new Date(startedAt).getTime() > 60000);
+      if (notionTokenError) {
+        console.error(
+          '[AutoSync] Failed to check Notion connection:',
+          notionTokenError,
+        );
+      } else if (notionToken && notionToken.length > 0) {
+        const { data: recentJobs, error: notionJobsError } =
+          await supabaseServer
+            .from('sync_jobs')
+            .select('started_at, status')
+            .eq('tenant_id', tenantId)
+            .eq('connector', 'notion')
+            .order('created_at', { ascending: false })
+            .limit(1);
 
-        if (needsSync) {
-          console.log(`[AutoSync] Triggering background Notion sync for tenant ${tenantId}`);
-          const notionConnector = new NotionConnector();
-          await notionConnector.sync(userId, tenantId);
+        if (notionJobsError) {
+          console.error(
+            '[AutoSync] Failed to check recent Notion sync jobs:',
+            notionJobsError,
+          );
+        } else {
+          const latestJob = recentJobs?.[0];
+          const startedAt = latestJob?.started_at;
+
+          const needsSync =
+            !latestJob ||
+            latestJob.status === 'failed' ||
+            !startedAt ||
+            Date.now() - new Date(startedAt).getTime() > 60_000;
+
+          if (needsSync) {
+            console.log(
+              `[AutoSync] Triggering Notion sync for tenant ${tenantId}`,
+            );
+
+            try {
+              const notionConnector = new NotionConnector();
+
+              await notionConnector.sync(userId, tenantId);
+
+              syncCompleted = true;
+
+              console.log(
+                `[AutoSync] Notion sync completed for tenant ${tenantId}`,
+              );
+            } catch (error) {
+              console.error(
+                `[AutoSync] Notion sync failed for tenant ${tenantId}:`,
+                error,
+              );
+            }
+          }
         }
       }
-    } catch (err) {
-      console.error('[AutoSync] Error during background sync trigger:', err);
+
+      /*
+       * Generate embeddings once after one or more successful syncs.
+       */
+      if (syncCompleted) {
+        console.log(
+          `[AutoSync] Generating embeddings for tenant ${tenantId}`,
+        );
+
+        try {
+          const embeddingResult = await indexTenantEmbeddings(
+            supabaseServer,
+            {
+              tenantId,
+              batchSize: 100,
+            },
+          );
+
+          console.log(
+            `[AutoSync] Embedding generation completed for tenant ${tenantId}`,
+            embeddingResult.totals,
+          );
+        } catch (error) {
+          console.error(
+            `[AutoSync] Embedding generation failed for tenant ${tenantId}:`,
+            error,
+          );
+        }
+      }
+    } catch (error) {
+      console.error(
+        '[AutoSync] Unexpected error during background sync:',
+        error,
+      );
     }
   })();
 }

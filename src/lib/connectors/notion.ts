@@ -9,6 +9,7 @@ import {
 import { syncQueue } from '@/lib/queue';
 import { supabaseServer } from '@/lib/supabase/server';
 import type { Database } from '@/lib/supabase/database.types';
+import { triggerBackgroundSync } from '@/lib/sync/autoSync';
 
 type OAuthTokenRow = Database['public']['Tables']['oauth_tokens']['Row'];
 
@@ -138,7 +139,10 @@ export class NotionConnector implements ConnectorInterface {
       { onConflict: 'user_id,provider' }
     );
 
-    if (error) throw error;
+    if (error)  throw error;
+
+     void triggerBackgroundSync(userId, userId);
+
   }
 
   private async getClientForUser(userId: string): Promise<Client> {

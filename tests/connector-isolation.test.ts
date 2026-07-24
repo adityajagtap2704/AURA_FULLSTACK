@@ -4,6 +4,10 @@ import { join } from 'path';
 
 // Every connector enqueues sync jobs — stub the queue so tests never try to
 // open a real Redis connection.
+vi.mock('@/lib/sync/autoSync', () => ({
+  triggerBackgroundSync: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('@/lib/queue', () => ({
   syncQueue: { add: vi.fn().mockResolvedValue(undefined) },
 }));

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
@@ -41,6 +41,20 @@ import {
   Info
 } from 'lucide-react';
 
+interface GlobalSearchResult {
+  title: string;
+  type: string;
+  href: string;
+}
+
+interface SemanticSearchApiResult {
+  object_type: 'task' | 'event' | 'message' | 'document';
+  object_id: string;
+  content: string;
+  similarity: number;
+  record?: Record<string, unknown> | null;
+}
+
 const navItems = [
   { href: '/dashboard', label: 'Today', icon: LayoutDashboard },
   { href: '/dashboard/tasks', label: 'Tasks', icon: CheckSquare },
@@ -62,6 +76,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -227,59 +242,181 @@ case "o":
   // Google Meet has no real connector/backend in this app — shown as a
   // static, always-"not connected" entry at your request, not tied to
   // connectorStatus like the other three.
-  const searchResults = useMemo(() => {
+  useEffect(() => {
+    const query = searchQuery.trim();
 
- 
- 
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
 
+    const controller = new AbortController();
 
-  if (!searchQuery.trim() || !data) return [];
+    const timer = window.setTimeout(async () => {
+      try {
+      /*
+       * Supabase normally stores the authenticated browser session
+       * inside localStorage using a key such as:
+       *
+       * sb-project-reference-auth-token
+       */
+        const authStorageKey = Object.keys(window.localStorage).find(
+          (key) =>
+            key.startsWith('sb-') &&
+            key.endsWith('-auth-token')
+        );
 
-  const q = searchQuery.toLowerCase();
+        if (!authStorageKey) {
+          console.error('Supabase authentication session was not found.');
+          setSearchResults([]);
+          return;
+        }
 
-  const tasks = data.tasks
-    .filter(task =>
-      task.title.toLowerCase().includes(q)
-    )
-    .map(task => ({
-      type: "Task",
-      title: task.title,
-      href: "/dashboard/tasks"
-    }));
+        const storedSessionText =
+          window.localStorage.getItem(authStorageKey);
 
-  const events = data.events
-    .filter(event =>
-      event.title.toLowerCase().includes(q)
-    )
-    .map(event => ({
-      type: "Calendar",
-      title: event.title,
-      href: "/dashboard/calendar"
-    }));
+        if (!storedSessionText) {
+          console.error('Supabase authentication session is empty.');
+          setSearchResults([]);
+          return;
+        }
 
-  const messages = data.messages
-    .filter(msg =>
-      msg.subject?.toLowerCase().includes(q) ||
-      msg.sender?.toLowerCase().includes(q)
-    )
-    .map(msg => ({
-      type: "Message",
-      title: msg.subject || "(No Subject)",
-      href: "/dashboard/gmail"
-    }));
+        const storedSession = JSON.parse(storedSessionText);
 
-  const documents = data.documents
-    .filter(doc =>
-      doc.title.toLowerCase().includes(q)
-    )
-    .map(doc => ({
-      type: "Document",
-      title: doc.title,
-      href: "/dashboard/documents"
-    }));
+        const accessToken =
+          storedSession?.access_token ??
+          storedSession?.currentSession?.access_token;
 
-  return [...tasks, ...events, ...messages, ...documents];
-}, [searchQuery, data]);
+      /*
+       * First try the tenant assigned to the authenticated user.
+       * NEXT_PUBLIC_TENANT_ID is available as a temporary fallback
+       * while tenant assignment is still being implemented.
+       */
+        const tenantId =
+          user?.app_metadata?.tenant_id ??
+          user?.user_metadata?.tenant_id ??
+          process.env.NEXT_PUBLIC_TENANT_ID;
+
+        if (!accessToken) {
+          console.error('Supabase access token was not found.');
+          setSearchResults([]);
+          return;
+        }
+
+        if (!tenantId) {
+          console.error(
+            'Tenant ID was not found. Add tenant_id to the user metadata or configure NEXT_PUBLIC_TENANT_ID.'
+          );
+
+          setSearchResults([]);
+          return;
+        }
+
+        const response = await fetch('/api/search/semantic', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            tenantId,
+            query,
+            limit: 8,
+            objectTypes: [
+              'task',
+              'event',
+              'message',
+              'document',
+            ],
+          }),
+          signal: controller.signal,
+        });
+
+        const payload = await response.json();
+
+        if (!response.ok) {
+          console.error(
+            'Semantic search request failed:',
+            payload
+          );
+
+          setSearchResults([]);
+          return;
+        }
+
+        const hrefMap: Record<
+          SemanticSearchApiResult['object_type'],
+          string
+        > = {
+          task: '/dashboard/tasks',
+          event: '/dashboard/calendar',
+          message: '/dashboard/gmail',
+          document: '/dashboard/documents',
+        };
+
+        const typeMap: Record<
+          SemanticSearchApiResult['object_type'],
+          string
+        > = {
+          task: 'Task',
+          event: 'Calendar',
+          message: 'Message',
+          document: 'Document',
+        };
+
+        const formattedResults: GlobalSearchResult[] =
+          (payload.results ?? []).map(
+            (item: SemanticSearchApiResult) => {
+              const record = item.record ?? {};
+
+              const title =
+                (
+                  typeof record.title === 'string' &&
+                  record.title
+                ) ||
+                (
+                  typeof record.name === 'string' &&
+                  record.name
+                ) ||
+                (
+                  typeof record.subject === 'string' &&
+                  record.subject
+                ) ||
+                item.content ||
+                'Untitled';
+
+              return {
+                title,
+                type: typeMap[item.object_type],
+                href: hrefMap[item.object_type],
+              };
+            }
+          );
+
+        setSearchResults(formattedResults);
+      } catch (error) {
+        if (
+          error instanceof DOMException &&
+          error.name === 'AbortError'
+        ) {
+          return;
+        }
+
+        console.error(
+          'Semantic global search failed:',
+          error
+        );
+
+        setSearchResults([]);
+      }
+  } , 400);
+
+  return () => {
+    window.clearTimeout(timer);
+    controller.abort();
+  };
+}, [searchQuery, user]);
+
   const integrations = [
     { label: 'Gmail', icon: GmailIcon, connected: connectorStatus?.google ?? false, href: '/dashboard/gmail' },
     { label: 'Google Calendar', icon: GoogleCalendarIcon, connected: connectorStatus?.google ?? false, href: '/dashboard/calendar' },
@@ -404,10 +541,10 @@ case "o":
 
           <div>
             <p className="text-sm font-semibold text-foreground">
-              {item.title}
+              {item.title || 'Untitled result'}
             </p>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground capitalize">
               {item.type}
             </p>
           </div>

@@ -39,6 +39,10 @@ vi.mock('@/lib/queue', () => ({
   syncQueue: { add: vi.fn().mockResolvedValue(undefined) },
 }));
 
+vi.mock('@/lib/sync/autoSync', () => ({
+  triggerBackgroundSync: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock('googleapis', () => {
   const oauth2ClientInstance = {
     generateAuthUrl: vi.fn(({ state }: { state: string }) =>
