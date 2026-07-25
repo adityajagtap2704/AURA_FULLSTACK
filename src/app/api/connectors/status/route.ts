@@ -28,9 +28,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json({ google: false, notion: false });
     }
     console.error('Connector status API error:', error);
-    return NextResponse.json({ error: 'Failed to fetch connector status' }, { status: 500 });
+    return NextResponse.json({ google: false, notion: false });
   }
 }

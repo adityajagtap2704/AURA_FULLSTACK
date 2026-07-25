@@ -16,6 +16,7 @@
     "redis": "echo Redis should be running on localhost:6379"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
     "@notionhq/client": "^2.3.0",
     "@supabase/supabase-js": "^2.46.1",
     "bullmq": "^5.79.3",

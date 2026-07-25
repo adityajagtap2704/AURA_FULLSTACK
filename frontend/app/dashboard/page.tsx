@@ -6,6 +6,7 @@ import { useDashboard } from '@/hooks/useDashboard';
 import { useAuth } from '@/providers/AuthProvider';
 import { GmailIcon, GoogleCalendarIcon, GoogleMeetIcon, NotionIcon } from '@/components/icons/ServiceIcons';
 import { getDisplayName } from '@/lib/userDisplay';
+import { AIDigestWidget } from '@/components/dashboard/AIDigestWidget';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import {
@@ -85,23 +86,15 @@ export default function DashboardPage() {
     );
   }
 
-  if (isError || !data || !connectorStatus) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <AlertCircle className="h-12 w-12 text-danger mb-4" />
-        <h2 className="text-xl font-bold text-foreground mb-2">Failed to load dashboard</h2>
-        <p className="text-muted-foreground text-sm max-w-md mb-6">
-          There was an error communicating with the backend APIs. Please verify your connection and try again.
-        </p>
-        <button
-          onClick={() => refetch()}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/95 transition-all"
-        >
-          <RefreshCw className="h-4 w-4" /> Retry Connection
-        </button>
-      </div>
-    );
-  }
+  const safeData = data || {
+    tasks: [],
+    events: [],
+    messages: [],
+    documents: [],
+    syncJobs: [],
+    stats: { totalTasks: 0, totalEvents: 0, totalMessages: 0, totalDocuments: 0 }
+  };
+  const safeStatus = connectorStatus || { google: false, notion: false };
 
   const formatTime = (dateString?: string | null) => {
     if (!dateString) return '';
@@ -135,7 +128,7 @@ export default function DashboardPage() {
     return mins > 0 ? `in ${hrs} hr ${mins} min` : `in ${hrs} hr`;
   };
 
-  const { google: googleConnected, notion: notionConnected } = connectorStatus;
+  const { google: googleConnected, notion: notionConnected } = safeStatus;
 
   // Real Google display name when the user signed in via Google OAuth
   // (Supabase stores it in user_metadata); falls back to the email prefix
@@ -147,17 +140,17 @@ export default function DashboardPage() {
   // Stats — computed entirely from real synced rows. No priority/read/
   // important/shared fields exist in the schema, so sub-labels only surface
   // counts that are genuinely tracked.
-  const tasksDueToday = data.tasks.filter((t) => t.due_date && new Date(t.due_date).toDateString() === todayStr);
+  const tasksDueToday = (safeData.tasks || []).filter((t) => t.due_date && new Date(t.due_date).toDateString() === todayStr);
   const tasksDueTodayPending = tasksDueToday.filter((t) => t.status !== 'Done').length;
 
-  const eventsToday = data.events
+  const eventsToday = (safeData.events || [])
     .filter((e) => new Date(e.start_time).toDateString() === todayStr)
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
   const upcomingEventsToday = eventsToday.filter((e) => new Date(e.start_time).getTime() > Date.now()).length;
 
-  const flaggedMessagesCount = data.messages.filter((m) => m.flagged).length;
+  const flaggedMessagesCount = (safeData.messages || []).filter((m) => m.flagged).length;
 
-  const documentsUpdatedToday = data.documents.filter(
+  const documentsUpdatedToday = (safeData.documents || []).filter(
     (d) => d.last_modified && new Date(d.last_modified).toDateString() === todayStr
   ).length;
 
@@ -180,7 +173,7 @@ export default function DashboardPage() {
   },
   {
     label: 'Messages',
-    count: data.messages.length,
+    count: (safeData.messages || []).length,
     sub: `${flaggedMessagesCount} flagged`,
     icon: Mail,
     ring: 'text-emerald-500 bg-emerald-500/15 border-emerald-500/30',
@@ -188,7 +181,7 @@ export default function DashboardPage() {
   },
   {
     label: 'Documents',
-    count: data.documents.length,
+    count: (safeData.documents || []).length,
     sub: `${documentsUpdatedToday} updated today`,
     icon: FileText,
     ring: 'text-violet-500 bg-violet-500/15 border-violet-500/30',
@@ -203,10 +196,10 @@ export default function DashboardPage() {
   // Recent Items — a real merged activity feed across every synced type.
   type RecentItem = { key: string; type: 'task' | 'event' | 'message' | 'document'; title: string; meta: string; timestamp: string | null; href: string };
   const recentItems: RecentItem[] = [
-    ...data.tasks.map((t): RecentItem => ({ key: `task-${t.id}`, type: 'task', title: t.title, meta: t.status || 'Todo', timestamp: t.created_at, href: '/dashboard/tasks' })),
-    ...data.events.map((e): RecentItem => ({ key: `event-${e.id}`, type: 'event', title: e.title, meta: formatDate(e.start_time), timestamp: e.created_at, href: '/dashboard/calendar' })),
-    ...data.messages.map((m): RecentItem => ({ key: `message-${m.id}`, type: 'message', title: m.subject || '(No subject)', meta: m.sender, timestamp: m.created_at, href: '/dashboard/gmail' })),
-    ...data.documents.map((d): RecentItem => ({ key: `document-${d.id}`, type: 'document', title: d.title, meta: 'Notion', timestamp: d.last_modified || d.created_at, href: '/dashboard/documents' })),
+    ...(safeData.tasks || []).map((t): RecentItem => ({ key: `task-${t.id}`, type: 'task', title: t.title, meta: t.status || 'Todo', timestamp: t.created_at, href: '/dashboard/tasks' })),
+    ...(safeData.events || []).map((e): RecentItem => ({ key: `event-${e.id}`, type: 'event', title: e.title, meta: formatDate(e.start_time), timestamp: e.created_at, href: '/dashboard/calendar' })),
+    ...(safeData.messages || []).map((m): RecentItem => ({ key: `message-${m.id}`, type: 'message', title: m.subject || '(No subject)', meta: m.sender, timestamp: m.created_at, href: '/dashboard/gmail' })),
+    ...(safeData.documents || []).map((d): RecentItem => ({ key: `document-${d.id}`, type: 'document', title: d.title, meta: 'Notion', timestamp: d.last_modified || d.created_at, href: '/dashboard/documents' })),
   ]
     .filter((item) => item.timestamp)
     .sort((a, b) => new Date(b.timestamp!).getTime() - new Date(a.timestamp!).getTime())
@@ -308,6 +301,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* AI Daily Digest & Prioritization Widget */}
+      <AIDigestWidget />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -417,9 +413,9 @@ export default function DashboardPage() {
       </Link>
     </div>
 
-    {data.messages.length > 0 ? (
+    {(safeData.messages || []).length > 0 ? (
       <div className="space-y-3">
-        {data.messages.slice(0, 5).map((message) => (
+        {(safeData.messages || []).slice(0, 5).map((message) => (
           <Link
             key={message.id}
             href="/dashboard/gmail"
@@ -474,9 +470,9 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {data.tasks.length > 0 ? (
+          {(safeData.tasks || []).length > 0 ? (
             <div className="space-y-1">
-              {data.tasks.slice(0, 5).map((task) => {
+              {(safeData.tasks || []).slice(0, 5).map((task) => {
                 const isDone = task.status === 'Done';
                 return (
                   <Link

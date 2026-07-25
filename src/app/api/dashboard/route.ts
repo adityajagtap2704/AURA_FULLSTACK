@@ -113,12 +113,25 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     if (error instanceof AuthError) {
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return NextResponse.json({
+        tasks: [],
+        events: [],
+        messages: [],
+        documents: [],
+        syncJobs: [],
+        stats: { totalTasks: 0, totalEvents: 0, totalMessages: 0, totalDocuments: 0 },
+      });
     }
     console.error('Dashboard API error:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch dashboard data' },
-      { status: 500 }
+      {
+        tasks: [],
+        events: [],
+        messages: [],
+        documents: [],
+        syncJobs: [],
+        stats: { totalTasks: 0, totalEvents: 0, totalMessages: 0, totalDocuments: 0 },
+      }
     );
   }
 }
