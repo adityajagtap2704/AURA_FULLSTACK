@@ -1,0 +1,191 @@
+[
+  {
+    "day_id": "day_1_busy_sync",
+    "date": "2026-07-24",
+    "description": "Standard work day with urgent tasks and product sync meeting",
+    "raw_data": {
+      "tasks": [
+        {
+          "id": "t1",
+          "title": "Submit Q3 Budget Proposal",
+          "status": "urgent",
+          "due_date": "2026-07-24T17:00:00Z",
+          "source": "notion",
+          "source_id": "n1"
+        },
+        {
+          "id": "t2",
+          "title": "Fix Auth Token Refresh Bug",
+          "status": "high",
+          "due_date": "2026-07-24T12:00:00Z",
+          "source": "notion",
+          "source_id": "n2"
+        },
+        {
+          "id": "t3",
+          "title": "Update Documentation",
+          "status": "todo",
+          "due_date": "2026-07-30T17:00:00Z",
+          "source": "notion",
+          "source_id": "n3"
+        }
+      ],
+      "events": [
+        {
+          "id": "e1",
+          "title": "Product Sync & Sprint Planning",
+          "start_time": "2026-07-24T14:00:00Z",
+          "end_time": "2026-07-24T15:00:00Z",
+          "attendees": [{"name": "Sarah Connor", "email": "sarah@aura.com"}],
+          "source": "google_calendar",
+          "source_id": "g1"
+        }
+      ],
+      "messages": [
+        {
+          "id": "m1",
+          "sender": "Sarah Connor",
+          "subject": "Sprint Planning Agenda",
+          "snippet": "Please review the budget proposal and auth bug before our 2 PM sync.",
+          "created_at": "2026-07-24T09:00:00Z",
+          "source": "gmail"
+        }
+      ],
+      "documents": []
+    },
+    "expected_top_priority_ids": ["t1", "t2"],
+    "expected_verbatim_entities": ["Submit Q3 Budget Proposal", "Fix Auth Token Refresh Bug", "Product Sync & Sprint Planning"]
+  },
+  {
+    "day_id": "day_2_empty_schedule",
+    "date": "2026-07-25",
+    "description": "Weekend day with no meetings or urgent tasks",
+    "raw_data": {
+      "tasks": [],
+      "events": [],
+      "messages": [],
+      "documents": []
+    },
+    "expected_top_priority_ids": [],
+    "expected_verbatim_entities": []
+  },
+  {
+    "day_id": "day_3_client_meeting",
+    "date": "2026-07-26",
+    "description": "Important client onboarding meeting with related documentation",
+    "raw_data": {
+      "tasks": [
+        {
+          "id": "t4",
+          "title": "Prepare Client Demo Environment",
+          "status": "high",
+          "due_date": "2026-07-26T10:00:00Z",
+          "source": "notion",
+          "source_id": "n4"
+        }
+      ],
+      "events": [
+        {
+          "id": "e2",
+          "title": "Acme Corp Client Onboarding Call",
+          "start_time": "2026-07-26T11:00:00Z",
+          "end_time": "2026-07-26T12:00:00Z",
+          "attendees": [{"name": "John Doe", "email": "john@acme.com"}],
+          "source": "google_calendar",
+          "source_id": "g2"
+        }
+      ],
+      "messages": [
+        {
+          "id": "m2",
+          "sender": "John Doe",
+          "subject": "Onboarding Agenda Questions",
+          "snippet": "We want to see the live demo environment during our call.",
+          "created_at": "2026-07-25T16:00:00Z",
+          "source": "gmail"
+        }
+      ],
+      "documents": [
+        {
+          "id": "d1",
+          "title": "Acme Corp Client Onboarding Call Notes",
+          "content": "Client requires SSO integration demo.",
+          "source": "notion"
+        }
+      ]
+    },
+    "expected_top_priority_ids": ["t4", "e2"],
+    "expected_verbatim_entities": ["Prepare Client Demo Environment", "Acme Corp Client Onboarding Call"]
+  },
+  {
+    "day_id": "day_4_multiple_meetings",
+    "date": "2026-07-27",
+    "description": "Multiple back-to-back engineering sync meetings",
+    "raw_data": {
+      "tasks": [
+        {
+          "id": "t5",
+          "title": "Deploy Hotfix to Staging",
+          "status": "critical",
+          "due_date": "2026-07-27T08:00:00Z",
+          "source": "notion",
+          "source_id": "n5"
+        }
+      ],
+      "events": [
+        {
+          "id": "e3",
+          "title": "Architecture Review",
+          "start_time": "2026-07-27T10:00:00Z",
+          "end_time": "2026-07-27T11:00:00Z",
+          "attendees": [{"name": "Alice Smith", "email": "alice@aura.com"}],
+          "source": "google_calendar",
+          "source_id": "g3"
+        },
+        {
+          "id": "e4",
+          "title": "Security Compliance Audit",
+          "start_time": "2026-07-27T14:00:00Z",
+          "end_time": "2026-07-27T15:00:00Z",
+          "attendees": [{"name": "Bob Jones", "email": "bob@aura.com"}],
+          "source": "google_calendar",
+          "source_id": "g4"
+        }
+      ],
+      "messages": [],
+      "documents": []
+    },
+    "expected_top_priority_ids": ["t5"],
+    "expected_verbatim_entities": ["Deploy Hotfix to Staging", "Architecture Review", "Security Compliance Audit"]
+  },
+  {
+    "day_id": "day_5_deadline_heavy",
+    "date": "2026-07-28",
+    "description": "Deadline heavy day with multiple tasks due",
+    "raw_data": {
+      "tasks": [
+        {
+          "id": "t6",
+          "title": "Finalize Q3 Security Audit Report",
+          "status": "urgent",
+          "due_date": "2026-07-28T12:00:00Z",
+          "source": "notion",
+          "source_id": "n6"
+        },
+        {
+          "id": "t7",
+          "title": "Review PR #142",
+          "status": "medium",
+          "due_date": "2026-07-28T15:00:00Z",
+          "source": "notion",
+          "source_id": "n7"
+        }
+      ],
+      "events": [],
+      "messages": [],
+      "documents": []
+    },
+    "expected_top_priority_ids": ["t6"],
+    "expected_verbatim_entities": ["Finalize Q3 Security Audit Report"]
+  }
+]
