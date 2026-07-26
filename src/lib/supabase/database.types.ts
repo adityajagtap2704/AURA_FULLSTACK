@@ -6,249 +6,290 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      tasks: {
+      documents: {
         Row: {
+          created_at: string | null
           id: string
-          tenant_id: string
-          title: string
-          status: string | null
-          due_date: string | null
+          last_modified: string | null
           source: string | null
           source_id: string | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_modified?: string | null
+          source?: string | null
+          source_id?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_modified?: string | null
+          source?: string | null
+          source_id?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
+      embeddings: {
+        Row: {
+          content: string
           created_at: string
+          embedding: string
+          embedding_model: string
+          id: string
+          object_id: string
+          object_type: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          tenant_id: string
-          title: string
-          status?: string | null
-          due_date?: string | null
-          source?: string | null
-          source_id?: string | null
+          content: string
           created_at?: string
+          embedding: string
+          embedding_model?: string
+          id?: string
+          object_id: string
+          object_type: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          title?: string
-          status?: string | null
-          due_date?: string | null
-          source?: string | null
-          source_id?: string | null
+          content?: string
           created_at?: string
+          embedding?: string
+          embedding_model?: string
+          id?: string
+          object_id?: string
+          object_type?: string
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: []
       }
       events: {
         Row: {
-          id: string
-          tenant_id: string
-          title: string
-          start_time: string | null
-          end_time: string | null
           attendees: Json | null
+          created_at: string | null
+          end_time: string | null
+          id: string
           source: string | null
           source_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
+          start_time: string | null
           tenant_id: string
           title: string
-          start_time?: string | null
-          end_time?: string | null
+          updated_at: string | null
+        }
+        Insert: {
           attendees?: Json | null
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
           source?: string | null
           source_id?: string | null
-          created_at?: string
-          updated_at?: string
+          start_time?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          title?: string
-          start_time?: string | null
-          end_time?: string | null
           attendees?: Json | null
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
           source?: string | null
           source_id?: string | null
-          created_at?: string
-          updated_at?: string
+          start_time?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       messages: {
         Row: {
-          id: string
-          tenant_id: string
-          sender: string | null
-          subject: string | null
-          snippet: string | null
+          created_at: string | null
           flagged: boolean | null
-          source: string | null
-          source_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          tenant_id: string
-          sender?: string | null
-          subject?: string | null
-          snippet?: string | null
-          flagged?: boolean | null
-          source?: string | null
-          source_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          tenant_id?: string
-          sender?: string | null
-          subject?: string | null
-          snippet?: string | null
-          flagged?: boolean | null
-          source?: string | null
-          source_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      documents: {
-        Row: {
           id: string
-          tenant_id: string
-          title: string
-          url: string | null
-          last_modified: string | null
+          sender: string | null
+          snippet: string | null
           source: string | null
           source_id: string | null
-          created_at: string
-          updated_at: string
+          subject: string | null
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
+          flagged?: boolean | null
           id?: string
-          tenant_id: string
-          title: string
-          url?: string | null
-          last_modified?: string | null
+          sender?: string | null
+          snippet?: string | null
           source?: string | null
           source_id?: string | null
-          created_at?: string
-          updated_at?: string
+          subject?: string | null
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
+          flagged?: boolean | null
           id?: string
-          tenant_id?: string
-          title?: string
-          url?: string | null
-          last_modified?: string | null
+          sender?: string | null
+          snippet?: string | null
           source?: string | null
           source_id?: string | null
-          created_at?: string
-          updated_at?: string
+          subject?: string | null
+          tenant_id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       oauth_tokens: {
         Row: {
-          id: string
-          user_id: string
-          provider: string
           access_token: string
-          refresh_token: string | null
+          created_at: string | null
           expires_at: string | null
-          created_at: string
-          updated_at: string
+          id: string
+          provider: string
+          refresh_token: string | null
+          updated_at: string | null
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          provider: string
           access_token: string
-          refresh_token?: string | null
+          created_at?: string | null
           expires_at?: string | null
-          created_at?: string
-          updated_at?: string
+          id?: string
+          provider: string
+          refresh_token?: string | null
+          updated_at?: string | null
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          provider?: string
           access_token?: string
-          refresh_token?: string | null
+          created_at?: string | null
           expires_at?: string | null
-          created_at?: string
-          updated_at?: string
+          id?: string
+          provider?: string
+          refresh_token?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
       profiles: {
         Row: {
+          created_at: string | null
           id: string
           role: string
-          created_at: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           id: string
           role?: string
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
           role?: string
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
       sync_jobs: {
         Row: {
-          id: string
-          tenant_id: string
-          connector: string
-          status: string
-          started_at: string | null
           completed_at: string | null
+          connector: string
+          created_at: string | null
           error_message: string | null
+          id: string
           items_synced: number | null
-          created_at: string
-          updated_at: string
+          started_at: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
         }
         Insert: {
-          id?: string
-          tenant_id: string
-          connector: string
-          status?: string
-          started_at?: string | null
           completed_at?: string | null
+          connector: string
+          created_at?: string | null
           error_message?: string | null
+          id?: string
           items_synced?: number | null
-          created_at?: string
-          updated_at?: string
+          started_at?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
         }
         Update: {
-          id?: string
-          tenant_id?: string
-          connector?: string
-          status?: string
-          started_at?: string | null
           completed_at?: string | null
+          connector?: string
+          created_at?: string | null
           error_message?: string | null
+          id?: string
           items_synced?: number | null
-          created_at?: string
-          updated_at?: string
+          started_at?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string | null
+          due_date: string | null
+          id: string
+          source: string | null
+          source_id: string | null
+          status: string | null
+          tenant_id: string
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          source?: string | null
+          source_id?: string | null
+          status?: string | null
+          tenant_id: string
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          source?: string | null
+          source_id?: string | null
+          status?: string | null
+          tenant_id?: string
+          title?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -257,10 +298,155 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: { Args: { uid: string }; Returns: boolean }
+      match_embeddings: {
+        Args: {
+          match_count?: number
+          match_embedding_model: string
+          match_object_types?: string[]
+          match_tenant_id: string
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          embedding_model: string
+          id: string
+          object_id: string
+          object_type: string
+          similarity: number
+          tenant_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
     }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
