@@ -163,17 +163,17 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           width: 8px;
         }
         .notification-scrollbar::-webkit-scrollbar-track {
-          background: #F8FAFC;
+          background: var(--muted);
           border-radius: 9999px;
         }
         .notification-scrollbar::-webkit-scrollbar-thumb {
-          background: #CBD5E1; /* slate-300 */
+          background: var(--border);
           border-radius: 9999px;
-          border: 1.5px solid #F8FAFC;
+          border: 1.5px solid var(--muted);
           transition: background-color 0.2s ease;
         }
         .notification-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94A3B8; /* slate-400 */
+          background: var(--muted-foreground);
         }
         /* Smooth scrolling inside list */
         .notification-scrollbar {
@@ -186,24 +186,24 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         initial="hidden"
         animate="visible"
         exit="exit"
-        className="absolute right-0 mt-2 w-[330px] max-w-[calc(100vw-2rem)] h-[410px] bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col"
+        className="absolute right-0 mt-2 w-[330px] max-w-[calc(100vw-2rem)] h-[410px] bg-card border border-border rounded-2xl shadow-xl z-50 overflow-hidden flex flex-col"
       >
         {/* Sticky Fixed Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-gray-100 bg-white z-10 shrink-0 select-none">
-          <h3 className="font-bold text-[15px] text-gray-800 tracking-tight">Notifications</h3>
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-border bg-card z-10 shrink-0 select-none">
+          <h3 className="font-bold text-[15px] text-foreground tracking-tight">Notifications</h3>
           <motion.button
             disabled={notifications.length === 0}
             onClick={handleClearClick}
-            whileHover={notifications.length > 0 ? { 
-              scale: 1.04, 
+            whileHover={notifications.length > 0 ? {
+              scale: 1.04,
               color: '#10B981', // green primary
             } : {}}
             whileTap={notifications.length > 0 ? { scale: 0.96 } : {}}
             className={`text-xs font-semibold px-2 py-1 rounded-md transition-all outline-none flex items-center gap-1.5 ${
               notifications.length === 0
-                ? 'text-gray-300 cursor-not-allowed pointer-events-none'
+                ? 'text-muted-foreground/50 cursor-not-allowed pointer-events-none'
                 : confirmClear
-                ? 'text-red-500 bg-red-50 border border-red-100'
+                ? 'text-red-500 bg-red-500/10 border border-red-500/20'
                 : 'text-primary hover:bg-primary/5 border border-transparent'
             }`}
             title={confirmClear ? 'Click again to clear all notifications' : 'Clear all notifications'}
@@ -223,14 +223,14 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
         </div>
 
         {/* Scrollable list of items */}
-        <div className="flex-1 overflow-y-auto notification-scrollbar bg-white px-5 py-1">
+        <div className="flex-1 overflow-y-auto notification-scrollbar bg-card px-5 py-1">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-16">
-              <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 mb-2.5 border border-gray-100">
+              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground mb-2.5 border border-border">
                 <Inbox className="h-4 w-4" />
               </div>
-              <p className="text-xs font-bold text-gray-700 mb-0.5">All caught up!</p>
-              <p className="text-[10px] text-gray-400 max-w-[180px] leading-relaxed">
+              <p className="text-xs font-bold text-foreground mb-0.5">All caught up!</p>
+              <p className="text-[10px] text-muted-foreground max-w-[180px] leading-relaxed">
                 No new updates at this moment.
               </p>
             </div>
@@ -250,7 +250,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                       variants={itemVariants}
                       whileHover={{ y: -1, scale: 1.002 }}
                       whileTap={{ scale: 0.995 }}
-                      className="flex items-start gap-3 py-3 bg-white cursor-pointer select-none relative group"
+                      className="flex items-start gap-3 py-3 bg-card cursor-pointer select-none relative group"
                       onClick={() => handleCardClick(notif)}
                     >
                       {/* Left: Solid Status Dot */}
@@ -258,13 +258,13 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
 
                       {/* Content: Title, Description, Date */}
                       <div className="flex-1 min-w-0 pr-6">
-                        <h4 className={`text-[13px] text-gray-700 leading-tight mb-0.5 truncate ${notif.is_read ? 'font-medium' : 'font-bold'}`}>
+                        <h4 className={`text-[13px] text-foreground leading-tight mb-0.5 truncate ${notif.is_read ? 'font-medium' : 'font-bold'}`}>
                           {notif.title}
                         </h4>
-                        <p className="text-[11px] text-gray-400 leading-normal line-clamp-2 pr-1">
+                        <p className="text-[11px] text-muted-foreground leading-normal line-clamp-2 pr-1">
                           {notif.description}
                         </p>
-                        <span className="text-[10px] text-gray-300 font-medium mt-1 block">
+                        <span className="text-[10px] text-muted-foreground/70 font-medium mt-1 block">
                           {formatNotificationTime(notif.created_at)}
                         </span>
                       </div>
@@ -275,7 +275,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
                           e.stopPropagation();
                           deleteNotification(notif.id);
                         }}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-gray-300 hover:text-red-500 hover:bg-gray-50 opacity-0 group-hover:opacity-100 transition-all duration-150 z-20"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-1.5 rounded-full text-muted-foreground hover:text-red-500 hover:bg-muted opacity-0 group-hover:opacity-100 transition-all duration-150 z-20"
                         title="Dismiss notification"
                       >
                         <X className="h-3.5 w-3.5" />

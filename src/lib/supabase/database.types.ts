@@ -170,6 +170,7 @@ export type Database = {
           created_at: string | null
           expires_at: string | null
           id: string
+          needs_reauth: boolean
           provider: string
           refresh_token: string | null
           updated_at: string | null
@@ -180,6 +181,7 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          needs_reauth?: boolean
           provider: string
           refresh_token?: string | null
           updated_at?: string | null
@@ -190,6 +192,7 @@ export type Database = {
           created_at?: string | null
           expires_at?: string | null
           id?: string
+          needs_reauth?: boolean
           provider?: string
           refresh_token?: string | null
           updated_at?: string | null

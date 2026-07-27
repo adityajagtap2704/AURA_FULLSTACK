@@ -1,3 +1,4 @@
+import { Worker, Job, ConnectionOptions } from 'bullmq';
 import { indexTenantEmbeddings } from '@/lib/embeddings/index-tenant';
 
 // Load environment variables
@@ -468,13 +469,6 @@ export const syncWorker = new Worker<SyncJobData>(
       }
 
       return { success: true, itemsSynced };
-    } catch (error) {
-      console.error(`[Sync Worker] Error during ${connector} sync:`, error);
-
-      return {
-        success: true,
-        itemsSynced,
-      };
     } catch (error) {
       console.error(
         `[Sync Worker] Error during ${connector} sync:`,

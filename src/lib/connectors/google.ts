@@ -14,6 +14,15 @@ import { triggerBackgroundSync } from '@/lib/sync/autoSync';
 
 type OAuthTokenRow = Database['public']['Tables']['oauth_tokens']['Row'];
 
+// Google returns invalid_grant when a refresh token has been revoked,
+// expired from inactivity, or was issued for a different client/environment.
+// It will never succeed on retry, so callers use this to stop retrying and
+// prompt the user to reconnect instead.
+function isInvalidGrantError(err: unknown): boolean {
+  const data = (err as { response?: { data?: { error?: string } } })?.response?.data;
+  return data?.error === 'invalid_grant';
+}
+
 interface GoogleFetchResult {
   calendarEvents: calendar_v3.Schema$Event[];
   gmailMessages: gmail_v1.Schema$Message[];
@@ -67,6 +76,7 @@ export class GoogleConnector implements ConnectorInterface {
         expires_at: tokens.expiry_date
           ? new Date(tokens.expiry_date).toISOString()
           : null,
+        needs_reauth: false,
       },
       {
         onConflict: 'user_id,provider',
@@ -120,6 +130,10 @@ export class GoogleConnector implements ConnectorInterface {
 
     const token = tokenData[0] as OAuthTokenRow;
 
+    if (token.needs_reauth) {
+      throw new Error('GOOGLE_REAUTH_REQUIRED');
+    }
+
     // Set credentials
     this.oauth2Client.setCredentials({
       access_token: token.access_token,
@@ -151,65 +165,81 @@ export class GoogleConnector implements ConnectorInterface {
       }
     });
 
-    // Fetch Calendar events
-    const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
-    const ninetyDaysFromNow = new Date(now);
-    ninetyDaysFromNow.setDate(now.getDate() + 90);
+    try {
+      // Fetch Calendar events
+      const calendar = google.calendar({ version: 'v3', auth: this.oauth2Client });
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(now.getDate() - 30);
+      const ninetyDaysFromNow = new Date(now);
+      ninetyDaysFromNow.setDate(now.getDate() + 90);
 
-    console.log(`[Google fetch] Fetching calendar events from ${thirtyDaysAgo.toISOString()} to ${ninetyDaysFromNow.toISOString()}`);
+      console.log(`[Google fetch] Fetching calendar events from ${thirtyDaysAgo.toISOString()} to ${ninetyDaysFromNow.toISOString()}`);
 
-    const calendarResponse = await calendar.events.list({
-      calendarId: 'primary',
-      timeMin: thirtyDaysAgo.toISOString(),
-      timeMax: ninetyDaysFromNow.toISOString(),
-      singleEvents: true,
-      orderBy: 'startTime',
-    });
+      const calendarResponse = await calendar.events.list({
+        calendarId: 'primary',
+        timeMin: thirtyDaysAgo.toISOString(),
+        timeMax: ninetyDaysFromNow.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
 
-    console.log(`[Google fetch] Fetched ${calendarResponse.data.items?.length || 0} calendar events`);
+      console.log(`[Google fetch] Fetched ${calendarResponse.data.items?.length || 0} calendar events`);
 
-    // Fetch Gmail messages (inbox OR starred)
-    const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
-    
-    // Fetch recent inbox and starred messages together to avoid skipping recent emails if starred ones exist
-    let gmailResponse = await gmail.users.messages.list({
-      userId: 'me',
-      q: 'in:inbox OR is:starred',
-      maxResults: 50,
-    });
+      // Fetch Gmail messages (inbox OR starred)
+      const gmail = google.gmail({ version: 'v1', auth: this.oauth2Client });
 
-    // Fallback: if no messages found, fetch any recent messages
-    if (!gmailResponse.data.messages || gmailResponse.data.messages.length === 0) {
-      console.log(`[Google fetch] No inbox/starred messages, fetching any recent messages`);
-      gmailResponse = await gmail.users.messages.list({
+      // Fetch recent inbox and starred messages together to avoid skipping recent emails if starred ones exist
+      let gmailResponse = await gmail.users.messages.list({
         userId: 'me',
+        q: 'in:inbox OR is:starred',
         maxResults: 50,
       });
-    }
 
-    console.log(`[Google fetch] Fetched ${gmailResponse.data.messages?.length || 0} messages`);
-
-    // Fetch full message details
-    const messages = [];
-    if (gmailResponse.data.messages) {
-      for (const msg of gmailResponse.data.messages) {
-        const fullMessage = await gmail.users.messages.get({
+      // Fallback: if no messages found, fetch any recent messages
+      if (!gmailResponse.data.messages || gmailResponse.data.messages.length === 0) {
+        console.log(`[Google fetch] No inbox/starred messages, fetching any recent messages`);
+        gmailResponse = await gmail.users.messages.list({
           userId: 'me',
-          id: msg.id!,
+          maxResults: 50,
         });
-        messages.push(fullMessage.data);
       }
+
+      console.log(`[Google fetch] Fetched ${gmailResponse.data.messages?.length || 0} messages`);
+
+      // Fetch full message details
+      const messages = [];
+      if (gmailResponse.data.messages) {
+        for (const msg of gmailResponse.data.messages) {
+          const fullMessage = await gmail.users.messages.get({
+            userId: 'me',
+            id: msg.id!,
+          });
+          messages.push(fullMessage.data);
+        }
+      }
+
+      console.log(`[Google fetch] Returning data: ${calendarResponse.data.items?.length || 0} events, ${messages.length} messages`);
+
+      return {
+        calendarEvents: calendarResponse.data.items || [],
+        gmailMessages: messages,
+      };
+    } catch (err) {
+      if (isInvalidGrantError(err)) {
+        console.error(`[Google fetch] Refresh token rejected (invalid_grant) for user ${userId}, marking connection for reauthorization`);
+        const { error: flagError } = await supabaseServer
+          .from('oauth_tokens')
+          .update({ needs_reauth: true })
+          .eq('user_id', userId)
+          .eq('provider', 'google');
+        if (flagError) {
+          console.error('[Google fetch] Failed to persist needs_reauth flag:', flagError);
+        }
+        throw new Error('GOOGLE_REAUTH_REQUIRED');
+      }
+      throw err;
     }
-
-    console.log(`[Google fetch] Returning data: ${calendarResponse.data.items?.length || 0} events, ${messages.length} messages`);
-
-    return {
-      calendarEvents: calendarResponse.data.items || [],
-      gmailMessages: messages,
-    };
   }
 
   async mapToCanonical(rawData: unknown, tenantId: string): Promise<CanonicalData> {

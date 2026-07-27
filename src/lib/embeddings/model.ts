@@ -1,5 +1,3 @@
-import "server-only";
-
 import {
   env,
   pipeline,

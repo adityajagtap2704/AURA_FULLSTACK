@@ -302,9 +302,6 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      {/* AI Daily Digest & Prioritization Widget */}
-      <AIDigestWidget />
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((stat, i) => {
@@ -397,69 +394,8 @@ export default function DashboardPage() {
             View full calendar <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-          {/* ===================== Messages Card ===================== */}
-  <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-bold tracking-tight flex items-center gap-2">
-        <Mail className="h-5 w-5 text-primary" />
-        Messages
-      </h2>
-
-      <Link
-        href="/dashboard/gmail"
-        className="text-xs font-semibold text-primary hover:underline"
-      >
-        View all
-      </Link>
-    </div>
-
-    {(safeData.messages || []).length > 0 ? (
-      <div className="space-y-3">
-        {(safeData.messages || []).slice(0, 5).map((message) => (
-          <Link
-            key={message.id}
-            href="/dashboard/gmail"
-            className="block rounded-xl border border-border p-3 hover:bg-white hover:shadow-md hover:-translate-y-0.5 hover:border-primary/40 transition-all duration-200"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground truncate">
-                  {message.subject || "(No Subject)"}
-                </p>
-
-                <p className="text-xs text-muted-foreground truncate mt-1">
-                  {message.sender}
-                </p>
-              </div>
-
-              {message.flagged && (
-                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-600">
-                  FLAGGED
-                </span>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
-    ) : (
-      <div className="text-center py-10 border border-dashed border-border rounded-xl">
-        <Mail className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
-
-        <p className="text-sm text-muted-foreground">
-          No messages found.
-        </p>
-
-        <Link
-          href="/dashboard/gmail"
-          className="mt-3 inline-block text-xs font-semibold text-primary hover:underline"
-        >
-          Open Gmail
-        </Link>
-      </div>
-    )}
-  </div>
-  {/* ===================== End Messages Card ===================== */}
-
+          {/* AI Daily Digest — compact card, fits the middle column */}
+          <AIDigestWidget />
 
         {/* My Tasks */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
@@ -573,7 +509,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={integration.label}
-                  className={`flex flex-col items-center gap-2 p-4 border border-border rounded-xl relative transition-all duration-250 hover:bg-white hover:shadow-md hover:-translate-y-1 hover:border-primary/40 ${!integration.real ? 'opacity-60' : ''}`}
+                  className={`flex flex-col items-center gap-2 p-4 border border-border rounded-xl relative transition-all duration-250 hover:bg-muted hover:shadow-md hover:-translate-y-1 hover:border-primary/40 ${!integration.real ? 'opacity-60' : ''}`}
                 >
                   {integration.connected && (
                     <CheckCircle2 className="h-4 w-4 text-success absolute top-2 right-2" />

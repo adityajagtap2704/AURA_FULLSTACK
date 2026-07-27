@@ -73,3 +73,56 @@ export function NotionIcon({ className }: { className?: string }) {
     </svg>
   );
 }
+
+// Slack's mark — the four-color pinwheel of rounded bars.
+export function SlackIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <path d="M9 2.5a2 2 0 1 0 0 4h2v-2a2 2 0 0 0-2-2z" fill="#36C5F0" />
+      <path d="M9 8.5H4a2 2 0 1 0 0 4h5a2 2 0 0 0 0-4z" fill="#36C5F0" />
+      <path d="M21.5 9a2 2 0 1 0-4 0v2h2a2 2 0 0 0 2-2z" fill="#2EB67D" />
+      <path d="M15.5 9V4a2 2 0 1 0-4 0v5a2 2 0 0 0 4 0z" fill="#2EB67D" />
+      <path d="M15 21.5a2 2 0 1 0 0-4h-2v2a2 2 0 0 0 2 2z" fill="#ECB22E" />
+      <path d="M15 15.5h5a2 2 0 1 0 0-4h-5a2 2 0 0 0 0 4z" fill="#ECB22E" />
+      <path d="M2.5 15a2 2 0 1 0 4 0v-2h-2a2 2 0 0 0-2 2z" fill="#E01E5A" />
+      <path d="M8.5 15v5a2 2 0 1 0 4 0v-5a2 2 0 0 0-4 0z" fill="#E01E5A" />
+    </svg>
+  );
+}
+
+// Microsoft 365's mark — the four-color window panes.
+export function MicrosoftIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className}>
+      <rect x="2" y="2" width="9.5" height="9.5" fill="#F25022" />
+      <rect x="12.5" y="2" width="9.5" height="9.5" fill="#7FBA00" />
+      <rect x="2" y="12.5" width="9.5" height="9.5" fill="#00A4EF" />
+      <rect x="12.5" y="12.5" width="9.5" height="9.5" fill="#FFB900" />
+    </svg>
+  );
+}
+
+// Linear's mark — four diagonal bars of increasing length.
+export function LinearIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="#5E6AD2">
+      <rect x="16.3" y="2.3" width="2.2" height="5.5" rx="1.1" transform="rotate(45 17.4 5)" />
+      <rect x="12" y="1" width="2.2" height="11" rx="1.1" transform="rotate(45 13 6.5)" />
+      <rect x="6.5" y="1" width="2.2" height="17.5" rx="1.1" transform="rotate(45 7.5 9.5)" />
+      <rect x="1" y="4.5" width="2.2" height="18" rx="1.1" transform="rotate(45 2 13.5)" />
+    </svg>
+  );
+}
+
+// Dropbox's mark — the four-rhombi glyph folding into a box.
+export function DropboxIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="#0061FF">
+      <polygon points="6,3 12,7 6,11 0,7" />
+      <polygon points="18,3 24,7 18,11 12,7" />
+      <polygon points="6,12 12,16 6,20 0,16" />
+      <polygon points="18,12 24,16 18,20 12,16" />
+      <polygon points="12,17 18,13 12,9 6,13" />
+    </svg>
+  );
+}

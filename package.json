@@ -13,7 +13,8 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
-    "redis": "echo Redis should be running on localhost:6379"
+    "redis": "echo Redis should be running on localhost:6379",
+    "dev:all": "docker-compose up -d && concurrently -n BACKEND,WORKER,FRONTEND -c blue,green,magenta \"npm:dev\" \"npm:worker\" \"npm --prefix frontend run dev\""
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -38,6 +39,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^10.0.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4.0.0",

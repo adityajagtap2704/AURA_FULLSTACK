@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useTheme } from '@/providers/ThemeProvider';
 import { useDashboard } from '@/hooks/useDashboard';
 import { authService } from '@/services/auth';
-import { AuraLogoIcon, GmailIcon, GoogleCalendarIcon, GoogleMeetIcon, NotionIcon } from '@/components/icons/ServiceIcons';
+import { AuraLogoIcon } from '@/components/icons/ServiceIcons';
 import { getDisplayName, getAvatarUrl } from '@/lib/userDisplay';
 import { motion, AnimatePresence } from 'framer-motion';
 import KeyboardShortcutsModal from '@/components/help/KeyboardShortcutsModal';
@@ -25,7 +25,6 @@ import {
   LogOut,
   Sun,
   Moon,
-  Monitor,
   Menu,
   X,
   Search,
@@ -33,12 +32,14 @@ import {
   Bell,
   HelpCircle,
   Shield,
-  CheckCircle2,
   ExternalLink,
   Keyboard,
   Bug,
   Mail as MailIcon,
-  Info
+  Info,
+  Sparkles,
+  MessageSquare,
+  Link2
 } from 'lucide-react';
 
 interface GlobalSearchResult {
@@ -61,12 +62,15 @@ const navItems = [
   { href: '/dashboard/calendar', label: 'Calendar', icon: Calendar },
   { href: '/dashboard/gmail', label: 'Messages', icon: Mail },
   { href: '/dashboard/documents', label: 'Documents', icon: FileText },
+  { href: '/dashboard/ai-digest', label: 'AI Digest', icon: Sparkles },
+  { href: '/dashboard/ai-assistant', label: 'AI Assistant', icon: MessageSquare },
+  { href: '/dashboard/integrations', label: 'Integrations', icon: Link2 },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, loading, role } = useAuth();
   const { theme, setTheme, resolvedTheme } = useTheme();
-  const { connectorStatus, data } = useDashboard();
+  const { data } = useDashboard();
   const { unreadCount } = useNotifications();
   const router = useRouter();
 
@@ -239,9 +243,6 @@ case "o":
   const avatarUrl = getAvatarUrl(user);
   const userInitials = userEmail.slice(0, 2).toUpperCase();
 
-  // Google Meet has no real connector/backend in this app — shown as a
-  // static, always-"not connected" entry at your request, not tied to
-  // connectorStatus like the other three.
   useEffect(() => {
     const query = searchQuery.trim();
 
@@ -417,13 +418,6 @@ case "o":
   };
 }, [searchQuery, user]);
 
-  const integrations = [
-    { label: 'Gmail', icon: GmailIcon, connected: connectorStatus?.google ?? false, href: '/dashboard/gmail' },
-    { label: 'Google Calendar', icon: GoogleCalendarIcon, connected: connectorStatus?.google ?? false, href: '/dashboard/calendar' },
-    { label: 'Notion', icon: NotionIcon, connected: connectorStatus?.notion ?? false, href: '/dashboard/documents' },
-    { label: 'Google Meet', icon: GoogleMeetIcon, connected: false, href: '/dashboard/integrations' },
-  ];
-
   const SidebarContent = () => (
     <>
       {/* Brand */}
@@ -453,27 +447,6 @@ case "o":
           );
         })}
       </nav>
-
-      {/* Integrations */}
-      <div className="px-4 pt-6">
-        <span className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Integrations</span>
-        <div className="mt-2 space-y-1">
-          {integrations.map((integration) => {
-            const Icon = integration.icon;
-            return (
-              <Link
-                key={integration.label}
-                href={integration.connected ? integration.href : '/dashboard/integrations'}
-                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm text-muted-foreground hover:bg-white dark:hover:bg-muted hover:shadow-[0_8px_20px_rgba(0,0,0,0.06)] dark:hover:shadow-none hover:text-foreground transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02]"
-              >
-                <Icon className="h-4.5 w-4.5 shrink-0" />
-                <span className="flex-1 truncate">{integration.label}</span>
-                {integration.connected && <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />}
-              </Link>
-            );
-          })}
-        </div>
-      </div>
 
       <div className="flex-1" />
 
@@ -592,7 +565,7 @@ case "o":
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.12 }}
-                    className="absolute top-[2px] right-[2px] flex h-[15px] min-w-[15px] px-1.5 items-center justify-center rounded-full bg-[#EF4444] text-[8px] font-bold text-white shadow-sm ring-[1.5px] ring-white select-none pointer-events-none"
+                    className="absolute top-[2px] right-[2px] flex h-[15px] min-w-[15px] px-1.5 items-center justify-center rounded-full bg-[#EF4444] text-[8px] font-bold text-white shadow-sm ring-[1.5px] ring-card select-none pointer-events-none"
                   >
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </motion.span>
@@ -743,12 +716,6 @@ Contact Support
                             className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium ${theme === 'dark' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                           >
                             <Moon className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setTheme('system')}
-                            className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-medium ${theme === 'system' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
-                          >
-                            <Monitor className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>

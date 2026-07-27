@@ -27,7 +27,7 @@ export async function triggerBackgroundSync(
       const { data: googleToken, error: googleTokenError } =
         await supabaseServer
           .from('oauth_tokens')
-          .select('created_at')
+          .select('created_at, needs_reauth')
           .eq('user_id', userId)
           .eq('provider', 'google')
           .limit(1);
@@ -36,6 +36,10 @@ export async function triggerBackgroundSync(
         console.error(
           '[AutoSync] Failed to check Google connection:',
           googleTokenError,
+        );
+      } else if (googleToken?.[0]?.needs_reauth) {
+        console.log(
+          `[AutoSync] Skipping Google sync for tenant ${tenantId}: connection needs reauthorization`,
         );
       } else if (googleToken && googleToken.length > 0) {
         const { data: recentJobs, error: googleJobsError } =
@@ -58,7 +62,6 @@ export async function triggerBackgroundSync(
 
           const needsSync =
             !latestJob ||
-            latestJob.status === 'failed' ||
             !startedAt ||
             Date.now() - new Date(startedAt).getTime() > 60_000;
 
@@ -124,7 +127,6 @@ export async function triggerBackgroundSync(
 
           const needsSync =
             !latestJob ||
-            latestJob.status === 'failed' ||
             !startedAt ||
             Date.now() - new Date(startedAt).getTime() > 60_000;
 
