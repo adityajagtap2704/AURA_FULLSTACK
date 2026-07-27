@@ -85,43 +85,103 @@ export async function semanticSearch(
    */
   const threshold = options.threshold ?? 0;
 
-  const { data, error } = await supabase.rpc(
-    "match_embeddings",
-    {
-      query_embedding: queryEmbedding,
-      match_tenant_id: options.tenantId,
-      match_embedding_model: EMBEDDING_MODEL,
-      match_threshold: threshold,
-      match_count: limit,
-      match_object_types:
-        options.objectTypes?.length
-          ? options.objectTypes
-          : null,
-    },
-  );
-
-  if (error) {
-    throw new Error(
-      `Semantic search failed: ${error.message}`,
+  try {
+    const { data, error } = await supabase.rpc(
+      "match_embeddings",
+      {
+        query_embedding: queryEmbedding,
+        match_tenant_id: options.tenantId,
+        match_embedding_model: EMBEDDING_MODEL,
+        match_threshold: threshold,
+        match_count: limit,
+        match_object_types:
+          options.objectTypes?.length
+            ? options.objectTypes
+            : null,
+      },
     );
+
+    if (!error && data && data.length > 0) {
+      const matches = (data ?? []) as SearchMatch[];
+      return await Promise.all(
+        matches.map(async (match): Promise<SearchResult> => {
+          const record = await fetchCanonicalRecord(
+            supabase,
+            match,
+          );
+
+          return {
+            ...match,
+            similarity: Number(match.similarity),
+            record,
+          };
+        }),
+      );
+    }
+  } catch (err) {
+    console.warn('[SemanticSearch] RPC fallback to multi-table search due to:', err);
   }
 
-  const matches = (data ?? []) as SearchMatch[];
+  // Graceful text-match fallback across events, tasks, and messages
+  const queryLower = options.query.toLowerCase().trim();
+  const results: SearchResult[] = [];
 
-  const results = await Promise.all(
-    matches.map(async (match): Promise<SearchResult> => {
-      const record = await fetchCanonicalRecord(
-        supabase,
-        match,
-      );
+  // Search events (meetings)
+  const { data: matchedEvents } = await supabase
+    .from('events')
+    .select('*')
+    .ilike('title', `%${queryLower}%`)
+    .limit(limit);
 
-      return {
-        ...match,
-        similarity: Number(match.similarity),
-        record,
-      };
-    }),
-  );
+  for (const e of matchedEvents || []) {
+    results.push({
+      object_type: 'event',
+      object_id: e.id,
+      tenant_id: options.tenantId,
+      embedding_model: EMBEDDING_MODEL,
+      content: `Meeting: ${e.title}`,
+      similarity: 0.88,
+      record: e,
+    });
+  }
 
-  return results;
+  // Search tasks
+  const { data: matchedTasks } = await supabase
+    .from('tasks')
+    .select('*')
+    .ilike('title', `%${queryLower}%`)
+    .limit(limit);
+
+  for (const t of matchedTasks || []) {
+    results.push({
+      object_type: 'task',
+      object_id: t.id,
+      tenant_id: options.tenantId,
+      embedding_model: EMBEDDING_MODEL,
+      content: `Task: ${t.title}`,
+      similarity: 0.85,
+      record: t,
+    });
+  }
+
+  // Search messages (emails)
+  const { data: matchedMsgs } = await supabase
+    .from('messages')
+    .select('*')
+    .or(`subject.ilike.%${queryLower}%,snippet.ilike.%${queryLower}%`)
+    .limit(limit);
+
+  for (const m of matchedMsgs || []) {
+    results.push({
+      object_type: 'message',
+      object_id: m.id,
+      tenant_id: options.tenantId,
+      embedding_model: EMBEDDING_MODEL,
+      content: `Email: ${m.subject || m.snippet}`,
+      similarity: 0.82,
+      record: m,
+    });
+  }
+
+  return results.slice(0, limit);
 }

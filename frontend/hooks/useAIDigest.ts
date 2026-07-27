@@ -22,6 +22,7 @@ export interface AIDigestData {
   summary_text: string;
   top_priorities: PriorityItem[];
   meeting_prep_notes: MeetingPrepNote[];
+  ai_suggestions?: string[];
   metadata?: {
     date: string;
     guardrail_passed: boolean;

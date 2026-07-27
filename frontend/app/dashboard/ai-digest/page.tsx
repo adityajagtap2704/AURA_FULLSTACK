@@ -12,6 +12,8 @@ import {
   Star,
   CheckCircle2,
   Info,
+  Mail,
+  CheckSquare,
 } from 'lucide-react';
 
 const TABS = ['Today', 'This Week', 'Insights', 'Summaries'] as const;
@@ -24,37 +26,43 @@ export default function AIDigestPage() {
   const [tab, setTab] = useState<Tab>('Today');
 
   const todayStr = new Date().toDateString();
-  const eventsToday = (data?.events || []).filter((e) => new Date(e.start_time).toDateString() === todayStr);
+  const eventsToday = (data?.events || []).filter((e) => e.start_time && new Date(e.start_time).toDateString() === todayStr);
   const tasksDueToday = (data?.tasks || []).filter((t) => t.due_date && new Date(t.due_date).toDateString() === todayStr);
+  const messagesToday = (data?.messages || []).filter((m) => m.created_at && new Date(m.created_at).toDateString() === todayStr);
   const flaggedMessages = (data?.messages || []).filter((m) => m.flagged);
 
-  const priorityLabel = (score: number) => (score >= 70 ? 'High' : score >= 40 ? 'Medium' : 'Low');
-  const priorityStyle = (score: number) =>
-    score >= 70
-      ? 'bg-danger/10 text-danger'
-      : score >= 40
-      ? 'bg-orange-500/10 text-orange-600'
-      : 'bg-muted text-muted-foreground';
+  const priorityLabel = (score: number, idx: number) => {
+    if (score >= 90 || idx === 0) return 'High';
+    if (score >= 70 || idx <= 2) return 'Medium';
+    return 'Low';
+  };
+
+  const priorityStyle = (label: string) => {
+    switch (label) {
+      case 'High':
+        return 'bg-danger/10 text-danger';
+      case 'Medium':
+        return 'bg-orange-500/10 text-orange-600';
+      case 'Low':
+      default:
+    }
+  };
+
+  const getSourceIcon = (itemType: string, source: string) => {
+    if (itemType === 'task' || source === 'notion') {
+      return <CheckSquare className="h-4 w-4 text-orange-500 shrink-0" />;
+    }
+    if (itemType === 'event' || source === 'google_calendar') {
+      return <CalendarClock className="h-4 w-4 text-blue-500 shrink-0" />;
+    }
+    return <Mail className="h-4 w-4 text-emerald-500 shrink-0" />;
+  };
 
   // Real suggestions derived from today's actual schedule/tasks — no
   // fabricated content when there's nothing to base a suggestion on.
-  const suggestions: string[] = [];
-  const sortedEvents = [...eventsToday].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-  if (sortedEvents[0]) {
-    const t = new Date(sortedEvents[0].start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    suggestions.push(`Start your day with "${sortedEvents[0].title}" at ${t}`);
-  }
-  if (digest?.top_priorities?.[0]) {
-    suggestions.push(`Focus on "${digest.top_priorities[0].title}" — it's scored as your top priority today`);
-  }
-  if (sortedEvents.length > 1) {
-    const last = sortedEvents[sortedEvents.length - 1];
-    const t = new Date(last.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    suggestions.push(`You have "${last.title}" later at ${t}`);
-  }
-  if (flaggedMessages.length > 0) {
-    suggestions.push(`${flaggedMessages.length} flagged message${flaggedMessages.length === 1 ? '' : 's'} still need${flaggedMessages.length === 1 ? 's' : ''} a reply`);
-  }
+  const suggestions: string[] = digest?.ai_suggestions && digest.ai_suggestions.length > 0
+    ? digest.ai_suggestions
+    : (digest?.meeting_prep_notes || []).map((n) => `"${n.event_title}": ${n.prep_note}`);
 
   return (
     <div className="space-y-6 pb-10">
@@ -136,7 +144,7 @@ export default function AIDigestPage() {
                   <p className="text-[10px] font-semibold text-muted-foreground mt-1">Tasks</p>
                 </div>
                 <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-xl p-3 text-center">
-                  <p className="text-2xl font-bold text-emerald-600">{(data?.messages || []).length}</p>
+                  <p className="text-2xl font-bold text-emerald-600">{messagesToday.length}</p>
                   <p className="text-[10px] font-semibold text-muted-foreground mt-1">Emails</p>
                 </div>
               </div>
@@ -154,11 +162,11 @@ export default function AIDigestPage() {
                   {digest.top_priorities.map((item, idx) => (
                     <div key={item.id || idx} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                       <div className="flex items-center gap-3 min-w-0">
-                        <span className="h-4.5 w-4.5 rounded-full border-2 border-border shrink-0" />
+                        {getSourceIcon(item.item_type, item.source)}
                         <span className="text-sm text-foreground truncate">{item.title}</span>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${priorityStyle(item.score)}`}>
-                        {priorityLabel(item.score)}
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full shrink-0 ${priorityStyle(priorityLabel(item.score, idx))}`}>
+                        {priorityLabel(item.score, idx)}
                       </span>
                     </div>
                   ))}
