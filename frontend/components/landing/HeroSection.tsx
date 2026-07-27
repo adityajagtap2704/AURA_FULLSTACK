@@ -1,12 +1,8 @@
 'use client';
-import { motion, Variants } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowRight, Play, Shield, CheckCircle } from 'lucide-react';
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.4, 0.25, 1] as any } },
-};
+import { ArrowRight, Play, Shield, CheckCircle, X } from 'lucide-react';
 
 const TRUST_BADGES = [
   { icon: Shield, label: 'Secure OAuth Login' },
@@ -15,6 +11,8 @@ const TRUST_BADGES = [
 ];
 
 export default function HeroSection() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-16 bg-[#FDFBF8]">
       {/* Background decoration */}
@@ -35,7 +33,7 @@ export default function HeroSection() {
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0, ease: [0.25, 0.4, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0, ease: [0.25, 0.4, 0.25, 1] }}
               className="inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full bg-[#FDF6EC] border border-[#E8C98A]/50 text-[#C17817] text-xs font-bold uppercase tracking-widest"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#C17817] animate-pulse" />
@@ -45,7 +43,7 @@ export default function HeroSection() {
             {/* Headline */}
             <motion.div
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.4, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.25, 0.4, 0.25, 1] }}
             >
               <h1 className="text-5xl lg:text-6xl xl:text-7xl font-black text-[#1F1B16] leading-[1.05] tracking-tight">
                 The all-in-one<br />
@@ -59,7 +57,7 @@ export default function HeroSection() {
             {/* Description */}
             <motion.p
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.4, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.25, 0.4, 0.25, 1] }}
               className="text-lg text-[#6B6258] leading-relaxed max-w-md"
             >
               Bring Gmail, Calendar, Notion and Meet together in one intelligent dashboard. Let AI handle the clutter so you can focus on what matters.
@@ -68,7 +66,7 @@ export default function HeroSection() {
             {/* CTA Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.4, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0.3, ease: [0.25, 0.4, 0.25, 1] }}
               className="flex flex-wrap gap-4"
             >
               <Link
@@ -78,7 +76,10 @@ export default function HeroSection() {
                 Start for Free
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <button className="group flex items-center gap-3 px-6 py-4 bg-white border border-[#E8E0D5] text-[#4A3F35] font-bold text-base rounded-2xl hover:border-[#C17817]/40 hover:bg-[#FDF6EC] hover:-translate-y-1 transition-all duration-300 shadow-sm">
+              <button
+                onClick={() => setIsDemoOpen(true)}
+                className="group flex items-center gap-3 px-6 py-4 bg-white border border-[#E8E0D5] text-[#4A3F35] font-bold text-base rounded-2xl hover:border-[#C17817]/40 hover:bg-[#FDF6EC] hover:-translate-y-1 transition-all duration-300 shadow-sm"
+              >
                 <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C17817] to-[#E8A422] flex items-center justify-center shadow-sm">
                   <Play className="w-3.5 h-3.5 text-white ml-0.5" fill="white" />
                 </div>
@@ -89,7 +90,7 @@ export default function HeroSection() {
             {/* Trust Badges */}
             <motion.div
               initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.4, 0.25, 1] as any }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.25, 0.4, 0.25, 1] }}
               className="flex flex-wrap gap-5 pt-2"
             >
               {TRUST_BADGES.map((b) => (
@@ -136,8 +137,8 @@ export default function HeroSection() {
 
               {/* Greeting */}
               <div className="px-6 py-4 bg-white">
-                <p className="text-sm text-[#9B8F85]">Good morning, Bhargavi 👋</p>
-                <p className="text-xs text-[#B5ABA3] mt-0.5">Here's what's happening today.</p>
+                <p className="text-sm text-[#9B8F85]">Good morning, User 👋</p>
+                <p className="text-xs text-[#B5ABA3] mt-0.5">Here&apos;s what&apos;s happening today.</p>
               </div>
 
               {/* Dashboard grid */}
@@ -160,7 +161,7 @@ export default function HeroSection() {
 
                 {/* Today's Schedule */}
                 <div className="col-span-1 bg-[#FDFBF8] rounded-2xl p-4 border border-[#F0EBE3]">
-                  <div className="text-xs font-bold text-[#4A3F35] mb-2">Today's Schedule</div>
+                  <div className="text-xs font-bold text-[#4A3F35] mb-2">Today&apos;s Schedule</div>
                   <div className="space-y-2">
                     {[
                       { time: '10:00 AM', label: 'Project Standup', color: '#C17817' },
@@ -257,6 +258,42 @@ export default function HeroSection() {
           </motion.div>
         </div>
       </div>
+
+      {/* Demo Video Modal */}
+      <AnimatePresence>
+        {isDemoOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsDemoOpen(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 md:p-10"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.25, ease: [0.25, 0.4, 0.25, 1] }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-4xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl"
+            >
+              <button
+                onClick={() => setIsDemoOpen(false)}
+                aria-label="Close demo video"
+                className="absolute top-3 right-3 z-10 flex items-center justify-center w-9 h-9 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+              >
+                <X className="w-4.5 h-4.5" />
+              </button>
+              <video
+                src="/videos/demo.mp4"
+                controls
+                autoPlay
+                className="w-full h-full"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }

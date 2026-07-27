@@ -78,6 +78,8 @@ function Navbar() {
 
 /* --------------------------------- HERO --------------------------------- */
 function Hero() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
+
   return (
     <section className="min-h-screen bg-gradient-to-b from-[#FDFAF6] via-[#FDF8F2] to-[#F8F3EC] flex items-center pt-16 overflow-hidden">
       <div className="max-w-[1200px] mx-auto px-6 w-full py-16 lg:py-24 grid lg:grid-cols-[0.9fr_1.2fr] gap-10 lg:gap-14 items-center">
@@ -112,7 +114,10 @@ function Hero() {
               Start for Free
               <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>
-            <button className="flex items-center gap-3 px-5 py-3.5 bg-white border border-[#DDD5C8] hover:border-[#C17817]/50 text-[#1F1B16] font-bold text-[14px] rounded-xl hover:bg-[#FDF4E7] hover:-translate-y-0.5 transition-all shadow-sm">
+            <button
+              onClick={() => setIsDemoOpen(true)}
+              className="flex items-center gap-3 px-5 py-3.5 bg-white border border-[#DDD5C8] hover:border-[#C17817]/50 text-[#1F1B16] font-bold text-[14px] rounded-xl hover:bg-[#FDF4E7] hover:-translate-y-0.5 transition-all shadow-sm"
+            >
               <span className="w-8 h-8 rounded-full bg-[#C17817] flex items-center justify-center shrink-0">
                 <svg className="w-3 h-3 text-white translate-x-0.5" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5V1.5z"/></svg>
               </span>
@@ -190,7 +195,7 @@ function Hero() {
               <div className="flex-1 p-4 bg-white overflow-hidden">
                 {/* Greeting */}
                 <div className="mb-4">
-                  <h3 className="text-[13px] font-bold text-[#1F1B16]">Good morning, Bhargavi 🌟</h3>
+                  <h3 className="text-[13px] font-bold text-[#1F1B16]">Good morning, User 🌟</h3>
                   <p className="text-[10px] text-[#9B8F85]">Here&apos;s what&apos;s happening today.</p>
                 </div>
 
@@ -310,6 +315,77 @@ function Hero() {
           </div>
         </motion.div>
       </div>
+
+      {/* Demo Video Modal */}
+      <AnimatePresence>
+        {isDemoOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsDemoOpen(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 md:p-10"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-3xl bg-white rounded-2xl overflow-hidden shadow-2xl"
+            >
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4 px-6 py-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#FDF4E7] border border-[#EDD9A3] flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-[#C17817] translate-x-0.5" viewBox="0 0 12 12" fill="currentColor"><path d="M2 1.5l9 4.5-9 4.5V1.5z"/></svg>
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-bold text-[#1F1B16]">AURA – Product Demo</h3>
+                    <p className="text-[12.5px] text-[#9B8F85]">See how AURA can simplify your workflow</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsDemoOpen(false)}
+                  aria-label="Close demo video"
+                  className="flex items-center justify-center w-8 h-8 rounded-full text-[#9B8F85] hover:bg-[#F5F0E8] hover:text-[#1F1B16] transition-colors shrink-0"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M6 6l12 12M18 6L6 18"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Video */}
+              <div className="px-6">
+                <video src="/videos/demo.mp4" controls autoPlay className="w-full aspect-video rounded-xl bg-black" />
+              </div>
+
+              {/* Footer */}
+              <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5 mt-5 border-t border-[#F0EBE3]">
+                <div className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-[#C17817]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                  <span className="text-[12.5px] font-medium text-[#6B6258]">Loved by teams around the world</span>
+                  <div className="flex -space-x-2 ml-1">
+                    {['#C17817', '#E8A422', '#A86510'].map((c) => (
+                      <div key={c} className="w-6 h-6 rounded-full border-2 border-white" style={{ background: c }} />
+                    ))}
+                    <div className="w-6 h-6 rounded-full border-2 border-white bg-[#F5F0E8] flex items-center justify-center text-[8px] font-bold text-[#6B6258]">
+                      +2K
+                    </div>
+                  </div>
+                </div>
+                <Link
+                  href="/signup"
+                  className="px-5 py-2.5 text-[13px] font-bold text-[#C17817] border border-[#C17817] rounded-xl hover:bg-[#FDF4E7] transition-all"
+                >
+                  Get Started Free
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
