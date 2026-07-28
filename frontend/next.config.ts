@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const backendUrl =
-      process.env.BACKEND_URL || "http://localhost:3000";
+      process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    if (!backendUrl || backendUrl.includes("aura-frontend-beryl.vercel.app")) {
+      return [];
+    }
 
     return [
       {

@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 
 // Axios instance pointing to relative path. Next.js rewrite redirects this to the backend server.
 export const api = axios.create({
-  baseURL: '',
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },
