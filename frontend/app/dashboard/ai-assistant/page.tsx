@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { getDisplayName } from '@/lib/userDisplay';
@@ -10,7 +10,7 @@ import { Sparkles, RotateCcw, ChevronsRight, Copy, Check, AlertCircle } from 'lu
 
 const QUICK_PROMPTS = ['Summarize my day', 'What are my top priorities?', 'What meetings do I have today?'];
 
-export default function AIAssistantPage() {
+function AIAssistantPageContent() {
   const { user } = useAuth();
   const userName = getDisplayName(user);
   const { messages, sendMessage, isSending, error, newChat } = useAIAssistant(userName);
@@ -158,5 +158,13 @@ export default function AIAssistantPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function AIAssistantPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AIAssistantPageContent />
+    </Suspense>
   );
 }

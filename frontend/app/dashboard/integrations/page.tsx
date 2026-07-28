@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, ComponentType } from 'react';
+import { useState, useEffect, useRef, ComponentType, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -28,7 +28,7 @@ interface IntegrationCard {
   actionLoading: boolean;
 }
 
-export default function IntegrationsPage() {
+function IntegrationsPageContent() {
   const {
     isLoading,
     isError,
@@ -319,5 +319,13 @@ export default function IntegrationsPage() {
         })}
       </div>
     </div>
+  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <IntegrationsPageContent />
+    </Suspense>
   );
 }
