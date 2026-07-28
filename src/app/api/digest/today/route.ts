@@ -23,57 +23,27 @@ export async function GET(request: NextRequest) {
       console.log('FastAPI service unreachable, generating digest directly from Supabase canonical DB records.');
     }
 
-    // 2. Fallback: Query Supabase canonical tables directly
-    let rawTasks: any[] = [];
+    // 2. Fallback: Query Supabase canonical tables directly (this tenant only)
     const { data: tasksData } = await supabaseServer
       .from('tasks')
       .select('*')
       .eq('tenant_id', tenantId)
       .order('due_date', { ascending: true });
+    const rawTasks: any[] = tasksData || [];
 
-    if (tasksData && tasksData.length > 0) {
-      rawTasks = tasksData;
-    } else {
-      const { data: allTasksData } = await supabaseServer
-        .from('tasks')
-        .select('*')
-        .order('due_date', { ascending: true });
-      rawTasks = allTasksData || [];
-    }
-
-    let rawEvents: any[] = [];
     const { data: eventsData } = await supabaseServer
       .from('events')
       .select('*')
       .eq('tenant_id', tenantId)
       .order('start_time', { ascending: true });
+    const rawEvents: any[] = eventsData || [];
 
-    if (eventsData && eventsData.length > 0) {
-      rawEvents = eventsData;
-    } else {
-      const { data: allEventsData } = await supabaseServer
-        .from('events')
-        .select('*')
-        .order('start_time', { ascending: true });
-      rawEvents = allEventsData || [];
-    }
-
-    let rawMessages: any[] = [];
     const { data: msgsData } = await supabaseServer
       .from('messages')
       .select('*')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
-
-    if (msgsData && msgsData.length > 0) {
-      rawMessages = msgsData;
-    } else {
-      const { data: allMsgsData } = await supabaseServer
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      rawMessages = allMsgsData || [];
-    }
+    const rawMessages: any[] = msgsData || [];
 
     let taskList: any[] = [...rawTasks];
     let eventList: any[] = [...rawEvents];

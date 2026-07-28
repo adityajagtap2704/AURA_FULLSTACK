@@ -64,19 +64,12 @@ export async function GET(request: NextRequest) {
       .lte('start_time', nextWeek.toISOString())
       .order('start_time', { ascending: true });
 
-    // Fetch messages (all synced emails/messages)
-    let { data: messages, error: messagesError } = await supabaseServer
+    // Fetch messages (synced emails/messages for this tenant only)
+    const { data: messages, error: messagesError } = await supabaseServer
       .from('messages')
       .select('*')
+      .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
-
-    if (!messages || messages.length === 0) {
-      const { data: allMsgsData } = await supabaseServer
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: false });
-      messages = allMsgsData || [];
-    }
 
     // Fetch recent documents
     const { data: documents, error: documentsError } = await supabaseServer

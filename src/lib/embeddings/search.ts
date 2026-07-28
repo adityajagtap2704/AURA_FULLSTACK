@@ -130,6 +130,7 @@ export async function semanticSearch(
   const { data: matchedEvents } = await supabase
     .from('events')
     .select('*')
+    .eq('tenant_id', options.tenantId)
     .ilike('title', `%${queryLower}%`)
     .limit(limit);
 
@@ -150,6 +151,7 @@ export async function semanticSearch(
   const { data: matchedTasks } = await supabase
     .from('tasks')
     .select('*')
+    .eq('tenant_id', options.tenantId)
     .ilike('title', `%${queryLower}%`)
     .limit(limit);
 
@@ -170,6 +172,7 @@ export async function semanticSearch(
   const { data: matchedMsgs } = await supabase
     .from('messages')
     .select('*')
+    .eq('tenant_id', options.tenantId)
     .or(`subject.ilike.%${queryLower}%,snippet.ilike.%${queryLower}%`)
     .limit(limit);
 
