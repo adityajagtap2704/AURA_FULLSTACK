@@ -31,9 +31,14 @@ export const authService = {
   },
 
   async logout() {
-    await api.post('/api/auth/logout');
-    // Clear client-side Supabase session
-    await supabase.auth.signOut();
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      console.warn('[authService] Backend logout failed, proceeding with client signOut:', err);
+    } finally {
+      // Always clear client-side Supabase session
+      await supabase.auth.signOut();
+    }
   },
 
   async getGoogleAuthUrl() {

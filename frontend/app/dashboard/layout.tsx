@@ -230,9 +230,11 @@ case "o":
   const handleLogout = async () => {
     try {
       await authService.logout();
-      router.push('/login');
     } catch (err) {
       console.error('Logout failed:', err);
+    } finally {
+      router.push('/login');
+      router.refresh();
     }
   };
     const userEmail = user?.email || 'user@aura.space';
