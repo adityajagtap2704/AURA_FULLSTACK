@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
@@ -11,9 +11,6 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build TypeScript
-RUN npm run build
-
-# Run the worker
-CMD ["node", "dist/lib/queue/worker.js"]
+# Run the worker directly with tsx (same as `npm run worker` in dev — no separate compile step)
+CMD ["npx", "tsx", "src/lib/queue/worker.ts"]
 
