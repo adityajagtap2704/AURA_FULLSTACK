@@ -296,7 +296,9 @@ case "o":
         const tenantId =
           user?.app_metadata?.tenant_id ??
           user?.user_metadata?.tenant_id ??
-          process.env.NEXT_PUBLIC_TENANT_ID;
+          user?.id ??
+          process.env.NEXT_PUBLIC_TENANT_ID ??
+          'default-tenant';
 
         if (!accessToken) {
           console.error('Supabase access token was not found.');

@@ -40,9 +40,9 @@ class RuleBasedScorer:
         if item_date == target_date:
             score += 25.0
             reasons.append("Today's item")
-        elif item_type == "event" and item_date and item_date < target_date:
+        elif item_date and item_date < target_date:
             score -= 30.0
-            reasons.append("Past event penalty")
+            reasons.append("Past item penalty")
         elif due_date_str:
             score += 10.0
             reasons.append("Deadline set")

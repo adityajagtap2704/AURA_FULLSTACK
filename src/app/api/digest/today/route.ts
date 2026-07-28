@@ -126,6 +126,9 @@ export async function GET(request: NextRequest) {
       if (itemDate === dateStr) {
         score += 30.0;
         reasons.push('Due today');
+      } else if (itemDate && itemDate < dateStr) {
+        score -= 30.0;
+        reasons.push('Past task penalty');
       } else if (t.due_date) {
         score += 10.0;
         reasons.push('Due date set');
@@ -254,11 +257,17 @@ export async function GET(request: NextRequest) {
 
     const meetingPrepNotes = prepEvents.slice(0, 4).map((e: any) => {
       const titleLower = String(e.title || '').toLowerCase();
-      let prepAdvice = "Prepare key updates on completed tasks, open blockers, and today's deliverables.";
-      if (titleLower.includes('nlp') || titleLower.includes('ai')) {
-        prepAdvice = 'Review AI/NLP module metrics, evaluation accuracy, and pipeline endpoints.';
+      let prepAdvice = "Prepare key status updates on completed action items, open blockers, and today's key deliverables.";
+      if (titleLower.includes('render') || titleLower.includes('calendar')) {
+        prepAdvice = 'Review calendar view rendering logic, event time zone parsing, and state synchronization across dashboard widgets.';
+      } else if (titleLower.includes('nlp') || titleLower.includes('ai') || titleLower.includes('aiml')) {
+        prepAdvice = 'Review AI/NLP module metrics, zero-hallucination guardrail evaluation accuracy, and real-time pipeline endpoints.';
+      } else if (titleLower.includes('testing') || titleLower.includes('test')) {
+        prepAdvice = 'Prepare comprehensive test cases, API endpoint validation scripts, and integration test coverage reports.';
       } else if (titleLower.includes('redesign') || titleLower.includes('ui')) {
         prepAdvice = 'Review design mockups, component states, and responsive layout guidelines.';
+      } else if (titleLower.includes('deploy') || titleLower.includes('release')) {
+        prepAdvice = 'Review build artifacts, environment configuration variables, and deployment rollout checklist.';
       }
       return {
         event_id: String(e.id || ''),
@@ -268,24 +277,49 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // Calculate today's specific counts so summary_text matches Today's Outlook cards
+    const todayTasks = taskList.filter((t: any) => t.due_date && String(t.due_date).startsWith(dateStr));
+    const taskCountToday = todayTasks.length;
+    const eventCountToday = todayEvents.length;
+    const todayMessages = messageList.filter((m: any) => m.created_at && String(m.created_at).startsWith(dateStr));
+    const msgCountToday = todayMessages.length;
+
     // Summary text
-    let summaryText = 'You have a clear schedule today with no pending tasks or meetings.';
+    let summaryText = 'Your schedule is clear today with no pending tasks or meetings. Take this opportunity to focus on long-term strategic goals!';
     if (taskList.length > 0 || eventList.length > 0 || messageList.length > 0) {
       const topTitle = slicedPriorities.length > 0 ? `'${slicedPriorities[0].title}'` : 'your priority items';
-      summaryText = `Your top focus today is ${topTitle}. Overall, you have ${taskList.length} pending task(s), ${eventList.length} scheduled meeting(s), and ${messageList.length} message update(s). Stay focused, tackle high-impact items first, and make today great!`;
+      summaryText = `Your top focus today is ${topTitle}. Overall, you have ${taskCountToday} pending task(s), ${eventCountToday} scheduled meeting(s), and ${msgCountToday} message update(s). Stay focused, tackle high-impact items first, and make today great!`;
+    }
+
+    // Construct clean, highly accurate AI Suggestions & Meeting Prep Notes
+    const aiSuggestions: string[] = [];
+
+    if (slicedPriorities.length > 0) {
+      const top = slicedPriorities[0];
+      aiSuggestions.push(`Focus on "${top.title}" — scored as your top priority today (${top.reason}).`);
+    }
+
+    for (const note of meetingPrepNotes.slice(0, 2)) {
+      aiSuggestions.push(`"${note.event_title}": ${note.prep_note}`);
+    }
+
+    const urgentItems = slicedPriorities.filter((p) => p.score >= 80 && p.id !== slicedPriorities[0]?.id);
+    for (const u of urgentItems.slice(0, 2)) {
+      aiSuggestions.push(`"${u.title}": ${u.reason}. Review deliverables and take action.`);
     }
 
     return NextResponse.json({
       summary_text: summaryText,
       top_priorities: slicedPriorities,
       meeting_prep_notes: meetingPrepNotes,
+      ai_suggestions: aiSuggestions,
       metadata: {
         date: dateStr,
         user_id: userId,
         tenant_id: tenantId,
         guardrail_passed: true,
-        total_tasks: taskList.length,
-        total_events: eventList.length,
+        total_tasks: taskCountToday,
+        total_events: eventCountToday,
       },
     });
 

@@ -147,6 +147,9 @@ export default function DashboardPage() {
     .filter((e) => new Date(e.start_time).toDateString() === todayStr)
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
   const upcomingEventsToday = eventsToday.filter((e) => new Date(e.start_time).getTime() > Date.now()).length;
+  const messagesToday = (safeData.messages || []).filter(
+    (m) => m.created_at && new Date(m.created_at).toDateString() === todayStr
+  );
 
   const flaggedMessagesCount = (safeData.messages || []).filter((m) => m.flagged).length;
 
@@ -172,8 +175,8 @@ export default function DashboardPage() {
     card: 'bg-blue-500/5 border-blue-500/10',
   },
   {
-    label: 'Messages',
-    count: (safeData.messages || []).length,
+    label: 'Messages Today',
+    count: messagesToday.length,
     sub: `${flaggedMessagesCount} flagged`,
     icon: Mail,
     ring: 'text-emerald-500 bg-emerald-500/15 border-emerald-500/30',

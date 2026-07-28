@@ -86,7 +86,10 @@ export async function POST(request: NextRequest) {
      * Replace this with your actual tenant-membership lookup if tenant_id
      * is not stored in app_metadata.
      */
-    const tenantId = user.app_metadata?.tenant_id;
+    const tenantId =
+      (user.app_metadata?.tenant_id as string | undefined) ??
+      (user.user_metadata?.tenant_id as string | undefined) ??
+      user.id;
 
     if (
       typeof tenantId !== "string" ||
