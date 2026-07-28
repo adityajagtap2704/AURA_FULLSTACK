@@ -1,7 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import { embedQuery } from "./model";
-
 import {
   EMBEDDING_MODEL,
   type ObjectType,
@@ -75,8 +73,6 @@ export async function semanticSearch(
 ): Promise<SearchResult[]> {
   validateSearchOptions(options);
 
-  const queryEmbedding = await embedQuery(options.query);
-
   const limit = options.limit ?? 10;
 
   /*
@@ -86,6 +82,15 @@ export async function semanticSearch(
   const threshold = options.threshold ?? 0;
 
   try {
+    /*
+     * Dynamic import: @huggingface/transformers loads a native onnxruntime
+     * binary that is not available on Vercel's serverless Node runtime.
+     * A static top-level import would crash this entire route at module
+     * load time before the text-match fallback below ever runs.
+     */
+    const { embedQuery } = await import("./model");
+    const queryEmbedding = await embedQuery(options.query);
+
     const { data, error } = await supabase.rpc(
       "match_embeddings",
       {
