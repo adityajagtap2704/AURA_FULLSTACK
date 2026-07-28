@@ -306,7 +306,7 @@ case "o":
           return;
         }
 
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+        const backendUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || '').replace(/\/+$/, '');
 
         const response = await fetch(`${backendUrl}/api/search/semantic`, {
           method: 'POST',
