@@ -52,6 +52,28 @@ export function useDashboard() {
     },
   });
 
+  const disconnectGoogleMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/api/connectors/google/disconnect');
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['connectorStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const disconnectNotionMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.post('/api/connectors/notion/disconnect');
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['connectorStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
   return {
     data: dashboardQuery.data,
     isLoading: dashboardQuery.isLoading,
@@ -70,5 +92,11 @@ export function useDashboard() {
     syncNotion: syncNotionMutation.mutate,
     isSyncingNotion: syncNotionMutation.isPending,
     notionSyncResult: syncNotionMutation.data,
+
+    disconnectGoogle: disconnectGoogleMutation.mutate,
+    isDisconnectingGoogle: disconnectGoogleMutation.isPending,
+
+    disconnectNotion: disconnectNotionMutation.mutate,
+    isDisconnectingNotion: disconnectNotionMutation.isPending,
   };
 }

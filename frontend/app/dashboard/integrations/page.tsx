@@ -26,6 +26,8 @@ interface IntegrationCard {
   real: boolean;
   onAction: () => void;
   actionLoading: boolean;
+  onDisconnect?: () => void;
+  disconnectLoading?: boolean;
 }
 
 function IntegrationsPageContent() {
@@ -37,6 +39,10 @@ function IntegrationsPageContent() {
     isSyncingGoogle,
     syncNotion,
     isSyncingNotion,
+    disconnectGoogle,
+    isDisconnectingGoogle,
+    disconnectNotion,
+    isDisconnectingNotion,
     connectorStatus,
     isLoadingConnectorStatus,
     data,
@@ -156,6 +162,12 @@ function IntegrationsPageContent() {
 
   const notAvailable = (label: string) => () => setComingSoon(label);
 
+  const handleDisconnect = (label: string, disconnect: () => void) => () => {
+    if (window.confirm(`Disconnect ${label}? You'll need to reconnect to sync it again.`)) {
+      disconnect();
+    }
+  };
+
   const cards: IntegrationCard[] = [
     {
       key: 'gmail',
@@ -166,6 +178,8 @@ function IntegrationsPageContent() {
       real: true,
       onAction: googleConnected ? () => syncGoogle() : handleGoogleConnect,
       actionLoading: googleConnected ? isSyncingGoogle : googleLoading,
+      onDisconnect: googleConnected ? handleDisconnect('Gmail', disconnectGoogle) : undefined,
+      disconnectLoading: isDisconnectingGoogle,
     },
     {
       key: 'google_calendar',
@@ -176,6 +190,8 @@ function IntegrationsPageContent() {
       real: true,
       onAction: googleConnected ? () => syncGoogle() : handleGoogleConnect,
       actionLoading: googleConnected ? isSyncingGoogle : googleLoading,
+      onDisconnect: googleConnected ? handleDisconnect('Google Calendar', disconnectGoogle) : undefined,
+      disconnectLoading: isDisconnectingGoogle,
     },
     {
       key: 'notion',
@@ -186,6 +202,8 @@ function IntegrationsPageContent() {
       real: true,
       onAction: notionConnected ? () => syncNotion() : handleNotionConnect,
       actionLoading: notionConnected ? isSyncingNotion : notionLoading,
+      onDisconnect: notionConnected ? handleDisconnect('Notion', disconnectNotion) : undefined,
+      disconnectLoading: isDisconnectingNotion,
     },
     {
       key: 'google_meet',
@@ -298,22 +316,35 @@ function IntegrationsPageContent() {
                 )}
               </div>
 
-              <button
-                onClick={card.onAction}
-                disabled={card.actionLoading}
-                className={`flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all disabled:opacity-50 ${
-                  card.connected
-                    ? 'bg-success/10 text-success hover:bg-success/15'
-                    : 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/15'
-                }`}
-              >
-                {card.actionLoading ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : card.connected ? (
-                  <RefreshCw className="h-3.5 w-3.5" />
-                ) : null}
-                {card.actionLoading ? 'Working…' : card.connected ? 'Sync Now' : 'Connect'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={card.onAction}
+                  disabled={card.actionLoading}
+                  className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold rounded-lg transition-all disabled:opacity-50 ${
+                    card.connected
+                      ? 'bg-success/10 text-success hover:bg-success/15'
+                      : 'bg-orange-500/10 text-orange-600 hover:bg-orange-500/15'
+                  }`}
+                >
+                  {card.actionLoading ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  ) : card.connected ? (
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  ) : null}
+                  {card.actionLoading ? 'Working…' : card.connected ? 'Sync Now' : 'Connect'}
+                </button>
+
+                {card.onDisconnect && (
+                  <button
+                    onClick={card.onDisconnect}
+                    disabled={card.disconnectLoading}
+                    title={`Disconnect ${card.label}`}
+                    className="px-3 py-2 text-xs font-semibold rounded-lg transition-all disabled:opacity-50 bg-danger/10 text-danger hover:bg-danger/15"
+                  >
+                    {card.disconnectLoading ? 'Working…' : 'Disconnect'}
+                  </button>
+                )}
+              </div>
             </div>
           );
         })}
