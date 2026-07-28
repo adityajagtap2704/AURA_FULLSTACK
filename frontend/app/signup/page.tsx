@@ -240,7 +240,7 @@ export default function SignupPage() {
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-4 text-xs outline-none transition-all placeholder:text-[#6B6258]/50 ${
+                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-4 text-xs text-[#1F1B16] font-medium outline-none transition-all placeholder:text-[#6B6258]/60 ${
                     errors.email 
                       ? 'border-red-400 focus:ring-1 focus:ring-red-400' 
                       : 'border-[#E5DDD0] focus:border-[#C17817] focus:ring-1 focus:ring-[#C17817]'
@@ -264,7 +264,7 @@ export default function SignupPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-[#6B6258]/50 ${
+                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-xs text-[#1F1B16] font-medium outline-none transition-all placeholder:text-[#6B6258]/60 ${
                     errors.password 
                       ? 'border-red-400 focus:ring-1 focus:ring-red-400' 
                       : 'border-[#E5DDD0] focus:border-[#C17817] focus:ring-1 focus:ring-[#C17817]'
@@ -295,7 +295,7 @@ export default function SignupPage() {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-xs outline-none transition-all placeholder:text-[#6B6258]/50 ${
+                  className={`w-full rounded-xl border bg-white py-3 pl-10 pr-10 text-xs text-[#1F1B16] font-medium outline-none transition-all placeholder:text-[#6B6258]/60 ${
                     errors.confirmPassword 
                       ? 'border-red-400 focus:ring-1 focus:ring-red-400' 
                       : 'border-[#E5DDD0] focus:border-[#C17817] focus:ring-1 focus:ring-[#C17817]'
