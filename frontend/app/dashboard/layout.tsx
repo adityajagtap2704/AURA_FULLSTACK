@@ -306,7 +306,9 @@ case "o":
           return;
         }
 
-        const response = await fetch('/api/search/semantic', {
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || '';
+
+        const response = await fetch(`${backendUrl}/api/search/semantic`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
