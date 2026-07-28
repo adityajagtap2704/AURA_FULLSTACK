@@ -10,9 +10,10 @@ export async function GET(request: NextRequest) {
 
     // 1. Try fetching from Python FastAPI service first
     try {
+      const fastApiUrl = process.env.FASTAPI_URL || 'http://localhost:8000';
       const fastApiRes = await fetch(
-        `http://localhost:8000/api/digest/today?user_id=${userId}&tenant_id=${tenantId}&date=${dateStr}`,
-        { cache: 'no-store' }
+        `${fastApiUrl}/api/digest/today?user_id=${userId}&tenant_id=${tenantId}&date=${dateStr}`,
+        { cache: 'no-store', signal: AbortSignal.timeout(8000) }
       );
       if (fastApiRes.ok) {
         const data = await fastApiRes.json();

@@ -288,17 +288,9 @@ case "o":
           storedSession?.access_token ??
           storedSession?.currentSession?.access_token;
 
-      /*
-       * First try the tenant assigned to the authenticated user.
-       * NEXT_PUBLIC_TENANT_ID is available as a temporary fallback
-       * while tenant assignment is still being implemented.
-       */
-        const tenantId =
-          user?.app_metadata?.tenant_id ??
-          user?.user_metadata?.tenant_id ??
-          user?.id ??
-          process.env.NEXT_PUBLIC_TENANT_ID ??
-          'default-tenant';
+        // Phase 1: single-tenant, tenantId is always the user's own id —
+        // matches every backend route's getAuthContext (src/lib/auth/getAuthContext.ts).
+        const tenantId = user?.id;
 
         if (!accessToken) {
           console.error('Supabase access token was not found.');
@@ -307,10 +299,7 @@ case "o":
         }
 
         if (!tenantId) {
-          console.error(
-            'Tenant ID was not found. Add tenant_id to the user metadata or configure NEXT_PUBLIC_TENANT_ID.'
-          );
-
+          console.error('User was not found.');
           setSearchResults([]);
           return;
         }

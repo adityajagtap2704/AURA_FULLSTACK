@@ -32,7 +32,11 @@ export function useAIAssistant(userName: string) {
     setIsSending(true);
 
     try {
-      const response = await api.post('/api/assistant/chat', { message: trimmed, history });
+      const response = await api.post(
+        '/api/assistant/chat',
+        { message: trimmed, history },
+        { timeout: 30000 },
+      );
       const reply: string = response.data?.reply || "Sorry, I couldn't generate a reply.";
       setMessages((prev) => [...prev, { id: `a-${Date.now()}`, role: 'assistant', content: reply }]);
     } catch (err: any) {

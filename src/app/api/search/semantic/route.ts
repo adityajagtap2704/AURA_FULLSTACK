@@ -147,6 +147,18 @@ export async function POST(request: NextRequest) {
       results,
     });
   } catch (error) {
+    const isClientAbort =
+      request.signal.aborted ||
+      (error instanceof Error &&
+        (error.name === "AbortError" ||
+          error.message === "aborted")) ||
+      (error as { code?: string } | undefined)?.code ===
+        "ECONNRESET";
+
+    if (isClientAbort) {
+      return new NextResponse(null, { status: 499 });
+    }
+
     console.error(
       "Semantic search route failed:",
       error,

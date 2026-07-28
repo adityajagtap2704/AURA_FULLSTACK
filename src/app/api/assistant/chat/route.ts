@@ -74,6 +74,7 @@ async function callGemini(systemPrompt: string, history: ChatMessage[], message:
           systemInstruction: { parts: [{ text: systemPrompt }] },
           generationConfig: { temperature: 0.4, maxOutputTokens: 400 },
         }),
+        signal: AbortSignal.timeout(10000),
       }
     );
 
@@ -108,6 +109,7 @@ async function callGroq(systemPrompt: string, history: ChatMessage[], message: s
         temperature: 0.4,
         max_tokens: 400,
       }),
+      signal: AbortSignal.timeout(10000),
     });
 
     if (!res.ok) return null;
