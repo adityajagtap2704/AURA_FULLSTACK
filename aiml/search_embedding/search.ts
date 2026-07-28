@@ -1,5 +1,5 @@
 import { supabaseServer } from '@/lib/supabase/server';
-import { VectorSearchResult } from './types';
+import { VectorSearchResult, EMBEDDING_MODEL } from './types';
 import { embedDocument } from './model';
 
 export async function searchSemantic(
@@ -12,10 +12,11 @@ export async function searchSemantic(
 
     // Call pgvector match_embeddings RPC if available on Supabase DB
     const { data, error } = await supabaseServer.rpc('match_embeddings', {
-      query_embedding: queryVector,
+      query_embedding: queryVector as any,
       match_threshold: 0.2,
       match_count: limit,
-      filter_tenant_id: tenantId,
+      match_tenant_id: tenantId,
+      match_embedding_model: EMBEDDING_MODEL,
     });
 
     if (error || !data) {

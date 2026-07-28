@@ -135,6 +135,7 @@ export async function semanticSearch(
 
   for (const e of matchedEvents || []) {
     results.push({
+      id: `text-match-${e.id}`,
       object_type: 'event',
       object_id: e.id,
       tenant_id: options.tenantId,
@@ -154,6 +155,7 @@ export async function semanticSearch(
 
   for (const t of matchedTasks || []) {
     results.push({
+      id: `text-match-${t.id}`,
       object_type: 'task',
       object_id: t.id,
       tenant_id: options.tenantId,
@@ -173,6 +175,7 @@ export async function semanticSearch(
 
   for (const m of matchedMsgs || []) {
     results.push({
+      id: `text-match-${m.id}`,
       object_type: 'message',
       object_id: m.id,
       tenant_id: options.tenantId,
