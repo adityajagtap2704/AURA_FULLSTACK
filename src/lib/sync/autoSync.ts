@@ -18,8 +18,6 @@ export async function triggerBackgroundSync(
 ): Promise<void> {
   void (async () => {
     try {
-      let syncCompleted = false;
-
       /*
        * Google sync
        */
@@ -73,8 +71,6 @@ export async function triggerBackgroundSync(
               const googleConnector = new GoogleConnector();
 
               await googleConnector.sync(userId, tenantId);
-
-              syncCompleted = true;
 
               console.log(
                 `[AutoSync] Google sync completed for tenant ${tenantId}`,
@@ -139,8 +135,6 @@ export async function triggerBackgroundSync(
 
               await notionConnector.sync(userId, tenantId);
 
-              syncCompleted = true;
-
               console.log(
                 `[AutoSync] Notion sync completed for tenant ${tenantId}`,
               );
@@ -151,38 +145,6 @@ export async function triggerBackgroundSync(
               );
             }
           }
-        }
-      }
-
-      /*
-       * Generate embeddings once after one or more successful syncs.
-       */
-      if (syncCompleted) {
-        console.log(
-          `[AutoSync] Generating embeddings for tenant ${tenantId}`,
-        );
-
-        try {
-          const { indexTenantEmbeddings } = await import(
-            '@/lib/embeddings/index-tenant'
-          );
-          const embeddingResult = await indexTenantEmbeddings(
-            supabaseServer,
-            {
-              tenantId,
-              batchSize: 100,
-            },
-          );
-
-          console.log(
-            `[AutoSync] Embedding generation completed for tenant ${tenantId}`,
-            embeddingResult.totals,
-          );
-        } catch (error) {
-          console.error(
-            `[AutoSync] Embedding generation failed for tenant ${tenantId}:`,
-            error,
-          );
         }
       }
     } catch (error) {
