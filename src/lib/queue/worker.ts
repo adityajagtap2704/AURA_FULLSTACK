@@ -421,7 +421,7 @@ export const syncWorker = new Worker<SyncJobData>(
           supabaseServer,
           {
             tenantId,
-            batchSize: 100,
+            batchSize: 20,
           },
         );
 
@@ -497,7 +497,7 @@ export const syncWorker = new Worker<SyncJobData>(
   {
     connection:
       connection as unknown as ConnectionOptions,
-    concurrency: 5,
+    concurrency: 2,
   },
 );
 
