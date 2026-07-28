@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchRole = useCallback(async (userId: string) => {
     try {
-      const profileQuery = supabase.from('profiles').select('role').eq('id', userId).single();
+      const profileQuery = supabase.from('profiles').select('role').eq('id', userId).maybeSingle();
       const { data: profile } = await withTimeout(
         Promise.resolve(profileQuery),
         AUTH_TIMEOUT_MS
