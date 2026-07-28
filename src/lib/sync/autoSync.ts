@@ -1,6 +1,5 @@
 import { GoogleConnector } from '@/lib/connectors/google';
 import { NotionConnector } from '@/lib/connectors/notion';
-import { indexTenantEmbeddings } from '@/lib/embeddings/index-tenant';
 import { supabaseServer } from '@/lib/supabase/server';
 
 /**
@@ -164,6 +163,9 @@ export async function triggerBackgroundSync(
         );
 
         try {
+          const { indexTenantEmbeddings } = await import(
+            '@/lib/embeddings/index-tenant'
+          );
           const embeddingResult = await indexTenantEmbeddings(
             supabaseServer,
             {
