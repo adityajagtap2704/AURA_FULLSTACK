@@ -127,17 +127,49 @@ export async function semanticSearch(
     console.warn('[SemanticSearch] RPC fallback to multi-table search due to:', err);
   }
 
-  // Graceful text-match fallback across events, tasks, and messages
+  // Graceful text-match fallback — run all queries in parallel for speed
   const queryLower = options.query.toLowerCase().trim();
-  const results: SearchResult[] = [];
 
-  // Search events (meetings)
-  const { data: matchedEvents } = await supabase
-    .from('events')
-    .select('*')
-    .eq('tenant_id', options.tenantId)
-    .ilike('title', `%${queryLower}%`)
-    .limit(limit);
+  const [
+    { data: matchedEvents },
+    { data: matchedTasks },
+    { data: matchedMsgs },
+    { data: matchedDocs },
+  ] = await Promise.all([
+    // Search events (meetings)
+    supabase
+      .from('events')
+      .select('*')
+      .eq('tenant_id', options.tenantId)
+      .ilike('title', `%${queryLower}%`)
+      .limit(limit),
+
+    // Search tasks
+    supabase
+      .from('tasks')
+      .select('*')
+      .eq('tenant_id', options.tenantId)
+      .ilike('title', `%${queryLower}%`)
+      .limit(limit),
+
+    // Search messages (emails)
+    supabase
+      .from('messages')
+      .select('*')
+      .eq('tenant_id', options.tenantId)
+      .or(`subject.ilike.%${queryLower}%,snippet.ilike.%${queryLower}%`)
+      .limit(limit),
+
+    // Search documents
+    supabase
+      .from('documents')
+      .select('*')
+      .eq('tenant_id', options.tenantId)
+      .or(`title.ilike.%${queryLower}%,name.ilike.%${queryLower}%`)
+      .limit(limit),
+  ]);
+
+  const results: SearchResult[] = [];
 
   for (const e of matchedEvents || []) {
     results.push({
@@ -152,14 +184,6 @@ export async function semanticSearch(
     });
   }
 
-  // Search tasks
-  const { data: matchedTasks } = await supabase
-    .from('tasks')
-    .select('*')
-    .eq('tenant_id', options.tenantId)
-    .ilike('title', `%${queryLower}%`)
-    .limit(limit);
-
   for (const t of matchedTasks || []) {
     results.push({
       id: `text-match-${t.id}`,
@@ -173,14 +197,6 @@ export async function semanticSearch(
     });
   }
 
-  // Search messages (emails)
-  const { data: matchedMsgs } = await supabase
-    .from('messages')
-    .select('*')
-    .eq('tenant_id', options.tenantId)
-    .or(`subject.ilike.%${queryLower}%,snippet.ilike.%${queryLower}%`)
-    .limit(limit);
-
   for (const m of matchedMsgs || []) {
     results.push({
       id: `text-match-${m.id}`,
@@ -191,6 +207,19 @@ export async function semanticSearch(
       content: `Email: ${m.subject || m.snippet}`,
       similarity: 0.82,
       record: m,
+    });
+  }
+
+  for (const d of matchedDocs || []) {
+    results.push({
+      id: `text-match-${d.id}`,
+      object_type: 'document',
+      object_id: d.id,
+      tenant_id: options.tenantId,
+      embedding_model: EMBEDDING_MODEL,
+      content: `Document: ${d.title || d.name}`,
+      similarity: 0.80,
+      record: d,
     });
   }
 

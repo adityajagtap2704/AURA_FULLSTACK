@@ -81,6 +81,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -131,101 +132,95 @@ const [contactSupportOpen, setContactSupportOpen] = useState(false);
     setProfileMenuOpen(false);
   }, [pathname]);
   useEffect(() => {
-  let waitingForG = false;
+    let waitingForG = false;
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    const target = e.target as HTMLElement;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
 
-if (
-  target.tagName === "INPUT" ||
-  target.tagName === "TEXTAREA" ||
-  target.isContentEditable
-) {
-  return;
-}
-    // Ctrl + K or Cmd + K → Focus Search
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-      e.preventDefault();
+      // ── Global shortcuts (work regardless of focus) ──────────────
 
-      const input = document.querySelector(
-        'input[placeholder="Search across your tools, tasks, messages..."]'
-      ) as HTMLInputElement | null;
+      // Ctrl + K or Cmd + K → Focus Search
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        const input = document.getElementById("global-search") as HTMLInputElement | null;
+        input?.focus();
+        return;
+      }
 
-      input?.focus();
-      return;
-    }
+      // Ctrl + / → Open Keyboard Shortcuts
+      if ((e.ctrlKey || e.metaKey) && e.key === "/") {
+        e.preventDefault();
+        setShortcutsOpen((prev) => !prev);
+        return;
+      }
 
-    // Ctrl + / → Open Keyboard Shortcuts
-    if (e.ctrlKey && e.key === "/") {
-      e.preventDefault();
-      setShortcutsOpen(true);
-      return;
-    }
+      // Esc → Close all popups
+      if (e.key === "Escape") {
+        setHelpOpen(false);
+        setShortcutsOpen(false);
+        setAboutOpen(false);
+        setHelpCenterOpen(false);
+        setNotificationOpen(false);
+        setProfileMenuOpen(false);
+        // Also blur the search input so user can start using G-shortcuts
+        (document.activeElement as HTMLElement)?.blur?.();
+        return;
+      }
 
-    // Esc → Close all popups
-    if (e.key === "Escape") {
-      setHelpOpen(false);
-      setShortcutsOpen(false);
-      setAboutOpen(false);
-      setHelpCenterOpen(false);
-      setNotificationOpen(false);
-      setProfileMenuOpen(false);
-      return;
-    }
+      // ── Skip remaining shortcuts if user is typing in a field ────
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
 
-    // Press G
-    if (e.key.toLowerCase() === "g") {
-      waitingForG = true;
+      // ── G then <key> navigation shortcuts ────────────────────────
 
-      setTimeout(() => {
-        waitingForG = false;
-      }, 1000);
+      // Press G → start waiting for the follow-up key
+      if (e.key.toLowerCase() === "g") {
+        waitingForG = true;
+        setTimeout(() => {
+          waitingForG = false;
+        }, 1000);
+        return;
+      }
 
-      return;
-    }
+      if (!waitingForG) return;
 
-    if (!waitingForG) return;
-
-    switch (e.key.toLowerCase()) {
-      case "d":
-        router.push("/dashboard");
-        break;
-
-      case "t":
-        router.push("/dashboard/tasks");
-        break;
-
-      case "c":
-        router.push("/dashboard/calendar");
-        break;
-
-      case "m":
-        router.push("/dashboard/gmail");
-        break;
-          case "o":
-
-    router.push("/dashboard/documents");
-
-    break;
-case "o":
-  router.push("/dashboard/documents");
-  break;
-      case "s":
-        router.push("/dashboard/settings");
-        break;
+      switch (e.key.toLowerCase()) {
+        case "d":
+          router.push("/dashboard");
+          break;
+        case "t":
+          router.push("/dashboard/tasks");
+          break;
+        case "c":
+          router.push("/dashboard/calendar");
+          break;
+        case "m":
+          router.push("/dashboard/gmail");
+          break;
+        case "o":
+          router.push("/dashboard/documents");
+          break;
+        case "s":
+          router.push("/dashboard/settings");
+          break;
         default:
           break;
-    }
+      }
 
-    waitingForG = false;
-  };
+      waitingForG = false;
+    };
 
-  window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
 
-  return () => {
-    window.removeEventListener("keydown", handleKeyDown);
-  };
-}, [router]);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [router]);
 
   const handleLogout = async () => {
     try {
@@ -250,9 +245,11 @@ case "o":
 
     if (!query) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
+    setIsSearching(true);
     const controller = new AbortController();
 
     const timer = window.setTimeout(async () => {
@@ -404,8 +401,10 @@ case "o":
         );
 
         setSearchResults([]);
+      } finally {
+        setIsSearching(false);
       }
-  } , 400);
+  } , 300);
 
   return () => {
     window.clearTimeout(timer);
@@ -482,6 +481,7 @@ case "o":
                 <Search className="h-[17px] w-[17px] text-[#F97316]" />
               </div>
               <input
+                id="global-search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -494,7 +494,15 @@ case "o":
               {searchQuery.trim() && (
   <div className="absolute left-0 right-0 mt-2 bg-card border border-border rounded-xl shadow-xl overflow-hidden z-50">
 
-    {searchResults.length > 0 ? (
+    {isSearching ? (
+      <div className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
+        <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        </svg>
+        Searching…
+      </div>
+    ) : searchResults.length > 0 ? (
 
       searchResults.map((item, index) => (
 
