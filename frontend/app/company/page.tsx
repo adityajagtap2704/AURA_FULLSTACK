@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Building2, HeartHandshake, ShieldCheck, Zap } from "lucide-react";
+import Navbar from "@/components/landing/Navbar";
 
 export default function CompanyInfoPage() {
   const milestones = [
@@ -12,11 +13,13 @@ export default function CompanyInfoPage() {
   ];
 
   return (
+    <>
+    <Navbar />
     <motion.main
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="min-h-screen bg-[#FDFAF6] py-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
+      className="min-h-screen bg-[#FDFAF6] pt-28 pb-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
     >
       <div>
         {/* Navigation */}
@@ -44,7 +47,7 @@ export default function CompanyInfoPage() {
         </div>
 
         {/* Impact Numbers Banner */}
-        <div className="bg-[#1F1B16] text-white rounded-3xl p-8 mb-10 shadow-lg grid grid-cols-2 md:grid-cols-4 gap-6 text-center max-w-5xl mx-auto">
+        <div className="bg-[#1F1B16] text-white rounded-3xl p-8 mb-10 shadow-lg grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
             <div className="text-3xl md:text-4xl font-extrabold text-[#E8A422]">50K+</div>
             <div className="text-[11px] text-[#B8ACA0]">Active Users</div>
@@ -64,7 +67,7 @@ export default function CompanyInfoPage() {
         </div>
 
         {/* Compact Milestones */}
-        <div className="max-w-5xl mx-auto mb-8">
+        <div className="mb-8">
           <div className="grid md:grid-cols-3 gap-6">
             {milestones.map((m, idx) => (
               <div key={idx} className="bg-white rounded-2xl p-6 border border-[#EBE3D7] shadow-sm">
@@ -77,5 +80,6 @@ export default function CompanyInfoPage() {
         </div>
       </div>
     </motion.main>
+    </>
   );
 }

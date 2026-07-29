@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Check, Sparkles, Shield } from "lucide-react";
+import Navbar from "@/components/landing/Navbar";
 
 export default function PricingPage() {
   const plans = [
@@ -54,11 +55,13 @@ export default function PricingPage() {
   ];
 
   return (
+    <>
+    <Navbar />
     <motion.main
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="min-h-screen bg-[#FDFAF6] py-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
+      className="min-h-screen bg-[#FDFAF6] pt-28 pb-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
     >
       <div>
         {/* Navigation */}
@@ -86,7 +89,7 @@ export default function PricingPage() {
         </div>
 
         {/* Compact Grid */}
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -129,5 +132,6 @@ export default function PricingPage() {
         </div>
       </div>
     </motion.main>
+    </>
   );
 }

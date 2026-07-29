@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Home } from "lucide-react";
+import Navbar from "@/components/landing/Navbar";
 export default function HelpPage() {
  const helpTopics = [
   {
@@ -45,7 +46,9 @@ export default function HelpPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-background py-10 px-6">
+    <>
+    <Navbar />
+    <main className="min-h-screen bg-background pt-28 pb-10 px-6">
       <div className="mx-auto max-w-7xl">
      <div className="mb-8 flex items-center">
 
@@ -146,5 +149,6 @@ export default function HelpPage() {
 
       </div>
     </main>
+    </>
   );
 }

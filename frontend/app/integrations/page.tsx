@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import { ArrowLeft, Globe, Shield, Sparkles, CheckCircle2 } from "lucide-react";
+import Navbar from "@/components/landing/Navbar";
 
 export default function IntegrationsInfoPage() {
   const socialIcons = [
@@ -30,11 +31,13 @@ export default function IntegrationsInfoPage() {
   };
 
   return (
+    <>
+    <Navbar />
     <motion.main
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="min-h-screen bg-gradient-to-b from-[#FAF8F5] via-[#FFFDFB] to-[#F7F3EC] py-10 px-6 max-w-7xl mx-auto flex flex-col justify-between overflow-hidden"
+      className="min-h-screen bg-gradient-to-b from-[#FAF8F5] via-[#FFFDFB] to-[#F7F3EC] pt-28 pb-10 px-6 max-w-7xl mx-auto flex flex-col justify-between overflow-hidden"
     >
       <div>
         {/* Back Button with Hover Animation */}
@@ -104,7 +107,7 @@ export default function IntegrationsInfoPage() {
         </motion.div>
 
         {/* Animated Staggered Feature Cards */}
-        <motion.div variants={containerVariants} className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-8">
+        <motion.div variants={containerVariants} className="grid md:grid-cols-3 gap-6 mb-8">
           <motion.div
             variants={itemVariants}
             whileHover={{ y: -6, boxShadow: "0 12px 30px rgba(193, 120, 23, 0.12)" }}
@@ -137,5 +140,6 @@ export default function IntegrationsInfoPage() {
         </motion.div>
       </div>
     </motion.main>
+    </>
   );
 }
