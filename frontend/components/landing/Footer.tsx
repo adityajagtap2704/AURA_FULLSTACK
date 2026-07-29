@@ -128,7 +128,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-[#9B8F85]">
-            © 2025 AURA by Kalvr. All rights reserved.
+            © 2026 AURA by Kalnet. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Privacy</a>

@@ -1267,7 +1267,7 @@ function Footer() {
           </div>
         </div>
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[12px] text-[#9B8F85]">© 2025 AURA by Kalvr. All rights reserved.</p>
+          <p className="text-[12px] text-[#9B8F85]">© 2026 AURA by Kalnet. All rights reserved.</p>
           <div className="flex gap-5">
             {['Privacy','Terms','Cookies'].map(l=><a key={l} href="#" className="text-[12px] text-[#9B8F85] hover:text-[#C17817] transition-colors">{l}</a>)}
           </div>
