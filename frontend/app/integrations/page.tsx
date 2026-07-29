@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowLeft, Globe, Shield, Sparkles, CheckCircle2 } from "lucide-react";
 
 export default function IntegrationsInfoPage() {
@@ -16,7 +16,7 @@ export default function IntegrationsInfoPage() {
     { name: "Atlassian", icon: "🔷" },
   ];
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -24,7 +24,7 @@ export default function IntegrationsInfoPage() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
   };
