@@ -50,11 +50,11 @@ export default function HelpPage() {
      <div className="mb-8 flex items-center">
 
   <Link
-    href="/dashboard"
-    className="inline-flex items-center gap-2 rounded-full bg-[#C67A20] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:bg-[#B56F1A] hover:shadow-md"
+    href="/"
+    className="inline-flex items-center gap-2 rounded-full bg-[#1F1B16] px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-all duration-300 hover:bg-[#C17817]"
   >
     <ArrowLeft className="h-4 w-4" />
-    Home
+    Back to Home
   </Link>
 
 </div>
