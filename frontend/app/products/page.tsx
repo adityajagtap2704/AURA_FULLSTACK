@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Sparkles, CheckCircle2, Calendar, Mail, Cpu, ArrowRight, ChevronRight } from "lucide-react";
-import Navbar from "@/components/landing/Navbar";
 
 export default function ProductsInfoPage() {
   const [activeTab, setActiveTab] = useState("tasks");
@@ -47,15 +46,13 @@ export default function ProductsInfoPage() {
   const currentFeature = features.find((f) => f.id === activeTab) || features[0];
 
   return (
-    <>
-      <Navbar />
-      <motion.main
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="min-h-screen bg-[#FDFAF6] pt-28 pb-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
-      >
-      <div>
+    <motion.main
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+      className="min-h-screen w-full bg-[#FDFAF6]"
+    >
+      <div className="max-w-7xl mx-auto px-6 py-10">
         {/* Navigation */}
         <div className="mb-6 flex items-center justify-between">
           <Link
@@ -171,7 +168,6 @@ export default function ProductsInfoPage() {
           </div>
         </div>
       </div>
-      </motion.main>
-    </>
+    </motion.main>
   );
 }

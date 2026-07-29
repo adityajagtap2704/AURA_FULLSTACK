@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowLeft, Home } from "lucide-react";
-import Navbar from "@/components/landing/Navbar";
 export default function HelpPage() {
  const helpTopics = [
   {
@@ -46,9 +45,7 @@ export default function HelpPage() {
   ];
 
   return (
-    <>
-    <Navbar />
-    <main className="min-h-screen bg-background pt-28 pb-10 px-6">
+    <main className="min-h-screen bg-[#FDFAF6] py-10 px-6">
       <div className="mx-auto max-w-7xl">
      <div className="mb-8 flex items-center">
 
@@ -69,7 +66,7 @@ export default function HelpPage() {
             Help Center
           </h1>
 
-          <p className="mt-3 max-w-3xl text-muted-foreground leading-7">
+          <p className="mt-3 max-w-3xl text-[#7A6F64] leading-7">
             Welcome to the AURA Help Center. This guide will help you understand
             the platform, connect your productivity tools, and make the most of
             every feature available within your workspace.
@@ -84,11 +81,11 @@ export default function HelpPage() {
             Quick Start Guide
           </h2>
 
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-sm text-[#7A6F64]">
             Follow these steps to begin using AURA effectively.
           </p>
 
-          <ol className="mt-6 space-y-5 list-decimal list-inside text-[15px] leading-7 text-foreground">
+          <ol className="mt-6 space-y-5 list-decimal list-inside text-[15px] leading-7 text-[#1F1B16]">
 
             {quickStart.map((step, index) => (
               <li key={index}>{step}</li>
@@ -115,11 +112,11 @@ export default function HelpPage() {
                 className="rounded-2xl border border-[#EADBC8] bg-[#FFF9F2] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
               >
 
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-xl font-semibold text-[#1F1B16]">
                   {topic.title}
                 </h3>
 
-                <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                <p className="mt-3 text-sm leading-6 text-[#7A6F64]">
                   {topic.description}
                 </p>
 
@@ -139,7 +136,7 @@ export default function HelpPage() {
             Support
           </h2>
 
-          <p className="mt-3 text-muted-foreground leading-7">
+          <p className="mt-3 text-[#7A6F64] leading-7">
             If you experience issues while using AURA, you can use the Help
             menu to access Keyboard Shortcuts, Report a Bug, Contact Support,
             or learn more About AURA.
@@ -149,6 +146,5 @@ export default function HelpPage() {
 
       </div>
     </main>
-    </>
   );
 }

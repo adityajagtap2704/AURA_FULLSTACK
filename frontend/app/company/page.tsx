@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowLeft, Building2, HeartHandshake, ShieldCheck, Zap } from "lucide-react";
-import Navbar from "@/components/landing/Navbar";
 
 export default function CompanyInfoPage() {
   const milestones = [
@@ -13,15 +12,13 @@ export default function CompanyInfoPage() {
   ];
 
   return (
-    <>
-    <Navbar />
     <motion.main
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="min-h-screen bg-[#FDFAF6] pt-28 pb-10 px-6 max-w-7xl mx-auto flex flex-col justify-between"
+      className="min-h-screen w-full bg-[#FDFAF6]"
     >
-      <div>
+      <div className="max-w-7xl mx-auto py-10 px-6">
         {/* Navigation */}
         <div className="mb-6 flex items-center justify-between">
           <Link
@@ -80,6 +77,5 @@ export default function CompanyInfoPage() {
         </div>
       </div>
     </motion.main>
-    </>
   );
 }
