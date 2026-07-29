@@ -260,3 +260,18 @@ body {
 .animate-icon-orbit-2 { animation: icon-orbit-2 9s ease-in-out infinite; }
 .animate-icon-orbit-3 { animation: icon-orbit-3 14s ease-in-out infinite; }
 
+/* ── Slide-and-pause vertical rotation for "Trusted by" logo columns ── */
+/* Column stack = 3 unique logos + 1 duplicate of the first (104px rows), so the
+   final hold lands visually back on logo #1 for a seamless loop restart. */
+@keyframes logo-slide-pause {
+  0%, 25% { transform: translateY(0px); }
+  30%, 55% { transform: translateY(-104px); }
+  60%, 85% { transform: translateY(-208px); }
+  90%, 100% { transform: translateY(-312px); }
+}
+.animate-logo-slide-pause {
+  animation-name: logo-slide-pause;
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+

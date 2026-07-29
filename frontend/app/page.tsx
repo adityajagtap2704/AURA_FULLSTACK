@@ -322,122 +322,159 @@ function Hero() {
 }
 
 /* ----------------------------- TRUSTED BY ----------------------------- */
-function TrustedBy() {
-  const companies = [
-    {
-      name: 'Vercel',
-      logo: (
-        <svg viewBox="0 0 116 100" className="h-5 w-auto" fill="currentColor">
-          <path d="M57.5 0L115 100H0L57.5 0z"/>
-        </svg>
-      ),
-    },
-    {
-      name: 'Linear',
-      logo: (
-        <svg viewBox="0 0 100 100" className="h-5 w-auto" fill="currentColor">
-          <path d="M1.22541 61.5228c-.38463-.3848-.38463-1.0088 0-1.3936L28.3364 33.025c.3847-.3847 1.0087-.3847 1.3934 0l5.1963 5.1963c.3848.3848.3848 1.0088 0 1.3935L9.8117 65.6161c-.3847.3847-1.0087.3847-1.3934 0L1.22541 61.5228zM1.22541 78.4772c-.38463.3848-.38463 1.0088 0 1.3936l5.19634 5.1963c.38469.3847 1.00869.3847 1.39339 0L99.5 6.04917c.3847-.38468.3847-1.00868 0-1.39337L94.3037.45946c-.3847-.38469-1.0087-.38469-1.3934 0L1.22541 78.4772z"/>
-        </svg>
-      ),
-    },
-    {
-      name: 'Stripe',
-      logo: (
-        <svg viewBox="0 0 60 25" className="h-5 w-auto" fill="currentColor">
-          <path d="M59.64 14.28h-8.06c.19 1.93 1.6 2.55 3.2 2.55 1.64 0 2.96-.37 4.05-.95v3.32a8.33 8.33 0 0 1-4.56 1.1c-4.01 0-6.83-2.5-6.83-7.48 0-4.19 2.39-7.52 6.3-7.52 3.92 0 5.96 3.28 5.96 7.5 0 .4-.04 1.26-.06 1.48zm-5.92-5.62c-1.03 0-2.17.73-2.17 2.58h4.25c0-1.85-1.07-2.58-2.08-2.58zM40.95 20.3c-1.44 0-2.32-.6-2.9-1.04l-.02 4.63-4.12.87V5.57h3.76l.08 1.03a4.3 4.3 0 0 1 3.23-1.47c2.9 0 5.62 2.6 5.62 7.4 0 5.23-2.7 7.77-5.65 7.77zm-1.28-11.24c-.87 0-1.5.31-1.93.85l.02 6.44c.43.5 1.04.84 1.91.84 1.74 0 2.8-1.4 2.8-4.05-.01-2.63-1.07-4.08-2.8-4.08zM28.24 5.57h4.13v14.44h-4.13V5.57zm0-4.7L32.37 0v3.36l-4.13.88V.87zm-4.32 9.35v9.79H19.8V5.57h3.7l.12 1.22c1-1.77 3.07-1.41 3.62-1.22v3.79c-.52-.17-2.29-.43-3.32.86zm-8.55 4.72c0 2.43 2.6 1.68 3.12 1.46v3.36c-.55.3-1.54.54-2.89.54a4.15 4.15 0 0 1-4.27-4.24l.01-13.17 4.02-.86v3.54h3.14V9.1h-3.13v5.84zm-4.91.7c0 2.97-2.31 4.66-5.73 4.66A11.2 11.2 0 0 1 0 19.37v-3.64c1.94.97 3.93 1.54 5.29 1.54.94 0 1.32-.31 1.32-.73 0-1.46-6.09-1.22-6.09-5.55 0-2.55 1.93-4.44 5.73-4.44 1.28 0 2.5.2 3.78.73v3.59c-1.2-.55-2.71-.86-3.78-.86-.9 0-1.28.28-1.28.68 0 1.36 6.28.98 6.28 5.62z"/>
-        </svg>
-      ),
-    },
-    {
-      name: 'Figma',
-      logo: (
-        <svg viewBox="0 0 38 57" className="h-5 w-auto" fill="currentColor">
-          <path d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/>
-          <path d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/>
-          <path d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/>
-          <path d="M0 9.5A9.5 9.5 0 0 1 9.5 0H19v19H9.5A9.5 9.5 0 0 1 0 9.5z"/>
-          <path d="M0 28.5A9.5 9.5 0 0 1 9.5 19H19v19H9.5A9.5 9.5 0 0 1 0 28.5z"/>
-        </svg>
-      ),
-    },
-    {
-      name: 'GitHub',
-      logo: (
-        <svg viewBox="0 0 98 96" className="h-5 w-auto" fill="currentColor">
-          <path fillRule="evenodd" clipRule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"/>
-        </svg>
-      ),
-    },
-    {
-      name: 'Notion',
-      logo: (
-        <svg viewBox="0 0 100 100" className="h-5 w-auto" fill="currentColor">
-          <path d="M6.085 6.979c1.699 1.383 2.34 1.275 5.534 1.062l30.095-1.81c.639 0 .107-.639-.213-.852L36.99 1.906c-.745-.532-1.704-.958-3.513-.745L4.6 3.254c-1.063.107-1.276.638-.744 1.383l2.23 2.342zM7.254 15.3V51.85c0 1.918.958 2.664 3.087 2.557l34.35-1.918c2.128-.107 2.66-.852 2.66-2.77v-36.5c0-1.916-.745-2.87-2.448-2.7L9.808 12.417c-1.809.107-2.554.957-2.554 2.883zM41.04 17.852c.213 0 .213 5.32.213 5.32l-27.65 1.597V19.13L41.04 17.852zm1.6 11.383l-29.25 1.915v5.11l29.25-1.915v-5.11z"/>
-        </svg>
-      ),
-    },
-  ];
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.2 },
-    },
-  };
-
-  const logoVariants = {
-    hidden: { opacity: 0, y: 16 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 90, damping: 14 } },
-  };
-
+function TrustedByLogo({ children }: { children: React.ReactNode }) {
   return (
-    <section className="bg-white py-14 overflow-hidden">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row md:items-center gap-8 md:gap-0">
-        {/* Label */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="shrink-0 md:w-56 md:pr-10 md:border-r md:border-[#E8E4DE]"
-        >
-          <p className="text-[15px] leading-snug text-[#6B5F52]">
-            Trusted by teams at{' '}
-            <span className="font-medium text-[#1F1B16]">industry-leading companies</span>{' '}
-            around the world.
-          </p>
-        </motion.div>
+    <span className="inline-flex items-center gap-2 text-gray-900 fill-current">
+      {children}
+    </span>
+  );
+}
 
-        {/* Logos Row */}
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          className="flex-1 flex flex-wrap items-center justify-between gap-x-10 gap-y-6 md:pl-12"
-        >
-          {companies.map((company, i) => (
-            <motion.div
-              key={company.name}
-              variants={logoVariants}
-              whileHover={{ scale: 1.08, y: -3 }}
-              animate={{ y: [0, -4, 0] }}
-              transition={{
-                y: {
-                  duration: 3.5 + i * 0.3,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: i * 0.2,
-                },
-              }}
-              className="text-[#8C8074] hover:text-[#1F1B16] transition-colors duration-300 cursor-default [&_svg]:h-6"
-              title={company.name}
-            >
-              {company.logo}
-            </motion.div>
+const TRUSTED_BY_LOGOS = [
+  // Group 1
+  [
+    <TrustedByLogo key="browserbase">
+      <svg viewBox="0 0 28 28" className="h-7 w-7 shrink-0">
+        <rect width="28" height="28" rx="6" className="fill-gray-900" />
+        <text x="14" y="19" textAnchor="middle" fontSize="14" fontWeight="700" fill="#ffffff" fontFamily="sans-serif">B</text>
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Browserbase</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="acme">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3l9 18H3z" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Acme</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="stratus">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="currentColor">
+        <path d="M7 17a5 5 0 0 1 .5-9.98A6 6 0 0 1 19 9.5 4.5 4.5 0 0 1 18.5 17H7z" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Stratus</span>
+    </TrustedByLogo>,
+  ],
+  // Group 2
+  [
+    <TrustedByLogo key="braintrust">
+      <span className="text-[20px] font-extrabold lowercase tracking-tight">braintrust</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="globex">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M3 12h18M12 3c2.5 2.6 4 6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-6-4-9s1.5-6.4 4-9z" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Globex</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="initech">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="currentColor">
+        <rect x="3" y="3" width="8" height="8" rx="1.5" />
+        <rect x="13" y="13" width="8" height="8" rx="1.5" />
+        <rect x="13" y="3" width="8" height="8" rx="1.5" opacity="0.35" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Initech</span>
+    </TrustedByLogo>,
+  ],
+  // Group 3
+  [
+    <TrustedByLogo key="higgsfield">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M2 15c2.5-5 4.5-5 6.5 0s4.5 5 6.5 0 4.5-5 6.5 0" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Higgsfield</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="soylent">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="currentColor">
+        <path d="M12 2l4 6h-3v6h4l-5 8-5-8h4V8H8z" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Soylent</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="umbrella">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M3 12a9 9 0 0 1 18 0z" fill="currentColor" stroke="none" />
+        <path d="M12 12v8a2 2 0 0 1-4 0" />
+        <path d="M12 3v2" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Umbrella</span>
+    </TrustedByLogo>,
+  ],
+  // Group 4
+  [
+    <TrustedByLogo key="consensus">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.2">
+        <path d="M20 12a8 8 0 1 1-2.93-6.16" strokeLinecap="round" />
+        <path d="M20 4v5h-5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Consensus</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="vandelay">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="currentColor">
+        <path d="M4 20V9l8-6 8 6v11h-6v-6H10v6z" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Vandelay</span>
+    </TrustedByLogo>,
+    <TrustedByLogo key="hooli">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M12 21c4.5-4 7-7.7 7-11a7 7 0 1 0-14 0c0 3.3 2.5 7 7 11z" />
+        <circle cx="12" cy="10" r="2.5" fill="currentColor" stroke="none" />
+      </svg>
+      <span className="text-[17px] font-bold tracking-tight">Hooli</span>
+    </TrustedByLogo>,
+  ],
+];
+
+const TRUSTED_BY_DURATIONS = ['14s', '18s', '16s', '20s'];
+
+function TrustedByColumn({ logos, duration }: { logos: React.ReactNode[]; duration: string }) {
+  return (
+    <div className="relative h-full overflow-hidden">
+      <div
+        className="animate-logo-slide-pause flex flex-col"
+        style={{ animationDuration: duration }}
+      >
+        {[...logos, logos[0]].map((logo, i) => (
+          <div key={i} className="flex items-center justify-center h-[104px] shrink-0">
+            {logo}
+          </div>
+        ))}
+      </div>
+      {/* Fade masks so logos scroll in/out softly */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-6 bg-gradient-to-b from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-white to-transparent" />
+    </div>
+  );
+}
+
+function TrustedBy() {
+  return (
+    <section className="w-full bg-white border-y border-gray-200">
+      <div className="max-w-[1400px] w-full mx-auto grid grid-cols-2 md:grid-cols-[minmax(280px,1.5fr)_repeat(4,1fr)] h-auto md:h-[104px]">
+        {/* Left — text column */}
+        <div className="col-span-2 md:col-span-1 flex items-center justify-center px-6 md:px-8 py-8 md:py-0 border-b md:border-b-0 border-gray-200 md:border-r">
+          <p className="text-sm font-normal text-gray-900 leading-relaxed text-center text-balance max-w-[240px]">
+            Trusted by fast-growing companies around the world.
+          </p>
+        </div>
+
+        {/* Logo columns */}
+        {TRUSTED_BY_LOGOS.map((group, i) => (
+          <div
+            key={i}
+            className={`hidden md:block h-[104px] ${
+              i < TRUSTED_BY_LOGOS.length - 1 ? 'border-r border-gray-200' : ''
+            }`}
+          >
+            <TrustedByColumn logos={group} duration={TRUSTED_BY_DURATIONS[i]} />
+          </div>
+        ))}
+
+        {/* Mobile fallback — static grid of all logos */}
+        <div className="col-span-2 grid grid-cols-2 gap-y-6 py-8 md:hidden">
+          {TRUSTED_BY_LOGOS.flat().map((logo, i) => (
+            <div key={i} className="flex items-center justify-center">
+              {logo}
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );
