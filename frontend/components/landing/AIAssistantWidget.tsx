@@ -327,20 +327,20 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
           setCursor({ x: 0, y: 0 });
         }}
         onMouseMove={handleMouseMove}
-        className="group relative flex h-[100px] w-[100px] items-center justify-center rounded-full cursor-pointer"
+        className="group relative flex h-[72px] w-[72px] items-center justify-center rounded-full cursor-pointer"
         style={{ transformOrigin: 'center' }}
       >
         {/* idle ambient glow pulse */}
         <motion.span
           aria-hidden
-          className="absolute -inset-2.5 rounded-full bg-gradient-to-br from-[#FFB870]/60 via-[#FF7A29]/40 to-[#C17817]/30 blur-lg"
+          className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#FFB870]/60 via-[#FF7A29]/40 to-[#C17817]/30 blur-lg"
           animate={reduceMotion ? undefined : { opacity: [0.3, 0.55, 0.3], scale: [0.96, 1.03, 0.96] }}
           transition={glowTransition}
         />
         {/* reactive glow boost on hover */}
         <span
           aria-hidden
-          className="absolute -inset-2.5 rounded-full bg-gradient-to-br from-[#FFB870]/70 via-[#FF7A29]/50 to-[#C17817]/40 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-100"
+          className="absolute -inset-1.5 rounded-full bg-gradient-to-br from-[#FFB870]/70 via-[#FF7A29]/50 to-[#C17817]/40 opacity-0 blur-lg transition-opacity duration-300 group-hover:opacity-100"
         />
 
         {/* hover particles */}
@@ -366,14 +366,14 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
         {/* ground shadow */}
         <motion.span
           aria-hidden
-          className="absolute -bottom-2 left-1/2 h-3.5 w-14 -translate-x-1/2 rounded-full bg-black/25 blur-[4px]"
+          className="absolute -bottom-1.5 left-1/2 h-2.5 w-10 -translate-x-1/2 rounded-full bg-black/25 blur-[4px]"
           animate={reduceMotion ? undefined : { scaleX: [1, 0.75, 1], opacity: [0.3, 0.15, 0.3] }}
           transition={floatTransition}
         />
 
         {/* float — glass container; pops up a little larger while it greets, then settles back */}
         <motion.div
-          className="relative flex h-[100px] w-[100px] items-center justify-center rounded-full border border-white/70 bg-white/55 shadow-[0_20px_44px_-10px_rgba(31,27,22,0.32),0_2px_10px_rgba(31,27,22,0.14),inset_0_1px_1px_rgba(255,255,255,0.85)] backdrop-blur-xl"
+          className="relative flex h-[72px] w-[72px] items-center justify-center rounded-full border border-white/70 bg-white/55 shadow-[0_20px_44px_-10px_rgba(31,27,22,0.32),0_2px_10px_rgba(31,27,22,0.14),inset_0_1px_1px_rgba(255,255,255,0.85)] backdrop-blur-xl"
           animate={reduceMotion ? undefined : { y: [0, -6, 0], scale: waving ? 1.16 : 1 }}
           transition={{ y: floatTransition, scale: { duration: 0.45, ease: 'easeOut' } }}
         >
@@ -393,7 +393,7 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
                 transition={breatheTransition}
               >
                 <RobotAvatar
-                  className="h-20 w-20"
+                  className="h-14 w-14"
                   excited={hovered || introSmile}
                   eyeOffset={hovered ? cursor : undefined}
                   waving={waving}
@@ -414,7 +414,7 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
               transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 1.6, ease: 'easeOut' }}
             />
             <motion.span
-              className="relative block h-4 w-4 rounded-full bg-[#FF7A29] ring-2 ring-white"
+              className="relative block h-3 w-3 rounded-full bg-[#FF7A29] ring-2 ring-white"
               animate={reduceMotion ? undefined : { scale: [1, 1.15, 1] }}
               transition={{ duration: 1, repeat: Infinity, repeatDelay: 2, ease: 'easeOut' }}
             />
@@ -427,9 +427,9 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
         initial={{ opacity: 0, y: -6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...SPRING, delay: 0.25 }}
-        className="-mt-2.5 flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 py-1.5 text-xs font-semibold text-[#1F1B16] shadow-[0_6px_16px_rgba(31,27,22,0.18)] ring-1 ring-[#F0EBE3]"
+        className="-mt-2 flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#1F1B16] shadow-[0_6px_16px_rgba(31,27,22,0.18)] ring-1 ring-[#F0EBE3]"
       >
-        <MessageCircle className="h-3.5 w-3.5 text-[#C17817]" />
+        <MessageCircle className="h-3 w-3 text-[#C17817]" />
         AURA Assistant
       </motion.div>
     </motion.div>
