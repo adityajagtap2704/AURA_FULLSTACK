@@ -16,6 +16,9 @@ const shortcuts = [
   { key: 'G → C', action: 'Go to Calendar' },
   { key: 'G → M', action: 'Go to Messages' },
   { key: 'G → D', action: 'Go to Documents' },
+  { key: 'G → A', action: 'Go to AI Assistant' },
+  { key: 'G → I', action: 'Go to AI Digest' },
+  { key: 'G → N', action: 'Go to Integrations' },
 ];
 
 export default function KeyboardShortcutsModal({

@@ -221,7 +221,7 @@ function Hero() {
                         </div>
                       </div>
                     ))}
-                    <button className="text-[8px] text-[#C17817] font-semibold">View All Documents →</button>
+                    
                   </div>
                 </div>
               </div>
@@ -643,10 +643,10 @@ function Integrations() {
 /* ------------------------------ AI SECTION ------------------------------ */
 function AISection() {
   return (
-   <section id="features" className="py-6 bg-[#FAFAF8]">
+   <section id="features" className="py-6 bg-[#FAFAF8]"  data-navbar-theme="dark">
       <div className="max-w-[1200px] mx-auto px-6">
         <motion.div initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
-          data-navbar-theme="dark"
+          
           className="relative rounded-[28px] overflow-hidden bg-gradient-to-br from-[#1C1814] via-[#201C16] to-[#181410] min-h-[460px] flex items-center" style={{boxShadow:'0 30px 60px -20px rgba(28,24,20,0.35)'}}>
 
           {/* bg effects */}
@@ -1228,7 +1228,10 @@ function Testimonials() {
 /* ------------------------------ CTA BANNER ------------------------------ */
 function CTABanner() {
   return (
-    <section className="py-10 bg-white">
+  <section
+  className="py-10 bg-white"
+  data-navbar-theme="dark"
+>
       <div className="max-w-[1100px] mx-auto px-6">
         <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
           className="relative rounded-[28px] overflow-hidden bg-gradient-to-br from-[#1C1814] via-[#2A2018] to-[#1A1612] py-16 lg:py-20 px-10 text-center" style={{boxShadow:'0 24px 48px -12px rgba(28,24,20,0.25)'}}>

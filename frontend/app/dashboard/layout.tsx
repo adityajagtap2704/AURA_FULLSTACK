@@ -205,9 +205,17 @@ const [contactSupportOpen, setContactSupportOpen] = useState(false);
         case "o":
           router.push("/dashboard/documents");
           break;
-        case "s":
-          router.push("/dashboard/settings");
-          break;
+        case 'a':
+  router.push('/dashboard/ai-assistant');
+  break;
+
+case 'i':
+  router.push('/dashboard/digest');
+  break;
+
+case 'n':
+  router.push('/dashboard/integrations');
+  break;
         default:
           break;
       }
