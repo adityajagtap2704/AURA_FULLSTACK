@@ -26,8 +26,8 @@ flowchart TD
         Guard[Zero-Hallucination Guardrail Validator]
     end
 
-    subgraph SearchEngine["4. Vector & Hybrid Search Engine"]
-        BGE[BGE-Small-EN Embedding Model]
+    subgraph SearchEngine["4. Vector & Hybrid Search Engine (Vercel Serverless Safe)"]
+        Gemini[Google Gemini REST API text-embedding-004]
         PGV[pgvector Vector Matching]
         Fallback[Multi-Table Text Fallback Search]
     end
@@ -53,7 +53,7 @@ flowchart TD
 | :--- | :--- | :--- |
 | **AI Daily Digest** | `aiml/ai_digest/` | Synthesizes daily executive briefings, top priorities, and actionable suggestions. |
 | **Prioritization Engine** | `aiml/prioritization/` | Scores items from **0.0 to 100.0**, penalizes overdue tasks, and assigns **High / Medium / Low** priority badges. |
-| **Search & Embedding** | `aiml/search_embedding/` | Generates 384-dim BGE vector embeddings and provides hybrid vector/text search across workspace items. |
+| **Search & Embedding** | `aiml/search_embedding/` | Generates 384-dim REST embeddings via Gemini API and provides hybrid vector/text search across workspace items. |
 | **NLP & Guardrails** | `aiml/nlp/` | Generates meeting prep notes, invokes LLMs (Gemini / Groq), and validates zero-hallucination compliance. |
 
 ---
@@ -80,8 +80,8 @@ Items are sorted in descending score order and mapped to clear priority badges:
 ### Stage 4: Meeting Prep & AI Suggestion Generation
 Generates context-aware, topic-specific preparation advice (e.g. for calendar render issues, testing, deployment, AI modules).
 
-### Stage 5: Zero-Hallucination Guardrail Validation
-Before returning results, our guardrail engine verifies that **100% of titles, dates, and names exist strictly within the source data**.
+### Stage 5: Vercel-Safe Vector Embedding & Hybrid Search
+Generates embeddings using Google Gemini REST API (`fetch()`), requiring zero native C++ ONNX binaries (`libonnxruntime.so.1`), ensuring 100% reliability in Vercel production serverless environments.
 
 ---
 

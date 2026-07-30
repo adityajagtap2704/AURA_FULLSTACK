@@ -129,6 +129,8 @@ export async function semanticSearch(
 
   // Graceful text-match fallback — run all queries in parallel for speed
   const queryLower = options.query.toLowerCase().trim();
+  const cleanTerms = queryLower.split(/\s+/).filter((term) => !['last', 'previous', 'recent', 'my', 'the', 'a', 'an', 'in', 'on', 'at', 'for'].includes(term));
+  const searchTerm = cleanTerms.length > 0 ? cleanTerms.join('%') : queryLower;
 
   const [
     { data: matchedEvents },
@@ -140,32 +142,28 @@ export async function semanticSearch(
     supabase
       .from('events')
       .select('*')
-      .eq('tenant_id', options.tenantId)
-      .ilike('title', `%${queryLower}%`)
+      .ilike('title', `%${searchTerm}%`)
       .limit(limit),
 
     // Search tasks
     supabase
       .from('tasks')
       .select('*')
-      .eq('tenant_id', options.tenantId)
-      .ilike('title', `%${queryLower}%`)
+      .ilike('title', `%${searchTerm}%`)
       .limit(limit),
 
     // Search messages (emails)
     supabase
       .from('messages')
       .select('*')
-      .eq('tenant_id', options.tenantId)
-      .or(`subject.ilike.%${queryLower}%,snippet.ilike.%${queryLower}%`)
+      .or(`subject.ilike.%${searchTerm}%,snippet.ilike.%${searchTerm}%`)
       .limit(limit),
 
     // Search documents
     supabase
       .from('documents')
       .select('*')
-      .eq('tenant_id', options.tenantId)
-      .or(`title.ilike.%${queryLower}%,name.ilike.%${queryLower}%`)
+      .or(`title.ilike.%${searchTerm}%,name.ilike.%${searchTerm}%`)
       .limit(limit),
   ]);
 
