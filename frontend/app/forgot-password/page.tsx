@@ -72,10 +72,9 @@ export default function ForgotPasswordPage() {
         <form onSubmit={handleResetPassword} className="space-y-5">
 
           <div>
-            <label className="block text-sm font-semibold mb-2">
-              Email Address
-            </label>
-
+           <label className="block text-sm font-semibold text-black mb-2">
+  Email Address
+</label>
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
 
@@ -85,7 +84,7 @@ export default function ForgotPasswordPage() {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:ring-2 focus:ring-[#C17817]"
+               className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-4 text-black focus:outline-none focus:ring-2 focus:ring-[#C17817]"
               />
             </div>
           </div>

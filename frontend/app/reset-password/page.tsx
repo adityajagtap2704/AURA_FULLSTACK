@@ -34,8 +34,13 @@ export default function ResetPasswordPage() {
     setError('');
     setSuccess('');
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    const passwordRegex =
+      /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setError(
+        'Password must contain 8+ characters, uppercase, lowercase, number, and special character.'
+      );
       return;
     }
 
@@ -114,14 +119,12 @@ export default function ResetPasswordPage() {
                 placeholder="Enter new password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-11 focus:ring-2 focus:ring-[#C17817] outline-none"
+                className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-11 text-black focus:ring-2 focus:ring-[#C17817] outline-none"
               />
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3"
               >
                 {showPassword ? (
@@ -131,6 +134,11 @@ export default function ResetPasswordPage() {
                 )}
               </button>
             </div>
+
+            <p className="mt-2 text-[11px] text-[#6B6258]">
+              Password must contain 8+ characters, uppercase, lowercase,
+              number, and special character.
+            </p>
           </div>
 
           <div>
@@ -148,15 +156,13 @@ export default function ResetPasswordPage() {
                 onChange={(e) =>
                   setConfirmPassword(e.target.value)
                 }
-                className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-11 focus:ring-2 focus:ring-[#C17817] outline-none"
+                className="w-full border border-[#E5DDD0] rounded-xl py-3 pl-11 pr-11 text-black focus:ring-2 focus:ring-[#C17817] outline-none"
               />
 
               <button
                 type="button"
                 onClick={() =>
-                  setShowConfirmPassword(
-                    !showConfirmPassword
-                  )
+                  setShowConfirmPassword(!showConfirmPassword)
                 }
                 className="absolute right-3 top-3"
               >

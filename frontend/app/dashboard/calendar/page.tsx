@@ -8,6 +8,7 @@ import CalendarView from './components/CalendarView';
 import UpcomingEventsPanel from './components/UpcomingEventsPanel';
 import { getDisplayName, getAvatarUrl } from '@/lib/userDisplay';
 import { useRouter } from 'next/navigation';
+import { CalendarDays } from "lucide-react";
 
 export default function CalendarPage() {
   const { user } = useAuth();
@@ -64,9 +65,13 @@ export default function CalendarPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
         {/* Left Side: Title and Search */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground select-none shrink-0">
-            3. Calendar
-          </h1>
+      <h1 className="flex items-center gap-3 text-4xl font-bold">
+  <CalendarDays
+    className="h-9 w-9 text-[#F97316]"
+    strokeWidth={2}
+  />
+  <span>Calendar</span>
+</h1>
           {/* Search bar */}
           <div className="relative max-w-sm w-full">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">

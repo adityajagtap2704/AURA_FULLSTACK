@@ -24,15 +24,25 @@ export default function Navbar() {
   // Swap to a dark palette whenever a `[data-navbar-theme="dark"]` section
   // (e.g. the dark AI panel) scrolls underneath the pill, Clerk.com-style.
   useEffect(() => {
-    const target = document.querySelector('[data-navbar-theme="dark"]');
-    if (!target) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setTheme(entry.isIntersecting ? 'dark' : 'light'),
-      { rootMargin: '-70px 0px -100% 0px', threshold: 0 }
-    );
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, []);
+  const targets = document.querySelectorAll('[data-navbar-theme="dark"]');
+
+  if (!targets.length) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const isDark = entries.some((entry) => entry.isIntersecting);
+      setTheme(isDark ? 'dark' : 'light');
+    },
+    {
+      rootMargin: "-80px 0px -60% 0px",
+      threshold: 0.2,
+    }
+  );
+
+  targets.forEach((target) => observer.observe(target));
+
+  return () => observer.disconnect();
+}, []);
 
   const isDark = theme === 'dark';
 

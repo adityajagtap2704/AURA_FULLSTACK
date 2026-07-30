@@ -460,8 +460,8 @@ export default function DashboardPage() {
         {/* Recent Items — merged real activity feed */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold tracking-tight">Recent Items</h2>
-            <span className="text-xs font-semibold text-primary">View all</span>
+            <h2 className="text-lg font-bold tracking-tight">Recent Iteams</h2>
+             
           </div>
 
           {recentItems.length > 0 ? (

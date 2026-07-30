@@ -63,9 +63,18 @@ export function useKeyboardShortcuts({
           case 'd':
             router.push('/dashboard/documents');
             break;
-            case "o":
-  router.push("/dashboard/documents");
-  break;
+        case 'a':
+    router.push('/dashboard/ai-assistant');
+    break;
+
+  case 'i':
+    router.push('/dashboard/ai-digest'); // or /dashboard/digest
+    break;
+
+  case 'n':
+    router.push('/dashboard/integrations');
+    break;
+
 
           default:
             break;
