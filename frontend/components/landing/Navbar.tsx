@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Transition } from 'framer-motion';
 import Link from 'next/link';
+
+const SPRING: Transition = { type: 'spring', stiffness: 180, damping: 24, mass: 0.8 };
+const MotionLink = motion.create(Link);
 
 /* --------------------------------- NAVBAR (Clerk-style Pill Dropdown) --------------------------------- */
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -16,6 +20,50 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Swap to a dark palette whenever a `[data-navbar-theme="dark"]` section
+  // (e.g. the dark AI panel) scrolls underneath the pill, Clerk.com-style.
+  useEffect(() => {
+    const target = document.querySelector('[data-navbar-theme="dark"]');
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setTheme(entry.isIntersecting ? 'dark' : 'light'),
+      { rootMargin: '-70px 0px -100% 0px', threshold: 0 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
+
+  const isDark = theme === 'dark';
+
+  const pillClass = isDark
+    ? scrolled
+      ? 'bg-[#1A1A1A]/90 backdrop-blur-xl border-[#2E2A24] shadow-[0_12px_40px_rgba(0,0,0,0.35)]'
+      : 'bg-[#1A1A1A]/75 backdrop-blur-md border-[#2E2A24]'
+    : scrolled
+      ? 'bg-white/90 backdrop-blur-xl border-[#E5DDD0] shadow-[0_12px_40px_rgba(31,27,22,0.1)]'
+      : 'bg-white/80 backdrop-blur-md border-[#EAE3DA]';
+
+  const logoTextClass = isDark ? 'text-white' : 'text-[#1F1B16]';
+
+  const navLinkClass = (active: boolean) =>
+    isDark
+      ? active
+        ? 'text-[#F0C674] bg-white/10'
+        : 'text-[#D9CFC2] hover:text-white hover:bg-white/10'
+      : active
+        ? 'text-[#C17817] bg-[#FDF4E7]'
+        : 'text-[#4A3F35] hover:text-[#1F1B16] hover:bg-[#F7F2EC]';
+
+  const chevronIdleClass = isDark ? 'text-[#8C8074]' : 'text-[#9B8F85]';
+
+  const signInClass = isDark
+    ? 'text-[#D9CFC2] hover:text-white hover:bg-white/10'
+    : 'text-[#4A3F35] hover:text-[#1F1B16] hover:bg-[#F7F2EC]';
+
+  const hamburgerClass = isDark
+    ? 'text-[#D9CFC2] hover:bg-white/10'
+    : 'text-[#4A3F35] hover:bg-[#F7F2EC]';
 
   const handleMouseEnter = (menuName: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -191,16 +239,21 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none">
+    <motion.header
+      animate={{ y: scrolled ? -10 : 0 }}
+      transition={SPRING}
+      className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none"
+    >
       {/* Clerk Floating Pill Container - Wider Horizontally */}
-      <div className={`pointer-events-auto transition-all duration-300 rounded-full border px-6 py-2.5 flex items-center justify-between gap-6 md:gap-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-5xl ${
-        scrolled
-          ? 'bg-white/90 backdrop-blur-xl border-[#E5DDD0] shadow-[0_12px_40px_rgba(31,27,22,0.1)]'
-          : 'bg-white/80 backdrop-blur-md border-[#EAE3DA]'
-      }`}>
+      <div className={`pointer-events-auto transition-all duration-300 rounded-full border px-6 py-2.5 flex items-center justify-between gap-6 md:gap-10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] w-full max-w-5xl ${pillClass}`}>
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0 pl-1 group">
+        <MotionLink
+          href="/"
+          whileHover={{ scale: 1.02 }}
+          transition={SPRING}
+          className="flex items-center gap-2 shrink-0 pl-1 group"
+        >
           <div className="w-8 h-8 rounded-full border-2 border-[#C17817] flex items-center justify-center group-hover:scale-105 transition-transform">
             <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none">
               <circle cx="10" cy="10" r="7" stroke="#C17817" strokeWidth="1.5"/>
@@ -209,8 +262,8 @@ export default function Navbar() {
               <path d="M3 10H17" stroke="#C17817" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
             </svg>
           </div>
-          <span className="text-[16px] font-extrabold text-[#1F1B16] tracking-tight">AURA</span>
-        </Link>
+          <span className={`text-[16px] font-extrabold tracking-tight ${logoTextClass}`}>AURA</span>
+        </MotionLink>
 
         {/* Desktop Nav Items with Framer Motion Floating Dropdowns */}
         <nav className="hidden md:flex items-center gap-2 lg:gap-3">
@@ -223,16 +276,12 @@ export default function Navbar() {
             >
               {menu.hasDropdown ? (
                 <button
-                  className={`px-4 py-1.5 text-[13.5px] font-semibold rounded-full flex items-center gap-1.5 transition-all ${
-                    activeMenu === menu.id
-                      ? 'text-[#C17817] bg-[#FDF4E7]'
-                      : 'text-[#4A3F35] hover:text-[#1F1B16] hover:bg-[#F7F2EC]'
-                  }`}
+                  className={`px-4 py-1.5 text-[13.5px] font-semibold rounded-full flex items-center gap-1.5 transition-all duration-200 hover:-translate-y-0.5 ${navLinkClass(activeMenu === menu.id)}`}
                 >
                   {menu.label}
                   <svg
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                      activeMenu === menu.id ? 'rotate-180 text-[#C17817]' : 'text-[#9B8F85]'
+                      activeMenu === menu.id ? 'rotate-180 text-[#C17817]' : chevronIdleClass
                     }`}
                     fill="none"
                     viewBox="0 0 24 24"
@@ -245,7 +294,7 @@ export default function Navbar() {
               ) : (
                 <Link
                   href={menu.href || '#'}
-                  className="px-4 py-1.5 text-[13.5px] font-semibold text-[#4A3F35] hover:text-[#1F1B16] hover:bg-[#F7F2EC] rounded-full transition-all"
+                  className={`px-4 py-1.5 text-[13.5px] font-semibold rounded-full transition-all duration-200 hover:-translate-y-0.5 ${navLinkClass(false)}`}
                 >
                   {menu.label}
                 </Link>
@@ -271,24 +320,30 @@ export default function Navbar() {
 
         {/* Right Action CTAs */}
         <div className="hidden md:flex items-center gap-3 pr-1">
-          <Link
+          <MotionLink
             href="/login"
-            className="px-4 py-1.5 text-[13px] font-bold text-[#4A3F35] hover:text-[#1F1B16] hover:bg-[#F7F2EC] rounded-full transition-all"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            transition={SPRING}
+            className={`px-4 py-1.5 text-[13px] font-bold rounded-full transition-all ${signInClass}`}
           >
             Sign In
-          </Link>
-          <Link
+          </MotionLink>
+          <MotionLink
             href="/signup"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            transition={SPRING}
             className="px-5 py-1.5 text-[13px] font-bold text-white bg-[#1F1B16] hover:bg-[#C17817] rounded-full shadow-sm hover:shadow-md transition-all flex items-center gap-1 group whitespace-nowrap"
           >
             Start building
             <span className="group-hover:translate-x-0.5 transition-transform text-xs">▸</span>
-          </Link>
+          </MotionLink>
         </div>
 
         {/* Mobile Toggle Button */}
         <button
-          className="md:hidden p-2 text-[#4A3F35] hover:bg-[#F7F2EC] rounded-full transition-colors"
+          className={`md:hidden p-2 rounded-full transition-colors ${hamburgerClass}`}
           onClick={() => setMobileOpen((prev) => !prev)}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -322,6 +377,6 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </div>
-    </header>
+    </motion.header>
   );
 }
