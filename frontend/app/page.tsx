@@ -6,6 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { motion, AnimatePresence, useInView, useMotionValue, useTransform, animate, useAnimation } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/landing/Navbar';
+import AIAssistantWidget from '@/components/landing/AIAssistantWidget';
 
 /* --------------------------------- HERO --------------------------------- */
 function Hero() {
@@ -1396,6 +1397,7 @@ export default function Home() {
         <CTABanner/>
       </main>
       <Footer/>
+      <AIAssistantWidget/>
     </div>
   );
 }
