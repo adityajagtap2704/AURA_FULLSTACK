@@ -14,6 +14,7 @@ export default function Navbar() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -21,28 +22,47 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Swap to a dark palette whenever a `[data-navbar-theme="dark"]` section
-  // (e.g. the dark AI panel) scrolls underneath the pill, Clerk.com-style.
+  // Swap to a dark palette only while the navbar pill's own DOM rect is
+  // physically overlapping a `[data-navbar-theme="dark"]` section (e.g. the
+  // dark AI panel), Clerk.com-style. This is a direct getBoundingClientRect
+  // overlap test between the navbar and each target — not an approximated
+  // IntersectionObserver rootMargin band — so the swap fires exactly when
+  // the pill's top/bottom bounds cross the section's top/bottom bounds,
+  // instead of early (as soon as the section nears the viewport) or late
+  // (only once it's mostly scrolled past).
   useEffect(() => {
-  const targets = document.querySelectorAll('[data-navbar-theme="dark"]');
+    const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-navbar-theme="dark"]'));
+    if (!targets.length || !headerRef.current) return;
 
-  if (!targets.length) return;
+    let ticking = false;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const isDark = entries.some((entry) => entry.isIntersecting);
+    const checkOverlap = () => {
+      ticking = false;
+      const navRect = headerRef.current?.getBoundingClientRect();
+      if (!navRect) return;
+
+      const isDark = targets.some((target) => {
+        const rect = target.getBoundingClientRect();
+        return navRect.bottom > rect.top && navRect.top < rect.bottom;
+      });
+
       setTheme(isDark ? 'dark' : 'light');
-    },
-    {
-      rootMargin: "-80px 0px -60% 0px",
-      threshold: 0.2,
-    }
-  );
+    };
 
-  targets.forEach((target) => observer.observe(target));
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(checkOverlap);
+    };
 
-  return () => observer.disconnect();
-}, []);
+    checkOverlap();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, []);
 
   const isDark = theme === 'dark';
 
@@ -250,6 +270,7 @@ export default function Navbar() {
 
   return (
     <motion.header
+      ref={headerRef}
       animate={{ y: scrolled ? -10 : 0 }}
       transition={SPRING}
       className="fixed top-4 inset-x-0 z-50 flex justify-center px-4 md:px-8 pointer-events-none"

@@ -22,6 +22,19 @@ import {
   Plus
 } from 'lucide-react';
 
+function getGreeting() {
+  const currentHour = new Date().getHours();
+  if (currentHour >= 5 && currentHour < 12) {
+    return 'Good Morning';
+  } else if (currentHour >= 12 && currentHour < 17) {
+    return 'Good Afternoon';
+  } else if (currentHour >= 17 && currentHour < 21) {
+    return 'Good Evening';
+  } else {
+    return 'Good Night';
+  }
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const {
@@ -38,32 +51,29 @@ export default function DashboardPage() {
   } = useDashboard();
 
   const [refreshKey, setRefreshKey] = useState(0);
-  const [greeting, setGreeting] = useState('Good Morning');
+  const [greeting, setGreeting] = useState(() => getGreeting());
+  // Snapshot of "now" for relative-time/countdown formatting below — read
+  // once per tick via the interval effect rather than calling Date.now()
+  // directly during render, which isn't idempotent across re-renders.
+  const [nowMs, setNowMs] = useState(() => Date.now());
 
-  useEffect(() => {
-    if (isRefetching || isSyncingGoogle) {
+  // Re-trigger the entrance animation (via the `key` below) whenever a
+  // refetch/sync transitions on — computed during render, per React's
+  // guidance for state that needs to change in response to a prop change,
+  // instead of an effect that calls setState synchronously.
+  const isSyncingNow = isRefetching || isSyncingGoogle;
+  const [wasSyncing, setWasSyncing] = useState(isSyncingNow);
+  if (isSyncingNow !== wasSyncing) {
+    setWasSyncing(isSyncingNow);
+    if (isSyncingNow) {
       setRefreshKey((prev) => prev + 1);
     }
-  }, [isRefetching, isSyncingGoogle]);
+  }
 
   useEffect(() => {
-    const getGreeting = () => {
-      const currentHour = new Date().getHours();
-      if (currentHour >= 5 && currentHour < 12) {
-        return 'Good Morning';
-      } else if (currentHour >= 12 && currentHour < 17) {
-        return 'Good Afternoon';
-      } else if (currentHour >= 17 && currentHour < 21) {
-        return 'Good Evening';
-      } else {
-        return 'Good Night';
-      }
-    };
-
-    setGreeting(getGreeting());
-
     const interval = setInterval(() => {
       setGreeting(getGreeting());
+      setNowMs(Date.now());
     }, 10000); // Check every 10 seconds
 
     return () => clearInterval(interval);
@@ -108,7 +118,7 @@ export default function DashboardPage() {
 
   const formatRelativeTime = (dateString?: string | null) => {
     if (!dateString) return '';
-    const diffMin = Math.floor((Date.now() - new Date(dateString).getTime()) / 60000);
+    const diffMin = Math.floor((nowMs - new Date(dateString).getTime()) / 60000);
     if (diffMin < 1) return 'just now';
     if (diffMin < 60) return `${diffMin} min ago`;
     const diffHr = Math.floor(diffMin / 60);
@@ -119,7 +129,7 @@ export default function DashboardPage() {
   // "in 2h 15m" style countdown for events later today, matching the
   // mockup's schedule timeline — only shown for events still upcoming.
   const formatCountdown = (dateString: string) => {
-    const diffMs = new Date(dateString).getTime() - Date.now();
+    const diffMs = new Date(dateString).getTime() - nowMs;
     if (diffMs <= 0) return null;
     const diffMin = Math.round(diffMs / 60000);
     if (diffMin < 60) return `in ${diffMin} min`;
@@ -137,16 +147,17 @@ export default function DashboardPage() {
   const todayStr = new Date().toDateString();
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Stats — computed entirely from real synced rows. No priority/read/
-  // important/shared fields exist in the schema, so sub-labels only surface
-  // counts that are genuinely tracked.
+  // Stats — computed entirely from real synced rows. No read/important/shared
+  // fields exist in the schema, so sub-labels only surface counts that are
+  // genuinely tracked.
+  const priorityRank: Record<string, number> = { High: 0, Medium: 1, Low: 2 };
   const tasksDueToday = (safeData.tasks || []).filter((t) => t.due_date && new Date(t.due_date).toDateString() === todayStr);
   const tasksDueTodayPending = tasksDueToday.filter((t) => t.status !== 'Done').length;
 
   const eventsToday = (safeData.events || [])
     .filter((e) => new Date(e.start_time).toDateString() === todayStr)
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
-  const upcomingEventsToday = eventsToday.filter((e) => new Date(e.start_time).getTime() > Date.now()).length;
+  const upcomingEventsToday = eventsToday.filter((e) => new Date(e.start_time).getTime() > nowMs).length;
   const messagesToday = (safeData.messages || []).filter(
     (m) => m.created_at && new Date(m.created_at).toDateString() === todayStr
   );
@@ -411,7 +422,10 @@ export default function DashboardPage() {
 
           {(safeData.tasks || []).length > 0 ? (
             <div className="space-y-1">
-              {(safeData.tasks || []).slice(0, 5).map((task) => {
+              {[...(safeData.tasks || [])]
+                .sort((a, b) => (priorityRank[a.priority || ''] ?? 3) - (priorityRank[b.priority || ''] ?? 3))
+                .slice(0, 5)
+                .map((task) => {
                 const isDone = task.status === 'Done';
                 return (
                   <Link
@@ -427,6 +441,15 @@ export default function DashboardPage() {
                     <span className={`text-sm flex-1 truncate ${isDone ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                       {task.title}
                     </span>
+                    {task.priority && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                        task.priority === 'High' ? 'bg-[#FEE2E2] text-[#EF4444]' :
+                        task.priority === 'Medium' ? 'bg-[#FEF3C7] text-[#D97706]' :
+                        'bg-[#DCFCE7] text-[#16A34A]'
+                      }`}>
+                        {task.priority}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -460,7 +483,7 @@ export default function DashboardPage() {
         {/* Recent Items — merged real activity feed */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1.5 hover:border-primary/40 hover:scale-[1.003]">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold tracking-tight">Recent Iteams</h2>
+            <h2 className="text-lg font-bold tracking-tight">Recent Items</h2>
              
           </div>
 

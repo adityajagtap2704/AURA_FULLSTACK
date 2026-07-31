@@ -210,12 +210,15 @@ const [contactSupportOpen, setContactSupportOpen] = useState(false);
   break;
 
 case 'i':
-  router.push('/dashboard/digest');
+  router.push('/dashboard/ai-digest');
   break;
 
 case 'n':
   router.push('/dashboard/integrations');
   break;
+        case 's':
+          router.push('/dashboard/settings');
+          break;
         default:
           break;
       }
@@ -818,6 +821,9 @@ Contact Support
   { keys: 'G then C', action: 'Go to Calendar' },
   { keys: 'G then M', action: 'Go to Messages' },
   { keys: 'G then O', action: 'Go to Documents' },
+  { keys: 'G then A', action: 'Go to AI Assistant' },
+  { keys: 'G then I', action: 'Go to AI Digest' },
+  { keys: 'G then N', action: 'Go to Integrations' },
   { keys: 'G then S', action: 'Go to Settings' },
 ].map((shortcut) => (
                     <div key={shortcut.keys} className="flex items-center justify-between py-1.5">

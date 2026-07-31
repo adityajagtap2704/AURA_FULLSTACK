@@ -7,6 +7,8 @@ import { motion, AnimatePresence, useInView, useMotionValue, useTransform, anima
 import Link from 'next/link';
 import Navbar from '@/components/landing/Navbar';
 import AIAssistantWidget from '@/components/landing/AIAssistantWidget';
+import IntegrationFlowDiagram from '@/components/landing/IntegrationFlowDiagram';
+import IntegrationsOrbitSection from '@/components/landing/IntegrationsOrbitSection';
 
 /* --------------------------------- HERO --------------------------------- */
 function Hero() {
@@ -481,165 +483,6 @@ function TrustedBy() {
   );
 }
 
-/* ----------------------------- INTEGRATIONS ----------------------------- */
-/* ----------------------------- INTEGRATIONS ----------------------------- */
-const INTEGRATIONS = [
-  { name:'Gmail', desc:'Stay on top of your emails effortlessly.', bg:'#FEF2F2', accent:'#EA4335', logo:(
-    <svg viewBox="0 0 48 48" className="w-10 h-10"><path d="M6 8h36v32H6z" fill="#fff" rx="3"/><path d="M6 8l18 13L42 8" stroke="#EA4335" strokeWidth="2.5" fill="none"/><path d="M6 8h36l-18 13z" fill="#EA4335"/><rect x="6" y="8" width="36" height="32" rx="3" stroke="#EA4335" strokeWidth="1.5" fill="none"/></svg>
-  )},
-  { name:'Google Calendar', desc:'Never miss a meeting or deadline.', bg:'#EFF6FF', accent:'#4285F4', logo:(
-    <svg viewBox="0 0 48 48" className="w-10 h-10"><rect x="4" y="8" width="40" height="36" rx="4" fill="#fff" stroke="#4285F4" strokeWidth="1.5"/><rect x="4" y="8" width="40" height="12" rx="4" fill="#4285F4"/><text x="24" y="36" textAnchor="middle" fill="#4285F4" fontSize="14" fontWeight="bold">31</text><line x1="14" y1="4" x2="14" y2="14" stroke="#4285F4" strokeWidth="2.5" strokeLinecap="round"/><line x1="34" y1="4" x2="34" y2="14" stroke="#4285F4" strokeWidth="2.5" strokeLinecap="round"/></svg>
-  )},
-  { name:'Notion', desc:'Organize your docs and ideas seamlessly.', bg:'#F9FAFB', accent:'#1F1B16', logo:(
-    <svg viewBox="0 0 48 48" className="w-10 h-10"><rect x="4" y="4" width="40" height="40" rx="8" fill="#1F1B16"/><text x="24" y="31" textAnchor="middle" fill="white" fontSize="22" fontWeight="900">N</text></svg>
-  )},
-  { name:'Google Meet', desc:'Join or start meetings in one click.', bg:'#F0FDF4', accent:'#34A853', logo:(
-    <svg viewBox="0 0 48 48" className="w-10 h-10"><rect x="4" y="12" width="28" height="24" rx="4" fill="#34A853"/><path d="M32 20l12-8v24l-12-8V20z" fill="#4285F4"/></svg>
-  )},
-];
-
-function FloatingIcon({ index, hovered, children }: { index: number; hovered: boolean; children: React.ReactNode }) {
-  const orbitIndex = index % 4;
-  return (
-    <div
-      className={hovered ? "" : `animate-icon-orbit-${orbitIndex}`}
-      style={{
-        transform: hovered ? 'translate(0px, 0px)' : undefined,
-        transition: hovered ? 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)' : 'none',
-        willChange: 'transform',
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-function IntegrationCard({ int, index }: { int: typeof INTEGRATIONS[0]; index: number }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <motion.div
-      key={int.name}
-      initial={{ opacity: 0, y: 30, scale: 0.92 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ delay: index * 0.1, type: 'spring' as const, stiffness: 80, damping: 14 }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="w-full"
-    >
-      {/* Floating Animation Wrapper for Resting Cards */}
-      <div 
-        className={hovered ? "" : "animate-float-card"}
-        style={{ animationDelay: `${(index % 4) * 1.8}s` }}
-      >
-        <div 
-          className="group relative flex flex-col items-center text-center p-8 rounded-[24px] cursor-pointer overflow-hidden transition-all duration-500"
-          style={{
-            transform: hovered ? 'translateY(-8px) scale(1.02)' : 'translateY(0) scale(1)',
-          }}
-        >
-          {/* Gradient Border Frame (Replaces basic dark border with luxury gold/champagne gradient) */}
-          <div 
-            className="absolute inset-0 rounded-[24px] p-[1.5px] bg-gradient-to-b from-[#F3ECE2] via-[#E8DCCB] to-[#F3ECE2] transition-all duration-500 group-hover:from-[#C17817] group-hover:via-[#E8A422] group-hover:to-[#C17817]"
-            style={{
-              boxShadow: hovered
-                ? '0 24px 50px -12px rgba(193,120,23,0.22), 0 0 20px rgba(193,120,23,0.2), 0 12px 24px -8px rgba(31,27,22,0.06)'
-                : '0 12px 32px -8px rgba(31,27,22,0.05), 0 2px 8px -2px rgba(0,0,0,0.02)',
-            }}
-          >
-            <div className="w-full h-full bg-gradient-to-b from-white via-[#FDFDFB] to-[#F9F6F1] rounded-[22.5px]" />
-          </div>
-
-          {/* Top Accent Highlight Glow */}
-          <div 
-            className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-[2px] bg-gradient-to-r from-transparent via-[#C17817]/50 to-transparent transition-opacity duration-500"
-            style={{ opacity: hovered ? 1 : 0.6 }}
-          />
-
-          {/* Website Theme Gradient Background Appearance on Hover */}
-          <div
-            className="absolute inset-0 rounded-[24px] pointer-events-none transition-opacity duration-500 bg-gradient-to-b from-[#FDF7EE] via-[#FDF3E5]/75 to-white"
-            style={{ opacity: hovered ? 1 : 0 }}
-          />
-
-          {/* Ambient Glow Behind Card (Soft gold illumination at rest, radiant on hover) */}
-          <div
-            className="absolute -inset-2 rounded-[28px] pointer-events-none transition-all duration-500 blur-xl -z-10"
-            style={{
-              opacity: hovered ? 0.85 : 0.3,
-              background: 'radial-gradient(circle at 50% 40%, rgba(193,120,23,0.25), rgba(232,164,34,0.12), transparent 70%)',
-            }}
-          />
-
-          {/* Periodic Glass Reflection Sweep */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[24px] z-20">
-            <div
-              className={`absolute top-0 -bottom-20 left-0 w-[140px] bg-gradient-to-r from-transparent via-white/50 to-transparent ${hovered ? '' : 'animate-sweep'}`}
-              style={{
-                animationDelay: `${index * 2.2}s`,
-                transform: hovered ? 'translateX(200%)' : undefined,
-                transition: hovered ? 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : undefined,
-              }}
-            />
-          </div>
-
-          {/* Icon Container with Zoom & Glow */}
-          <div 
-            className="relative z-10 w-[76px] h-[76px] rounded-[20px] flex items-center justify-center mb-5 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-500 group-hover:scale-110 group-hover:rotate-2 group-hover:shadow-lg"
-            style={{ background: int.bg }}
-          >
-            <FloatingIcon index={index} hovered={hovered}>
-              {int.logo}
-            </FloatingIcon>
-
-            {/* Soft Icon Ambient Glow */}
-            <div 
-              className="absolute inset-0 rounded-[20px] transition-opacity duration-500 pointer-events-none"
-              style={{
-                opacity: hovered ? 0.35 : 0.1,
-                boxShadow: `0 0 20px ${int.accent || '#C17817'}`,
-              }}
-            />
-          </div>
-
-          {/* Title with Theme Accent color transition */}
-          <h3 className="relative z-10 text-[16px] font-bold text-[#1F1B16] mb-1.5 transition-colors duration-300 group-hover:text-[#C17817]">
-            {int.name}
-          </h3>
-          
-          {/* Description */}
-          <p className="relative z-10 text-[12.5px] text-[#8C8074] leading-snug max-w-[170px] transition-colors duration-300 group-hover:text-[#6B6258]">
-            {int.desc}
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function Integrations() {
-  return (
-    <section id="integrations" className="py-24 bg-[#FAFAF8] relative overflow-hidden">
-      {/* Background ambient grid pattern & radial blur */}
-      <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:'radial-gradient(#E8A422 1px, transparent 1px)',backgroundSize:'32px 32px', opacity: 0.03}} />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[250px] bg-[#C17817]/5 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="max-w-[1000px] mx-auto px-6 relative z-10">
-        <motion.h2 initial={{opacity:0,y:16}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.5}}
-          className="text-center text-[26px] font-black text-[#1F1B16] mb-14 tracking-tight">
-          All your tools. Connected seamlessly.
-        </motion.h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-          {INTEGRATIONS.map((int, i) => (
-            <IntegrationCard key={int.name} int={int} index={i} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ------------------------------ AI SECTION ------------------------------ */
 function AISection() {
   return (
@@ -761,10 +604,10 @@ const STEP_ICONS = [
 ];
 
 const STATS = [
-  {icon:'⊞',num:4,suffix:'+',label:'Connected Apps'},
-  {icon:'🔒',num:100,suffix:'%',label:'Secure & Private'},
-  {icon:'☰',num:1,suffix:'',label:'Unified Dashboard'},
-  {icon:'⟳',num:24,suffix:'/7',label:'Smart Sync'},
+  {icon:'⊞',num:4,suffix:'+',label:'Connected Apps',desc:'All your favorite tools in one place.'},
+  {icon:'🔒',num:100,suffix:'%',label:'Secure & Private',desc:'Enterprise-grade security and encryption.'},
+  {icon:'☰',num:1,suffix:'',label:'Unified Dashboard',desc:'Everything you need, organized for you.'},
+  {icon:'⟳',num:24,suffix:'/7',label:'Smart Sync',desc:"Real-time updates so you're always ready."},
 ];
 
 function AnimatedCounter({ target, suffix = '', start }: { target: number; suffix?: string; start: boolean }) {
@@ -807,17 +650,25 @@ function HowItWorks() {
 
   return (
     <section id="how-it-works" ref={sectionRef} className="py-24 bg-[#FDFAF6]">
-      <div className="max-w-[1000px] mx-auto px-6">
-        <motion.h2 initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
+      <div className="max-w-[1100px] mx-auto px-6">
+        <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
           transition={{duration:0.5,ease:'easeOut'}}
-          className="text-center text-[26px] font-black text-[#1F1B16] mb-16 tracking-tight">
-          How AURA works
-        </motion.h2>
+          className="text-center mb-16">
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FDF6EC] border border-[#E8C98A]/50 text-[#C17817] text-xs font-bold uppercase tracking-widest mb-5">
+            How AURA works
+          </span>
+          <h2 className="text-[34px] md:text-[40px] font-black text-[#1F1B16] tracking-tight mb-4">
+            Your day, simplified in <span className="text-[#C17817]">4 steps</span>
+          </h2>
+          <p className="text-[#6B6258] text-base max-w-xl mx-auto">
+            AURA connects your tools, organizes your data and helps you focus on what matters.
+          </p>
+        </motion.div>
 
         {/* Steps */}
         <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Connector line with golden pulse */}
-          <div className="hidden md:block absolute top-[34px] left-[16%] right-[16%] h-0">
+          <div className="hidden md:block absolute top-[15px] left-[16%] right-[16%] h-0">
             {/* Base dashed line */}
             <div className="absolute inset-0 border-t border-dashed border-[#DDD5C8]"/>
             {/* Golden pulse traveling left to right */}
@@ -850,14 +701,19 @@ function HowItWorks() {
 
             return (
               <motion.div key={s.label}
-                className="flex flex-col items-center text-center group">
+                className="relative flex flex-col items-center text-center group">
+                {/* Step number badge */}
+                <div className="absolute top-0 left-0 w-8 h-8 rounded-full border border-[#E8C98A] bg-[#FDF6EC] flex items-center justify-center text-[11px] font-bold text-[#C17817]">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+
                 {/* Icon container */}
                 <motion.div
                   initial={{opacity:0,y:20,scale:0.8}}
                   animate={isActivated ? {opacity:1,y:0,scale:1} : {opacity:0,y:20,scale:0.8}}
                   transition={{duration:0.5,ease:[0.22,1,0.36,1]}}
                   whileHover={{scale:1.1,rotate:5}}
-                  className={`w-[68px] h-[68px] rounded-[18px] flex items-center justify-center mb-4 shadow-sm relative z-10 transition-all duration-500 ${
+                  className={`w-[68px] h-[68px] rounded-[18px] flex items-center justify-center mt-9 mb-4 shadow-sm relative z-10 transition-all duration-500 ${
                     isActivated
                       ? 'bg-[#FDF4E7] border border-[#EDD9A3] shadow-[0_0_20px_rgba(193,120,23,0.15)]'
                       : 'bg-[#F5F0E8]/60 border border-[#E5DED5] opacity-40'
@@ -904,25 +760,38 @@ function HowItWorks() {
           })}
         </div>
 
+        {/* Integrations flow diagram */}
+        <motion.div
+          initial={{opacity:0,y:24}}
+          whileInView={{opacity:1,y:0}}
+          viewport={{once:true}}
+          transition={{duration:0.6,ease:'easeOut'}}
+          className="mt-16">
+          <IntegrationFlowDiagram />
+        </motion.div>
+
         {/* Stats - activate after pulse completes */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mt-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
           {STATS.map((s,i)=>(
             <motion.div key={s.label}
               initial={{opacity:0,y:24,scale:0.96}}
               animate={statsActive ? {opacity:1,y:0,scale:1} : {opacity:0,y:24,scale:0.96}}
               transition={{delay:i*0.12,duration:0.5,ease:[0.22,1,0.36,1]}}
               whileHover={{y:-5,boxShadow:'0 16px 40px rgba(31,27,22,0.08)'}}
-              className="bg-white rounded-[20px] p-6 border border-[#EDE8E0] shadow-sm hover:shadow-md flex items-center gap-4 transition-all duration-300 group">
-              <motion.div
-                whileHover={{scale:1.1,rotate:-5}}
-                transition={{duration:0.3}}
-                className="w-12 h-12 rounded-xl bg-[#FDF4E7] flex items-center justify-center text-2xl shrink-0 group-hover:shadow-md transition-shadow duration-300">
-                {s.icon}
-              </motion.div>
-              <div>
-                <AnimatedCounter target={s.num} suffix={s.suffix} start={statsActive} />
-                <div className="text-[11px] text-[#9B8F85] font-medium mt-0.5">{s.label}</div>
+              className="bg-white rounded-[20px] p-6 border border-[#EDE8E0] shadow-sm hover:shadow-md transition-all duration-300 group">
+              <div className="flex items-center gap-4">
+                <motion.div
+                  whileHover={{scale:1.1,rotate:-5}}
+                  transition={{duration:0.3}}
+                  className="w-12 h-12 rounded-xl bg-[#FDF4E7] flex items-center justify-center text-2xl shrink-0 group-hover:shadow-md transition-shadow duration-300">
+                  {s.icon}
+                </motion.div>
+                <div>
+                  <AnimatedCounter target={s.num} suffix={s.suffix} start={statsActive} />
+                  <div className="text-[13px] font-bold text-[#1F1B16] mt-0.5">{s.label}</div>
+                </div>
               </div>
+              <p className="text-[12px] text-[#9B8F85] mt-3 leading-relaxed">{s.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -933,97 +802,104 @@ function HowItWorks() {
 
 /* ----------------------------- TESTIMONIALS ----------------------------- */
 const TESTIMONIALS = [
-  {name:'Priya Sharma',role:'Product Designer',avatarColor:'#C17817',initials:'PS',quote:'"AURA completely changed how I manage my work. I love the clean interface — everything is exactly where I expect it to be."'},
-  {name:'Rajesh Kumar',role:'Software Engineer',avatarColor:'#E8A422',initials:'RK',quote:'"The AI summary every morning saves me so much time. Very professional and well-designed portal. Highly recommended!"'},
+  {name:'Priya Sharma',role:'Product Designer',avatarColor:'#C97A0A',initials:'PS',quote:'"AURA completely changed how I manage my work. I love the clean interface — everything is exactly where I expect it to be."'},
+  {name:'Rajesh Kumar',role:'Software Engineer',avatarColor:'#D89B1D',initials:'RK',quote:'"The AI summary every morning saves me so much time. Very professional and well-designed portal. Highly recommended!"'},
   {name:'Ms. Anita Desai',role:'Project Manager',avatarColor:'#A86510',initials:'AD',quote:'"Managing my team and schedule used to take hours. Now the approval chain runs automatically and I get notified in real time."'},
   {name:'David L.',role:'Startup Founder',avatarColor:'#D4942A',initials:'DL',quote:'"Finally, a tool that brings everything together in one clean dashboard. The enquiry process was smooth and I got a reference number instantly."'},
   {name:'Sarah K.',role:'Freelancer',avatarColor:'#1F1B16',initials:'SK',quote:'"I love the seamless integration. Paying fees and checking announcements is so easy now. It just works flawlessly."'},
   {name:'Vikram M.',role:'Marketing Lead',avatarColor:'#6B6258',initials:'VM',quote:'"The best productivity tool I have used in years. It keeps my entire workflow organized without any unnecessary clutter."'},
 ];
 
-function TestimonialCard({ t, i, isActive }: { t: typeof TESTIMONIALS[0]; i: number; isActive: boolean }) {
-  const [hovered, setHovered] = useState(false);
+// Sample points along the background arc's quadratic bezier so the glowing
+// dots can be animated across it via keyframes, sidestepping CSS
+// offset-path (still spotty in Safari).
+function sampleQuadraticCurve(p0: [number, number], p1: [number, number], p2: [number, number], steps: number) {
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    pts.push({
+      x: (1 - t) ** 2 * p0[0] + 2 * (1 - t) * t * p1[0] + t ** 2 * p2[0],
+      y: (1 - t) ** 2 * p0[1] + 2 * (1 - t) * t * p1[1] + t ** 2 * p2[1],
+    });
+  }
+  return pts;
+}
+const CURVE_POINTS = sampleQuadraticCurve([40, 78], [600, -8], [1160, 78], 40);
+const CURVE_XS = CURVE_POINTS.map(p => p.x);
+const CURVE_YS = CURVE_POINTS.map(p => p.y);
+
+function FloatingCurveDot({ delay, radius, color }: { delay: number; radius: number; color: string }) {
+  return (
+    <motion.circle
+      r={radius}
+      fill={color}
+      style={{ filter: `drop-shadow(0 0 6px ${color})` }}
+      initial={{ cx: CURVE_XS[0], cy: CURVE_YS[0], opacity: 0 }}
+      animate={{ cx: CURVE_XS, cy: CURVE_YS, opacity: [0, 1, 1, 1, 0] }}
+      transition={{ duration: 10, repeat: Infinity, ease: 'linear', delay }}
+    />
+  );
+}
+
+// Exactly 3 complete cards on screen at once: the center card pops up in
+// scale, the two neighbors stay at their natural (unshrunk) size but sit
+// lower in the stack and dimmed, and anything beyond that is invisible —
+// no partial/clipped edge cards.
+function cardTier(distance: number) {
+  if (distance === 0) return { scale: 1.06, opacity: 1, y: -16, zIndex: 30, shadow: '0 30px 60px rgba(230,170,40,0.25), 0 18px 30px rgba(17,17,17,0.12)' };
+  if (distance === 1) return { scale: 1, opacity: 0.6, y: 0, zIndex: 10, shadow: '0 20px 25px -5px rgba(17,17,17,0.1), 0 8px 10px -6px rgba(17,17,17,0.1)' };
+  return { scale: 1, opacity: 0, y: 0, zIndex: 0, shadow: 'none' };
+}
+
+function TestimonialCard({ t, distance }: { t: typeof TESTIMONIALS[0]; distance: number }) {
+  const isActive = distance === 0;
+  const tier = cardTier(distance);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: (i % TESTIMONIALS.length) * 0.12 }}
-      className="w-[85vw] md:w-[360px] lg:w-[378px] shrink-0"
+      initial={false}
+      animate={{ scale: tier.scale, opacity: tier.opacity, y: tier.y, boxShadow: tier.shadow }}
+      whileHover={isActive ? { y: tier.y - 6 } : undefined}
+      transition={{ duration: 0.8, ease: 'easeInOut' }}
+      style={{ zIndex: tier.zIndex, willChange: 'transform, opacity, box-shadow' }}
+      className={`w-[85vw] sm:w-[380px] md:w-[260px] lg:w-[320px] xl:w-[340px] shrink-0 transform-gpu ${isActive ? '' : 'pointer-events-none'}`}
     >
-      <div className="h-full animate-float-card" style={{ animationDelay: `${(i % 3) * 2}s` }}>
-        <div 
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          className="h-full w-full bg-white border-0 rounded-[22px] p-8 md:p-9 flex flex-col shadow-[0_16px_45px_rgba(31,27,22,0.08),_0_4px_16px_rgba(0,0,0,0.03)] hover:shadow-[0_30px_70px_rgba(193,120,23,0.22),_0_12px_28px_rgba(31,27,22,0.08)] hover:-translate-y-[8px] hover:scale-[1.02] transition-all duration-500 relative group overflow-hidden cursor-default z-10"
-        >
-          {/* Full-Width Top Colored Accent Line with Website Theme Color (Exact match to reference image) */}
-          <div 
-            className="absolute top-0 inset-x-0 h-[4px] bg-gradient-to-r from-[#C17817] via-[#E8A422] to-[#C17817] rounded-t-[22px] transition-all duration-500 z-30"
-            style={{
-              boxShadow: hovered ? '0 2px 14px rgba(193,120,23,0.7)' : '0 1px 4px rgba(193,120,23,0.3)',
-            }}
-          />
-
-          {/* Website Theme Gradient Background Fill Appearance on Hover (Exact match to reference image) */}
-          <div 
-            className="absolute inset-0 rounded-[22px] pointer-events-none transition-opacity duration-500 bg-gradient-to-b from-[#FDF7EE] via-[#FDF3E5]/75 to-white z-0"
-            style={{ opacity: hovered ? 1 : 0 }} 
-          />
-
-          {/* Radiant Ambient Glow Behind Card on Hover */}
+      <div className={`relative h-full bg-white rounded-3xl border p-8 flex flex-col overflow-hidden ${isActive ? 'border-[#D89B1D]/35' : 'border-neutral-200'}`}>
+        {/* Soft gold glow, active card only */}
+        {isActive && (
           <div
-            className="absolute -inset-2 rounded-[26px] pointer-events-none transition-opacity duration-500 blur-xl -z-10"
-            style={{
-              opacity: hovered ? 0.8 : 0,
-              background: 'radial-gradient(circle at 50% 30%, rgba(193,120,23,0.22), rgba(232,164,34,0.12), transparent 70%)',
-            }}
+            className="absolute -inset-6 -z-10 rounded-[40px] blur-2xl pointer-events-none"
+            style={{ background: 'radial-gradient(circle at 50% 30%, rgba(216,155,29,0.28), rgba(243,201,107,0.12), transparent 70%)' }}
           />
+        )}
 
-          {/* Animated Glass Reflection Sweep */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-[22px] z-20">
-            <div 
-              className={`absolute top-0 -bottom-20 left-0 w-[150px] bg-gradient-to-r from-transparent via-white/50 to-transparent ${hovered ? '' : 'animate-sweep'}`}
-              style={{
-                animationDelay: `${(i % TESTIMONIALS.length) * 1.5}s`,
-                transform: hovered ? 'translateX(200%)' : undefined,
-                transition: hovered ? 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)' : undefined,
-              }} 
-            />
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex gap-1">
+            {[...Array(5)].map((_, j) => (
+              <svg key={j} className="w-[18px] h-[18px] text-[#D89B1D]" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
           </div>
+          <svg className="w-9 h-9 text-neutral-100" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+          </svg>
+        </div>
 
-          {/* Card Content Header */}
-          <div className="flex justify-between items-start mb-6 relative z-10">
-            <div className="flex gap-1.5">
-              {[...Array(5)].map((_, j) => (
-                <svg key={j} className={`w-[18px] h-[18px] text-[#F59E0B] origin-center ${isActive ? 'animate-shimmer-star' : ''}`} style={isActive ? { animationDelay: `${j * 0.15}s` } : {}} viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <svg className="w-8 h-8 text-[#F3F4F6] transition-colors duration-500 group-hover:text-[#C17817]/35" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-            </svg>
+        <p className="text-[15px] text-neutral-700 leading-relaxed font-medium flex-1">
+          {t.quote}
+        </p>
+
+        <div className="border-t border-neutral-100 pt-5 mt-6 flex items-center gap-3.5">
+          <div
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white text-[13px] font-bold shadow-sm shrink-0"
+            style={{ backgroundColor: t.avatarColor }}
+          >
+            {t.initials}
           </div>
-          
-          {/* Review Text */}
-          <p className="text-[14.5px] md:text-[15px] text-[#4B5563] leading-relaxed font-medium flex-1 relative z-10">
-            {t.quote}
-          </p>
-          
-          {/* Author Profile */}
-          <div className="border-t border-[#F3F4F6] pt-5 mt-auto flex items-center gap-3.5 relative z-10">
-            <div 
-              className="w-11 h-11 rounded-[14px] flex items-center justify-center text-white text-[13px] font-bold shadow-sm transition-all duration-500 group-hover:scale-105 group-hover:ring-4 group-hover:ring-[#C17817]/25" 
-              style={{backgroundColor: t.avatarColor}}
-            >
-              {t.initials}
-            </div>
-            <div>
-              <div className="text-[14px] font-bold text-[#1F1B16] transition-colors duration-300 group-hover:text-[#C17817]">{t.name}</div>
-              <div className="text-[12px] text-[#9B8F85] font-medium mt-0.5">{t.role}</div>
-            </div>
+          <div>
+            <div className="text-[14px] font-bold text-[#111111]">{t.name}</div>
+            <div className="text-[12px] text-[#6B7280] font-medium mt-0.5">{t.role}</div>
           </div>
         </div>
       </div>
@@ -1035,21 +911,23 @@ function Testimonials() {
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
   const [activeDot, setActiveDot] = useState(0);
-  
+  const [activeIndex, setActiveIndex] = useState(TESTIMONIALS.length);
+
   const controls = useAnimation();
   const trackRef = useRef<HTMLDivElement>(null);
   const indexRef = useRef(TESTIMONIALS.length);
   const isAnimating = useRef(false);
-  
+
   // We need 3 sets to allow looping backward and forward seamlessly.
   const extendedItems = [...TESTIMONIALS, ...TESTIMONIALS, ...TESTIMONIALS];
 
   const slideTo = useCallback(async (newIndex: number, immediate = false) => {
     if (!trackRef.current) return;
-    
+
     isAnimating.current = true;
     indexRef.current = newIndex;
-    
+    setActiveIndex(newIndex);
+
     // Update dot safely using modulo
     const dotIndex = newIndex % TESTIMONIALS.length;
     setActiveDot(dotIndex < 0 ? TESTIMONIALS.length + dotIndex : dotIndex);
@@ -1059,41 +937,54 @@ function Testimonials() {
     const gap = 32; // Assuming gap-8
     const stepWidth = cardWidth + gap;
 
+    // Center the active card in the viewport instead of flush-left, so its
+    // neighbors peek in symmetrically on both sides.
+    const viewportWidth = trackRef.current.parentElement?.getBoundingClientRect().width ?? cardWidth;
+    const centerOffset = (viewportWidth - cardWidth) / 2;
+
     if (immediate) {
-      controls.set({ x: -(stepWidth * newIndex) });
+      controls.set({ x: centerOffset - stepWidth * newIndex });
       isAnimating.current = false;
     } else {
       await controls.start({
-        x: -(stepWidth * newIndex),
-        transition: { duration: 1.0, ease: [0.25, 1, 0.36, 1] }
+        x: centerOffset - stepWidth * newIndex,
+        transition: { duration: 0.8, ease: 'easeInOut' }
       });
 
       // Seamless snap if we exceed bounds
       if (indexRef.current >= TESTIMONIALS.length * 2) {
         indexRef.current -= TESTIMONIALS.length;
-        controls.set({ x: -(stepWidth * indexRef.current) });
+        setActiveIndex(indexRef.current);
+        controls.set({ x: centerOffset - stepWidth * indexRef.current });
       } else if (indexRef.current <= 0) {
         indexRef.current += TESTIMONIALS.length;
-        controls.set({ x: -(stepWidth * indexRef.current) });
+        setActiveIndex(indexRef.current);
+        controls.set({ x: centerOffset - stepWidth * indexRef.current });
       }
       isAnimating.current = false;
     }
   }, [controls]);
 
-  // Initial position and window resize handler
+  // Keep the active card centered whenever the viewport's actual rendered size
+  // changes for any reason (window resize, font load, hot-reload layout settle, etc.)
+  // — a plain `resize` listener only fires on window dimension changes, which misses
+  // internal layout shifts, so we watch the container element itself instead.
   useEffect(() => {
+    const viewportEl = trackRef.current?.parentElement;
+    if (!viewportEl) return;
+
     let timeout: NodeJS.Timeout;
-    const handleResize = () => {
+    const recenter = () => {
       clearTimeout(timeout);
       timeout = setTimeout(() => slideTo(indexRef.current, true), 100);
     };
-    
-    // Set initial position
+
     slideTo(indexRef.current, true);
-    
-    window.addEventListener('resize', handleResize);
+
+    const observer = new ResizeObserver(recenter);
+    observer.observe(viewportEl);
     return () => {
-      window.removeEventListener('resize', handleResize);
+      observer.disconnect();
       clearTimeout(timeout);
     };
   }, [slideTo]);
@@ -1101,7 +992,7 @@ function Testimonials() {
   // Autoplay interval
   useEffect(() => {
     if (!isPlaying || isHovered) return;
-    
+
     const timer = setInterval(() => {
       if (!isAnimating.current) {
         slideTo(indexRef.current + 1);
@@ -1119,7 +1010,9 @@ function Testimonials() {
   };
 
   return (
-    <section className="py-40 md:py-48 bg-[#FDFAF6] relative overflow-hidden">
+    <section className="py-40 md:py-48 bg-[#FFFDF9] relative overflow-hidden">
+      {/* Shared with the Integrations section's cards above — keeping these two
+          keyframe sets defined here since Testimonials always renders on the page. */}
       <style dangerouslySetInnerHTML={{__html:`
         @keyframes float-card {
           0%, 100% { transform: translateY(0); }
@@ -1135,89 +1028,120 @@ function Testimonials() {
         .animate-sweep {
           animation: sweep-reflection 11s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-        @keyframes shimmer-star {
-          0%, 100% { opacity: 1; transform: scale(1); filter: brightness(1); }
-          50% { opacity: 0.6; transform: scale(1.15); filter: brightness(1.2); }
-        }
-        .animate-shimmer-star {
-          animation: shimmer-star 2.5s ease-in-out infinite;
-        }
       `}} />
-      <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:'radial-gradient(#E8A422 1px, transparent 1px)',backgroundSize:'32px 32px', opacity: 0.03}} />
+      <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:'radial-gradient(#D89B1D 1px, transparent 1px)',backgroundSize:'32px 32px', opacity: 0.03}} />
 
       <div className="max-w-[1200px] mx-auto text-center mb-16 relative z-10 px-6">
         <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}>
-          <h3 className="text-[12px] font-bold tracking-[0.2em] text-[#C17817] uppercase mb-4">
+          <h3 className="text-[12px] font-bold tracking-[0.2em] text-[#D89B1D] uppercase mb-4">
             Testimonials
           </h3>
-          <h2 className="text-[36px] md:text-[48px] font-black text-[#1F1B16] tracking-tight mb-5">
-            Loved by the <span className="bg-gradient-to-r from-[#C17817] to-[#D4942A] bg-clip-text text-transparent">AURA community</span>
+          <h2 className="text-[36px] md:text-[48px] font-black text-[#111111] tracking-tight mb-5">
+            Loved by the <span className="bg-gradient-to-r from-[#F3C96B] to-[#C97A0A] bg-clip-text text-transparent">AURA community</span>
           </h2>
-          <p className="text-[16px] md:text-[18px] text-[#6B6258] font-medium max-w-[600px] mx-auto">
+          <p className="text-[16px] md:text-[18px] text-[#6B7280] font-medium max-w-full md:whitespace-nowrap mx-auto">
             Hear from professionals, teams, and individuals who use AURA every day.
           </p>
         </motion.div>
       </div>
 
-      <div 
+      <div
         className="w-full relative z-10"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Main Carousel Track Container - precisely fits 3 cards on desktop */}
-        <div className="max-w-[1200px] mx-auto overflow-hidden px-4 md:px-0">
-          <motion.div
-            ref={trackRef}
-            animate={controls}
-            className="flex gap-8 w-max"
-          >
-            {extendedItems.map((t, i) => {
-              const isActive = (i % TESTIMONIALS.length) === activeDot;
-              return <TestimonialCard key={i} t={t} i={i} isActive={isActive} />;
-            })}
-          </motion.div>
-        </div>
+        <div className="w-[94vw] max-w-[1200px] mx-auto relative">
+          {/* Very soft radial gradient glow seated behind the center card */}
+          <div
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[420px] pointer-events-none -z-10"
+            style={{ background: 'radial-gradient(circle, rgba(243,201,107,0.18), rgba(201,122,10,0.07) 45%, transparent 75%)', filter: 'blur(50px)' }}
+          />
 
-        {/* Carousel Controls */}
-        <div className="flex items-center justify-center gap-4 mt-14 relative z-20">
-          <button 
-            onClick={handlePrev} 
-            className="w-10 h-10 rounded-[14px] border border-[#E5E7EB] flex items-center justify-center bg-white text-[#9B8F85] hover:text-[#C17817] hover:border-[#C17817]/40 hover:bg-[#FDF4E7] transition-all shadow-sm"
+          {/* Decorative arc connecting the side dot markers, arching behind the cards,
+              with three glowing dots drifting endlessly along the curve. */}
+          <svg
+            className="absolute inset-x-0 -top-10 w-full h-28 pointer-events-none hidden md:block overflow-visible"
+            viewBox="0 0 1200 90"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path d="M 40 78 Q 600 -8 1160 78" stroke="#D89B1D" strokeWidth="1.5" opacity="0.25" />
+            <circle cx="40" cy="78" r="4" fill="#C97A0A" className="animate-pulse" />
+            <circle cx="600" cy="2" r="3" fill="#D89B1D" opacity="0.7" className="animate-pulse" style={{ animationDelay: '0.6s' }} />
+            <circle cx="1160" cy="78" r="4" fill="#C97A0A" className="animate-pulse" style={{ animationDelay: '1.2s' }} />
+            <FloatingCurveDot delay={0} radius={3.5} color="#F3C96B" />
+            <FloatingCurveDot delay={3.3} radius={3} color="#D89B1D" />
+            <FloatingCurveDot delay={6.6} radius={3.5} color="#C97A0A" />
+          </svg>
+
+          {/* Peek Carousel Viewport - exactly 3 complete cards: popped-up center, two same-size dimmed neighbors.
+              Extra vertical padding gives the scaled-up, lifted center card room to breathe so it never
+              clips against this wrapper's overflow-hidden edge. */}
+          <div className="overflow-hidden relative z-10 pt-12 pb-6 -mt-12">
+            <motion.div
+              ref={trackRef}
+              animate={controls}
+              className="flex gap-8 w-max transform-gpu"
+              style={{ willChange: 'transform' }}
+            >
+              {extendedItems.map((t, i) => (
+                <TestimonialCard key={i} t={t} distance={Math.abs(i - activeIndex)} />
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Prev/Next - floating glass circles that breathe gently at rest */}
+          <motion.button
+            onClick={handlePrev}
+            aria-label="Previous testimonial"
+            animate={{ scale: [1, 1.035, 1] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.96 }}
+            className="hidden md:flex absolute -left-2 lg:-left-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full items-center justify-center bg-white/80 backdrop-blur-md border border-white/60 text-neutral-500 hover:text-[#C97A0A] hover:bg-white shadow-[0_10px_30px_rgba(17,17,17,0.12)] transition-colors z-30 transform-gpu"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
-          </button>
-          
+          </motion.button>
+          <motion.button
+            onClick={handleNext}
+            aria-label="Next testimonial"
+            animate={{ scale: [1, 1.035, 1] }}
+            transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut', delay: 1.7 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.96 }}
+            className="hidden md:flex absolute -right-2 lg:-right-5 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full items-center justify-center bg-white/80 backdrop-blur-md border border-white/60 text-neutral-500 hover:text-[#C97A0A] hover:bg-white shadow-[0_10px_30px_rgba(17,17,17,0.12)] transition-colors z-30 transform-gpu"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+          </motion.button>
+        </div>
+
+        {/* Dots, then a standalone Play/Pause pill beneath */}
+        <div className="flex flex-col items-center gap-5 mt-14 relative z-20">
           <div className="flex items-center gap-2">
             {TESTIMONIALS.map((_, i) => (
-              <button 
+              <motion.button
                 key={i}
                 onClick={() => slideTo(i + TESTIMONIALS.length)}
-                className={`transition-all duration-500 rounded-full ${
-                  activeDot === i 
-                    ? 'w-6 h-2 bg-[#C17817]' 
-                    : 'w-2 h-2 bg-[#E5E7EB] hover:bg-[#C17817]/50'
+                animate={{ width: activeDot === i ? 32 : 8 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+                className={`h-2 rounded-full transform-gpu ${
+                  activeDot === i ? 'bg-gradient-to-r from-[#F3C96B] to-[#C97A0A]' : 'bg-neutral-300 hover:bg-[#D89B1D]/50'
                 }`}
                 aria-label={`Go to testimonial ${i + 1}`}
               />
             ))}
           </div>
 
-          <button 
-            onClick={handleNext} 
-            className="w-10 h-10 rounded-[14px] border border-[#E5E7EB] flex items-center justify-center bg-white text-[#9B8F85] hover:text-[#C17817] hover:border-[#C17817]/40 hover:bg-[#FDF4E7] transition-all shadow-sm"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
-          </button>
-
-          <button 
-            onClick={() => setIsPlaying(!isPlaying)} 
-            className="w-10 h-10 rounded-[14px] border border-[#E5E7EB] flex items-center justify-center bg-white text-[#9B8F85] hover:text-[#C17817] hover:border-[#C17817]/40 hover:bg-[#FDF4E7] transition-all shadow-sm ml-2"
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white text-[#6B7280] hover:text-[#C97A0A] transition-colors shadow-[0_10px_24px_rgba(17,17,17,0.08)] text-[13px] font-semibold"
           >
             {isPlaying ? (
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
+              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/></svg>
             ) : (
-              <svg className="w-4 h-4 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg className="w-3.5 h-3.5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             )}
+            {isPlaying ? 'Pause' : 'Play'}
           </button>
         </div>
       </div>
@@ -1394,7 +1318,7 @@ export default function Home() {
       <main>
         <Hero/>
         <TrustedBy/>
-        <Integrations/>
+        <IntegrationsOrbitSection/>
         <AISection/>
         <HowItWorks/>
         <Testimonials/>
