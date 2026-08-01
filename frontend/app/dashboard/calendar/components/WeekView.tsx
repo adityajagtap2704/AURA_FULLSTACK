@@ -2,19 +2,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Event } from '@/types';
 import { Video, MapPin } from 'lucide-react';
+import { getEventAccent } from '@/lib/calendarColors';
 
 interface WeekViewProps { currentDate: Date; events: Event[]; }
-
-const ACCENT: Record<string, { hex: string; lightBg: string; lightText: string; darkText: string }> = {
-  orange: { hex:'#F97316', lightBg:'#FFF4EA', lightText:'#92350A', darkText:'#FDBA74' },
-  blue:   { hex:'#3B82F6', lightBg:'#EEF4FF', lightText:'#1D4ED8', darkText:'#93C5FD' },
-  green:  { hex:'#10B981', lightBg:'#EDFAF4', lightText:'#065F46', darkText:'#6EE7B7' },
-  purple: { hex:'#8B5CF6', lightBg:'#F4F0FF', lightText:'#5B21B6', darkText:'#C4B5FD' },
-  yellow: { hex:'#F59E0B', lightBg:'#FFFBEA', lightText:'#92400E', darkText:'#FDE68A' },
-  red:    { hex:'#EF4444', lightBg:'#FFF1F1', lightText:'#991B1B', darkText:'#FCA5A5' },
-  pink:   { hex:'#EC4899', lightBg:'#FDF2F8', lightText:'#9D174D', darkText:'#F9A8D4' },
-  grey:   { hex:'#6B7280', lightBg:'#F3F4F6', lightText:'#374151', darkText:'#D1D5DB' },
-};
 
 const GoogleIcon = () => (
   <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
@@ -39,31 +29,27 @@ const parseSafeDate = (s: string) => {
 export default function WeekView({ currentDate, events }: WeekViewProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [now, setNow] = useState(new Date());
-  const startHour = 6, endHour = 22, totalHours = endHour - startHour + 1, hourH = 64;
+  const SH = 6, EH = 22, TOTAL = EH - SH + 1, HH = 64;
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(t);
   }, []);
-
   useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = (8 - startHour) * hourH;
+    if (scrollRef.current) scrollRef.current.scrollTop = (8 - SH) * HH;
   }, []);
 
-  const sunDate = new Date(currentDate);
-  sunDate.setDate(currentDate.getDate() - currentDate.getDay());
-  const weekDays = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(sunDate); d.setDate(sunDate.getDate() + i); return d;
-  });
+  const sun = new Date(currentDate);
+  sun.setDate(currentDate.getDate() - currentDate.getDay());
+  const weekDays = Array.from({ length: 7 }, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate() + i); return d; });
 
-  const getEventsForDay = (d: Date) => events.filter(e => {
+  const getDayEvts = (d: Date) => events.filter(e => {
     const s = parseSafeDate(e.start_time);
     return s.getFullYear() === d.getFullYear() && s.getMonth() === d.getMonth() && s.getDate() === d.getDate();
   });
 
   const fmtTime = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-  const hours = Array.from({ length: totalHours }, (_, i) => startHour + i);
+  const hours = Array.from({ length: TOTAL }, (_, i) => SH + i);
   const today = new Date();
 
   const tzStr = (() => {
@@ -73,37 +59,37 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
 
   const timelinePos = (() => {
     const h = now.getHours(), m = now.getMinutes();
-    if (h < startHour || h > endHour) return null;
-    return ((h - startHour) + m / 60) * hourH;
+    if (h < SH || h > EH) return null;
+    return ((h - SH) + m / 60) * HH;
   })();
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden border border-border bg-card shadow-sm
                     select-none h-[580px] min-w-[720px] md:min-w-full">
       <style dangerouslySetInnerHTML={{ __html:`
-        .wk-scroll::-webkit-scrollbar{width:4px}
-        .wk-scroll::-webkit-scrollbar-track{background:transparent}
-        .wk-scroll::-webkit-scrollbar-thumb{background:rgba(183,121,43,0.25);border-radius:9999px}
-        .wk-scroll::-webkit-scrollbar-thumb:hover{background:rgba(183,121,43,0.45)}
+        .wk-s::-webkit-scrollbar{width:4px}
+        .wk-s::-webkit-scrollbar-track{background:transparent}
+        .wk-s::-webkit-scrollbar-thumb{background:rgba(183,121,43,0.25);border-radius:9999px}
+        .wk-s::-webkit-scrollbar-thumb:hover{background:rgba(183,121,43,0.45)}
       `}} />
 
       {/* Day headers */}
-      <div className="flex shrink-0 border-b border-border bg-muted/30 dark:bg-white/[0.02]">
+      <div className="flex shrink-0 border-b border-border bg-muted/25 dark:bg-white/[0.02]">
         <div className="w-[68px] shrink-0 border-r border-border flex items-center justify-center">
           <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{tzStr}</span>
         </div>
         <div className="flex-1 grid grid-cols-7">
           {weekDays.map((day, i) => {
-            const isToday = today.toDateString() === day.toDateString();
+            const isT = today.toDateString() === day.toDateString();
             return (
               <div key={i} className={`py-2.5 flex flex-col items-center border-r border-border last:border-r-0
-                ${isToday ? 'bg-[#F97316]/[0.07] dark:bg-[#F97316]/[0.08]' : ''}`}>
+                ${isT ? 'bg-[#F97316]/[0.06] dark:bg-[#F97316]/[0.07]' : ''}`}>
                 <span className={`text-[9px] font-black uppercase tracking-widest
-                  ${isToday ? 'text-[#F97316]' : 'text-muted-foreground'}`}>
+                  ${isT ? 'text-[#F97316]' : 'text-muted-foreground'}`}>
                   {day.toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
                 <span className={`mt-1 h-7 w-7 flex items-center justify-center rounded-full text-[14px] font-black
-                  ${isToday ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/40' : 'text-foreground'}`}>
+                  ${isT ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/40' : 'text-foreground'}`}>
                   {day.getDate()}
                 </span>
               </div>
@@ -112,82 +98,95 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
         </div>
       </div>
 
-      {/* Scrollable grid */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto relative wk-scroll bg-white dark:bg-background">
-        <div className="flex relative" style={{ height: `${totalHours * hourH + 20}px` }}>
+      {/* Scrollable body */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto relative wk-s bg-white dark:bg-background">
+        <div className="flex relative" style={{ height: `${TOTAL * HH + 20}px` }}>
 
-          {/* Hour labels */}
+          {/* Time labels */}
           <div className="w-[68px] shrink-0 border-r border-border relative bg-white dark:bg-background">
             {hours.map((h, i) => (
-              <div key={h} className="absolute right-3 text-[9px] font-bold text-muted-foreground/60 select-none"
-                   style={{ top: `${i === 0 ? 6 : i * hourH - 8}px` }}>
+              <div key={h} className="absolute right-3 text-[9px] font-bold text-muted-foreground/55 select-none"
+                   style={{ top: `${i === 0 ? 6 : i * HH - 8}px` }}>
                 {h === 12 ? '12 PM' : h > 12 ? `${h-12} PM` : `${h} AM`}
               </div>
             ))}
           </div>
 
-          {/* Grid body */}
+          {/* Grid */}
           <div className="flex-1 relative">
-            {/* Horizontal lines */}
+            {/* Hour lines */}
             {hours.map((_, i) => (
-              <div key={i} className="absolute w-full border-b border-border/40 dark:border-border/25"
-                   style={{ top: `${i * hourH}px` }} />
+              <div key={i} className="absolute w-full border-b border-border/35 dark:border-border/20"
+                   style={{ top: `${i * HH}px` }} />
             ))}
 
             {/* Columns */}
             <div className="absolute inset-0 grid grid-cols-7">
               {weekDays.map((day, di) => {
-                const isToday = today.toDateString() === day.toDateString();
-                const dayEvts = getEventsForDay(day);
+                const isT = today.toDateString() === day.toDateString();
+                const dayEvts = getDayEvts(day);
 
                 const mapped = dayEvts.map(e => {
                   const s = parseSafeDate(e.start_time);
                   const en = e.end_time ? parseSafeDate(e.end_time) : new Date(s.getTime() + 3600000);
                   const sh = s.getHours() + s.getMinutes() / 60;
                   const dur = (en.getTime() - s.getTime()) / 3600000;
-                  const top = Math.max(0, (sh - startHour) * hourH);
-                  const height = Math.max(28, Math.min((totalHours * hourH) - top, dur * hourH));
-                  return { ...e, top, height, startH: sh, endH: sh + dur, sDate: s, eDate: en };
-                }).filter(e => e.startH < endHour + 1 && e.endH > startHour);
+                  const top = Math.max(0, (sh - SH) * HH);
+                  const height = Math.max(28, Math.min((TOTAL * HH) - top, dur * HH));
+                  return { ...e, top, height, sh, eh: sh + dur, sDate: s, eDate: en };
+                }).filter(e => e.sh < EH + 1 && e.eh > SH);
 
+                // overlap grouping
                 const groups: typeof mapped[] = [];
                 mapped.forEach(ev => {
                   let placed = false;
                   for (const g of groups) {
-                    if (g.some(x => ev.startH < x.endH && ev.endH > x.startH)) { g.push(ev); placed = true; break; }
+                    if (g.some(x => ev.sh < x.eh && ev.eh > x.sh)) { g.push(ev); placed = true; break; }
                   }
                   if (!placed) groups.push([ev]);
                 });
                 const cards: any[] = [];
-                groups.forEach(g => g.forEach((ev, i) => cards.push({ ...ev, left: `${i * 100 / g.length}%`, width: `${100 / g.length - 2}%` })));
+                groups.forEach(g => g.forEach((ev, i) => cards.push({ ...ev, left: `${i*100/g.length}%`, width: `${100/g.length - 2}%` })));
 
                 return (
-                  <div key={di} className={`relative border-r border-border/40 last:border-r-0 h-full
-                    ${isToday ? 'bg-[#F97316]/[0.025] dark:bg-[#F97316]/[0.03]' : ''}`}>
+                  <div key={di} className={`relative border-r border-border/30 last:border-r-0 h-full
+                    ${isT ? 'bg-[#F97316]/[0.02] dark:bg-[#F97316]/[0.025]' : ''}`}>
                     {cards.map(card => {
-                      const a = ACCENT[card.color || 'orange'] || ACCENT.orange;
+                      const a = getEventAccent(card.id, card.title, card.color);
                       const hasMeet = !!card.meeting_link;
+
                       return (
                         <div key={card.id}
-                             style={{ top: `${card.top + 2}px`, height: `${card.height - 4}px`, left: card.left, width: card.width, background: a.lightBg, borderLeft: `3px solid ${a.hex}`, boxShadow: `0 1px 4px ${a.hex}20` }}
+                             style={{
+                               top: `${card.top + 2}px`,
+                               height: `${card.height - 4}px`,
+                               left: card.left,
+                               width: card.width,
+                             }}
                              className="absolute rounded-lg px-2 py-1.5 flex flex-col justify-between
                                         cursor-default overflow-hidden transition-all duration-150
-                                        hover:-translate-y-px hover:shadow-md dark:bg-opacity-0">
-                          {/* Dark mode overlay */}
-                          <div className="absolute inset-0 rounded-lg hidden dark:block"
-                               style={{ background: `rgba(30,30,30,0.95)`, borderLeft: `3px solid ${a.hex}` }} />
-                          <div className="relative z-10 flex flex-col gap-0.5">
-                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1"
-                                  style={{ color: a.lightText }}>
-                              <span className="dark:hidden flex items-center gap-1" style={{ color: a.lightText }}>
+                                        hover:-translate-y-px hover:shadow-md border-l-[2.5px]"
+                             style={{
+                               background: a.lightBg,
+                               borderLeftColor: a.hex,
+                               boxShadow: `0 1px 3px ${a.hex}18`,
+                             } as React.CSSProperties}>
+
+                          {/* Dark overlay */}
+                          <div className="absolute inset-0 rounded-lg pointer-events-none hidden dark:block"
+                               style={{ background: a.darkCardBg }} />
+
+                          <div className="relative z-10 flex flex-col gap-0.5 min-w-0">
+                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1">
+                              <span className="dark:hidden flex items-center gap-1 truncate" style={{ color: a.lightText }}>
                                 {card.source === 'google_calendar' && (
-                                  <span className="h-3.5 w-3.5 bg-white/80 rounded flex items-center justify-center shrink-0 shadow-sm">
+                                  <span className="h-3.5 w-3.5 bg-white/70 rounded flex items-center justify-center shrink-0">
                                     <GoogleIcon />
                                   </span>
                                 )}
                                 <span className="truncate">{card.title}</span>
                               </span>
-                              <span className="hidden dark:flex items-center gap-1" style={{ color: a.darkText }}>
+                              <span className="hidden dark:flex items-center gap-1 truncate" style={{ color: a.darkText }}>
                                 {card.source === 'google_calendar' && (
                                   <span className="h-3.5 w-3.5 bg-white/10 rounded flex items-center justify-center shrink-0">
                                     <GoogleIcon />
@@ -196,26 +195,27 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                                 <span className="truncate">{card.title}</span>
                               </span>
                             </span>
-                            <span className="text-[9px] font-semibold dark:hidden" style={{ color: a.lightText, opacity: 0.75 }}>
+                            <span className="text-[9px] font-semibold dark:hidden" style={{ color: a.lightText, opacity: 0.7 }}>
                               {fmtTime(card.sDate)}
                             </span>
-                            <span className="text-[9px] font-semibold hidden dark:block" style={{ color: a.darkText, opacity: 0.75 }}>
+                            <span className="text-[9px] font-semibold hidden dark:block" style={{ color: a.darkText, opacity: 0.7 }}>
                               {fmtTime(card.sDate)}
                             </span>
                           </div>
+
                           {card.height >= 52 && (
-                            <div className="relative z-10 flex items-center gap-1 text-[9px] overflow-hidden dark:hidden"
-                                 style={{ color: a.lightText, opacity: 0.7 }}>
-                              {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
-                            </div>
-                          )}
-                          {card.height >= 52 && (
-                            <div className="relative z-10 items-center gap-1 text-[9px] overflow-hidden hidden dark:flex"
-                                 style={{ color: a.darkText, opacity: 0.7 }}>
-                              {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
-                            </div>
+                            <>
+                              <div className="relative z-10 flex items-center gap-1 text-[9px] overflow-hidden dark:hidden"
+                                   style={{ color: a.lightText, opacity: 0.65 }}>
+                                {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
+                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
+                              </div>
+                              <div className="relative z-10 hidden dark:flex items-center gap-1 text-[9px] overflow-hidden"
+                                   style={{ color: a.darkText, opacity: 0.65 }}>
+                                {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
+                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
+                              </div>
+                            </>
                           )}
                         </div>
                       );
@@ -225,7 +225,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
               })}
             </div>
 
-            {/* Time line */}
+            {/* Current time line */}
             {timelinePos !== null && (
               <div className="absolute left-0 right-0 pointer-events-none z-20 flex items-center"
                    style={{ top: `${timelinePos}px` }}>
