@@ -1,19 +1,9 @@
 'use client';
 import { Clock, Video, Calendar, ArrowRight, CalendarOff } from 'lucide-react';
 import { Event } from '@/types';
+import { getEventAccent } from '@/lib/calendarColors';
 
 interface UpcomingEventsPanelProps { events: Event[]; onViewAllClick: () => void; }
-
-const ACCENT: Record<string, { hex: string; lightBg: string; lightText: string }> = {
-  orange: { hex:'#F97316', lightBg:'#FFF4EA', lightText:'#92350A' },
-  blue:   { hex:'#3B82F6', lightBg:'#EEF4FF', lightText:'#1D4ED8' },
-  green:  { hex:'#10B981', lightBg:'#EDFAF4', lightText:'#065F46' },
-  purple: { hex:'#8B5CF6', lightBg:'#F4F0FF', lightText:'#5B21B6' },
-  yellow: { hex:'#F59E0B', lightBg:'#FFFBEA', lightText:'#92400E' },
-  red:    { hex:'#EF4444', lightBg:'#FFF1F1', lightText:'#991B1B' },
-  pink:   { hex:'#EC4899', lightBg:'#FDF2F8', lightText:'#9D174D' },
-  grey:   { hex:'#6B7280', lightBg:'#F3F4F6', lightText:'#374151' },
-};
 
 const GoogleMeetLogo = () => (
   <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
@@ -40,7 +30,7 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
   const now = new Date();
   const upcoming = [...events]
     .filter(e => {
-      const start = new Date(now); start.setHours(0,0,0,0);
+      const start = new Date(now); start.setHours(0, 0, 0, 0);
       return parseSafeDate(e.start_time) >= start;
     })
     .sort((a, b) => parseSafeDate(a.start_time).getTime() - parseSafeDate(b.start_time).getTime())
@@ -59,22 +49,20 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border
-                      bg-gradient-to-r from-[#B7792B]/6 via-card to-card
-                      dark:from-[#C98A2E]/8 dark:via-card dark:to-card">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/25 dark:bg-white/[0.02]">
         <h3 className="text-[13px] font-black text-foreground tracking-tight">Upcoming Events</h3>
         {upcoming.length > 0 && (
           <span className="h-5 min-w-[1.25rem] px-1.5 rounded-full flex items-center justify-center
-                           text-[10px] font-black bg-[#F97316] text-white shadow shadow-[#F97316]/30">
+                           text-[10px] font-black bg-[#F97316] text-white shadow shadow-[#F97316]/25">
             {upcoming.length}
           </span>
         )}
       </div>
 
       {/* List */}
-      <div className="flex-1 divide-y divide-border/60 overflow-y-auto">
+      <div className="flex-1 divide-y divide-border/50 overflow-y-auto">
         {upcoming.length > 0 ? upcoming.map(event => {
-          const a = ACCENT[event.color || 'orange'] || ACCENT.orange;
+          const a = getEventAccent(event.id, event.title, event.color);
           const isGMeet = event.title.toLowerCase().includes('google meet') ||
                           event.meeting_link?.toLowerCase().includes('meet.google');
           const hasLink = !!event.meeting_link;
@@ -83,24 +71,26 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
 
           return (
             <div key={event.id}
-                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/30 dark:hover:bg-white/[0.03]
+                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 dark:hover:bg-white/[0.025]
                             transition-colors cursor-default group">
-              {/* Icon box */}
-              <div className="h-9 w-9 rounded-xl shrink-0 flex items-center justify-center border border-border
-                              bg-white dark:bg-[#1E1E1E] transition-transform group-hover:scale-105"
-                   style={{ boxShadow: `0 0 0 2px ${a.hex}20` }}>
-                {isGMeet ? <GoogleMeetLogo /> : <Calendar className="h-4 w-4" style={{ color: a.hex }} />}
+              {/* Icon */}
+              <div className="h-9 w-9 rounded-xl shrink-0 flex items-center justify-center border border-border/60
+                              transition-transform group-hover:scale-105"
+                   style={{ background: a.lightBg, boxShadow: `0 0 0 2px ${a.hex}18` }}>
+                {isGMeet
+                  ? <GoogleMeetLogo />
+                  : <Calendar className="h-4 w-4" style={{ color: a.hex }} />}
               </div>
 
-              {/* Text */}
+              {/* Details */}
               <div className="flex-1 min-w-0">
                 <p className="text-[12.5px] font-bold text-foreground truncate leading-snug
-                               group-hover:text-[#B7792B] dark:group-hover:text-[#C98A2E] transition-colors">
+                               group-hover:text-primary transition-colors">
                   {event.title}
                 </p>
                 <div className="flex items-center gap-1 mt-0.5">
-                  <Clock className="h-3 w-3 shrink-0 text-muted-foreground/50" />
-                  <span className="text-[11px] text-muted-foreground">
+                  <Clock className="h-3 w-3 shrink-0 text-muted-foreground/45" />
+                  <span className="text-[10.5px] text-muted-foreground">
                     <span className={`font-semibold ${isToday ? 'text-[#F97316]' : ''}`}>{day}</span>
                     {' · '}{fmtTime(event.start_time)}
                   </span>
@@ -110,20 +100,20 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
                         style={{ background: a.lightBg, color: a.lightText }}>
                     {event.source === 'google_calendar' ? 'Google' : 'Aura'}
                   </span>
-                  <span className="text-[10px] text-muted-foreground/55">
-                    {hasLink ? (isGMeet ? '· Meet' : '· Video') : '· Calendar'}
+                  <span className="text-[10px] text-muted-foreground/50">
+                    {hasLink ? (isGMeet ? '· Meet' : '· Video') : '· Calendar event'}
                   </span>
                 </div>
               </div>
 
-              {/* Join button */}
+              {/* Join btn */}
               {hasLink && (
                 <a href={event.meeting_link!} target="_blank" rel="noreferrer"
                    onClick={e => e.stopPropagation()}
                    className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center
                               bg-[#3B82F6]/10 dark:bg-[#3B82F6]/15 text-[#3B82F6]
                               hover:bg-[#3B82F6]/20 transition-colors"
-                   title="Join meeting">
+                   title="Join">
                   <Video className="h-3.5 w-3.5" />
                 </a>
               )}
@@ -132,20 +122,19 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
         }) : (
           <div className="flex flex-col items-center py-10 px-4 text-center">
             <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
-              <CalendarOff className="h-5 w-5 text-muted-foreground/40" />
+              <CalendarOff className="h-5 w-5 text-muted-foreground/35" />
             </div>
             <p className="text-xs font-bold text-foreground/70">No upcoming events</p>
-            <p className="text-[10.5px] text-muted-foreground/55 mt-1">Sync Google Calendar to see events.</p>
+            <p className="text-[10.5px] text-muted-foreground/50 mt-1">Sync Google Calendar to see events.</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-border">
+      <div className="px-4 py-3 border-t border-border bg-muted/10 dark:bg-white/[0.015]">
         <button onClick={onViewAllClick}
                 className="w-full flex items-center justify-center gap-1.5 text-[12px] font-bold
-                           text-[#B7792B] hover:text-[#92350A] dark:text-[#C98A2E] dark:hover:text-[#D9A84F]
-                           transition-colors group/btn">
+                           text-primary hover:text-primary/80 transition-colors group/btn">
           View full calendar
           <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5" />
         </button>

@@ -1,5 +1,6 @@
 'use client';
 import { Event } from '@/types';
+import { getEventAccent } from '@/lib/calendarColors';
 
 const GoogleGIcon = () => (
   <svg className="h-3 w-3 shrink-0" viewBox="0 0 24 24" fill="none">
@@ -11,17 +12,6 @@ const GoogleGIcon = () => (
 );
 
 interface MonthViewProps { currentDate: Date; events: Event[]; }
-
-const ACCENT: Record<string, { hex: string; lightBg: string; lightText: string }> = {
-  orange: { hex:'#F97316', lightBg:'#FFF4EA', lightText:'#92350A' },
-  blue:   { hex:'#3B82F6', lightBg:'#EEF4FF', lightText:'#1D4ED8' },
-  green:  { hex:'#10B981', lightBg:'#EDFAF4', lightText:'#065F46' },
-  purple: { hex:'#8B5CF6', lightBg:'#F4F0FF', lightText:'#5B21B6' },
-  yellow: { hex:'#F59E0B', lightBg:'#FFFBEA', lightText:'#92400E' },
-  red:    { hex:'#EF4444', lightBg:'#FFF1F1', lightText:'#991B1B' },
-  pink:   { hex:'#EC4899', lightBg:'#FDF2F8', lightText:'#9D174D' },
-  grey:   { hex:'#6B7280', lightBg:'#F3F4F6', lightText:'#374151' },
-};
 
 const parseSafeDate = (s: string) => {
   if (!s) return new Date();
@@ -61,67 +51,65 @@ export default function MonthView({ currentDate, events }: MonthViewProps) {
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 border-b border-border">
+      <div className="grid grid-cols-7 border-b border-border bg-muted/25 dark:bg-white/[0.02]">
         {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map((d, i) => (
           <div key={d} className={`py-3 text-center border-r border-border last:border-r-0
-                                  ${(i === 0 || i === 6) ? 'bg-muted/30 dark:bg-white/[0.02]' : 'bg-muted/15 dark:bg-white/[0.015]'}`}>
+            ${(i===0||i===6) ? 'bg-muted/40 dark:bg-white/[0.025]' : ''}`}>
             <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{d}</span>
           </div>
         ))}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-7 divide-x divide-y divide-border min-h-[600px]">
+      {/* Day grid */}
+      <div className="grid grid-cols-7 divide-x divide-y divide-border min-h-[580px]">
         {cells.map(({ date: d, isCur }, idx) => {
           const dayEvts = getEvents(d);
           const isToday = today.toDateString() === d.toDateString();
-          const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+          const isWknd = d.getDay() === 0 || d.getDay() === 6;
 
           return (
             <div key={idx}
-              className={`p-2 flex flex-col min-h-[95px] transition-colors duration-100 relative
-                ${!isCur ? 'bg-muted/20 dark:bg-white/[0.01]' : isWeekend ? 'bg-[#FDFAF6] dark:bg-[#161616]' : 'bg-white dark:bg-card'}
-                hover:bg-muted/30 dark:hover:bg-white/[0.025]
-                ${isToday ? 'ring-1 ring-inset ring-[#F97316]/40 dark:ring-[#F97316]/30' : ''}`}>
+              className={`p-2 flex flex-col min-h-[95px] transition-colors duration-100
+                ${!isCur ? 'bg-muted/15 dark:bg-white/[0.01]'
+                  : isWknd ? 'bg-[#FDFAF6] dark:bg-[#161616]'
+                  : 'bg-white dark:bg-card'}
+                hover:bg-muted/20 dark:hover:bg-white/[0.02]
+                ${isToday ? 'ring-1 ring-inset ring-primary/30' : ''}`}>
 
               {/* Day number */}
-              <div className="flex items-center justify-between mb-1">
-                <span className={`text-[12px] font-bold flex items-center justify-center h-6 w-6 rounded-full
+              <div className="flex items-center justify-between mb-1.5">
+                <span className={`text-[12px] font-bold h-6 w-6 flex items-center justify-center rounded-full
                   ${isToday ? 'bg-[#F97316] text-white font-black shadow shadow-[#F97316]/40'
-                    : isCur ? 'text-foreground' : 'text-muted-foreground/35'}`}>
+                    : isCur ? (isWknd ? 'text-muted-foreground' : 'text-foreground')
+                    : 'text-muted-foreground/30'}`}>
                   {d.getDate()}
                 </span>
-                {dayEvts.length > 0 && (
-                  <span className="md:hidden h-1.5 w-1.5 rounded-full" style={{ background: '#F97316' }} />
-                )}
+                {dayEvts.length > 0 && <span className="md:hidden h-1.5 w-1.5 rounded-full bg-primary" />}
               </div>
 
-              {/* Event pills */}
-              <div className="hidden md:flex flex-col gap-0.5 overflow-hidden" style={{ maxHeight: 76 }}>
-                {dayEvts.slice(0, 3).map(event => {
-                  const a = ACCENT[event.color || 'orange'] || ACCENT.orange;
+              {/* Event pills — desktop */}
+              <div className="hidden md:flex flex-col gap-0.5 overflow-hidden" style={{ maxHeight: 80 }}>
+                {dayEvts.slice(0, 3).map(ev => {
+                  const a = getEventAccent(ev.id, ev.title, ev.color);
                   return (
-                    <div key={event.id}
-                         title={`${event.title} · ${fmtTime(event.start_time)}`}
-                         className="flex items-center gap-1 px-1.5 py-[3px] rounded-[6px] cursor-default
-                                    hover:brightness-95 transition-all overflow-hidden"
+                    <div key={ev.id}
+                         title={`${ev.title} · ${fmtTime(ev.start_time)}`}
+                         className="flex items-center gap-1 px-1.5 py-[3px] rounded-[5px] overflow-hidden cursor-default hover:brightness-95 transition-all"
                          style={{ background: a.lightBg, borderLeft: `2.5px solid ${a.hex}` }}>
-                      {event.source === 'google_calendar' ? <GoogleGIcon /> : (
+                      {ev.source === 'google_calendar' ? <GoogleGIcon /> : (
                         <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: a.hex }} />
                       )}
                       <span className="text-[10.5px] font-bold truncate" style={{ color: a.lightText }}>
-                        {event.title}
+                        {ev.title}
                       </span>
-                      <span className="text-[9px] font-medium ml-auto shrink-0 pl-1 opacity-60" style={{ color: a.lightText }}>
-                        {fmtTime(event.start_time)}
+                      <span className="ml-auto shrink-0 pl-1 text-[9px] font-medium" style={{ color: a.lightText, opacity: 0.55 }}>
+                        {fmtTime(ev.start_time)}
                       </span>
                     </div>
                   );
                 })}
                 {dayEvts.length > 3 && (
-                  <span className="text-[9.5px] font-bold text-muted-foreground pl-1 mt-0.5">
-                    +{dayEvts.length - 3} more
-                  </span>
+                  <span className="text-[9.5px] font-bold text-primary/70 pl-1 mt-0.5">+{dayEvts.length - 3} more</span>
                 )}
               </div>
             </div>

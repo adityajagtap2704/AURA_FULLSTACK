@@ -1,6 +1,7 @@
 'use client';
 import { Event } from '@/types';
 import { Clock, Video, MapPin, Users, CalendarDays } from 'lucide-react';
+import { getEventAccent } from '@/lib/calendarColors';
 
 const parseSafeDate = (s: string) => {
   if (!s) return new Date();
@@ -14,19 +15,6 @@ const parseSafeDate = (s: string) => {
 };
 
 interface DayViewProps { currentDate: Date; events: Event[]; }
-
-/* Accent per colour — just the hue values used for pills + left stripe.
-   Background is always white/dark-card so light mode stays clean. */
-const ACCENT: Record<string, { hex: string; lightBg: string; lightText: string; darkBg: string; darkText: string }> = {
-  orange: { hex:'#F97316', lightBg:'#FFF4EA', lightText:'#92350A', darkBg:'rgba(249,115,22,0.12)', darkText:'#FDBA74' },
-  blue:   { hex:'#3B82F6', lightBg:'#EEF4FF', lightText:'#1D4ED8', darkBg:'rgba(59,130,246,0.12)',  darkText:'#93C5FD' },
-  green:  { hex:'#10B981', lightBg:'#EDFAF4', lightText:'#065F46', darkBg:'rgba(16,185,129,0.12)',  darkText:'#6EE7B7' },
-  purple: { hex:'#8B5CF6', lightBg:'#F4F0FF', lightText:'#5B21B6', darkBg:'rgba(139,92,246,0.12)',  darkText:'#C4B5FD' },
-  yellow: { hex:'#F59E0B', lightBg:'#FFFBEA', lightText:'#92400E', darkBg:'rgba(245,158,11,0.12)',  darkText:'#FDE68A' },
-  red:    { hex:'#EF4444', lightBg:'#FFF1F1', lightText:'#991B1B', darkBg:'rgba(239,68,68,0.12)',   darkText:'#FCA5A5' },
-  pink:   { hex:'#EC4899', lightBg:'#FDF2F8', lightText:'#9D174D', darkBg:'rgba(236,72,153,0.12)',  darkText:'#F9A8D4' },
-  grey:   { hex:'#6B7280', lightBg:'#F3F4F6', lightText:'#374151', darkBg:'rgba(107,114,128,0.12)', darkText:'#D1D5DB' },
-};
 
 const GoogleIcon = ({ size = 16 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
@@ -52,72 +40,64 @@ export default function DayView({ currentDate, events }: DayViewProps) {
 
   return (
     <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border
-                      bg-gradient-to-r from-[#B7792B]/8 via-card to-card
-                      dark:from-[#C98A2E]/10 dark:via-card dark:to-card">
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30 dark:bg-white/[0.025]">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#B7792B] dark:text-[#C98A2E] mb-0.5">
+          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary mb-0.5">
             {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
           </p>
-          <h3 className="text-[22px] font-black text-foreground tracking-tight leading-none">
+          <h3 className="text-[20px] font-black text-foreground tracking-tight leading-none">
             {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </h3>
         </div>
         <div className="flex items-center gap-2.5">
           {isToday && (
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                             bg-[#F97316] text-white shadow shadow-[#F97316]/30">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#F97316] text-white shadow shadow-[#F97316]/30">
               Today
             </span>
           )}
-          <span className="h-8 min-w-[2rem] px-3 rounded-xl flex items-center justify-center
-                           text-[11px] font-bold
-                           bg-[#B7792B]/10 text-[#B7792B] dark:bg-[#C98A2E]/15 dark:text-[#C98A2E]">
+          <span className="h-7 px-2.5 rounded-xl flex items-center justify-center text-[11px] font-bold bg-primary/10 text-primary">
             {dayEvents.length}
           </span>
         </div>
       </div>
 
-      {/* ── Events ── */}
-      <div className="p-5 space-y-3">
+      {/* Events */}
+      <div className="p-4 space-y-2.5">
         {dayEvents.length > 0 ? dayEvents.map(event => {
-          const a = ACCENT[event.color || 'orange'] || ACCENT.orange;
+          const a = getEventAccent(event.id, event.title, event.color);
           const hasLink = !!event.meeting_link;
           const isGoogle = event.source === 'google_calendar';
 
           return (
             <div key={event.id}
-              className="group flex gap-0 rounded-xl overflow-hidden border border-border
+              className="group flex rounded-xl overflow-hidden border border-border
                          hover:shadow-md dark:hover:shadow-black/40 transition-all duration-200
-                         bg-white dark:bg-[#1E1E1E]">
+                         bg-white dark:bg-[#1C1C1C]">
               {/* Colour stripe */}
-              <div className="w-1 shrink-0" style={{ background: a.hex }} />
+              <div className="w-[3px] shrink-0" style={{ background: a.hex }} />
 
               {/* Card body */}
-              <div className="flex flex-1 items-center gap-4 px-4 py-3.5">
-                {/* Icon */}
-                <div className="h-10 w-10 rounded-xl shrink-0 flex items-center justify-center
-                               border border-border bg-[#FAFAFA] dark:bg-[#252525]"
-                     style={{ boxShadow: `0 0 0 2px ${a.hex}20` }}>
-                  {isGoogle ? <GoogleIcon size={17} /> : (
-                    <span className="h-3 w-3 rounded-full" style={{ background: a.hex }} />
-                  )}
+              <div className="flex flex-1 items-center gap-3.5 px-4 py-3.5">
+                {/* Source icon */}
+                <div className="h-10 w-10 rounded-xl shrink-0 flex items-center justify-center border border-border/60"
+                     style={{ background: a.lightBg, boxShadow: `0 0 0 2px ${a.hex}1A` }}>
+                  <span className="dark:hidden">
+                    {isGoogle ? <GoogleIcon size={16} /> : <span className="h-3 w-3 rounded-full block" style={{ background: a.hex }} />}
+                  </span>
+                  <span className="hidden dark:block">
+                    {isGoogle ? <GoogleIcon size={16} /> : <span className="h-3 w-3 rounded-full block" style={{ background: a.hex }} />}
+                  </span>
                 </div>
 
-                {/* Text */}
+                {/* Text block */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[14px] font-bold text-foreground tracking-tight">
-                      {event.title}
+                    <span className="text-[14px] font-bold tracking-tight text-foreground">{event.title}</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md"
+                          style={{ background: a.lightBg, color: a.lightText }}>
+                      {isGoogle ? 'Google' : 'Aura'}
                     </span>
-                    {isGoogle && (
-                      <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md"
-                            style={{ background: a.lightBg, color: a.lightText }}>
-                        <span className="dark:hidden">Google</span>
-                        <span className="hidden dark:inline" style={{ color: a.darkText }}>Google</span>
-                      </span>
-                    )}
                   </div>
 
                   {event.description && (
@@ -125,14 +105,8 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                   )}
 
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1.5">
-                    <span className="flex items-center gap-1.5 text-[11.5px] font-semibold"
-                          style={{ color: a.lightText }}>
-                      <span className="dark:hidden">
-                        <Clock size={12} className="shrink-0 inline" />
-                      </span>
-                      <span className="hidden dark:inline" style={{ color: a.darkText }}>
-                        <Clock size={12} className="shrink-0 inline" />
-                      </span>
+                    <span className="flex items-center gap-1.5 text-[11.5px] font-semibold" style={{ color: a.lightText }}>
+                      <Clock size={12} className="shrink-0" />
                       <span className="dark:hidden" style={{ color: a.lightText }}>
                         {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
                       </span>
@@ -144,7 +118,7 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                     {hasLink ? (
                       <a href={event.meeting_link!} target="_blank" rel="noreferrer"
                          onClick={e => e.stopPropagation()}
-                         className="flex items-center gap-1.5 text-[11.5px] font-bold hover:underline underline-offset-2 text-[#3B82F6] dark:text-[#60A5FA]">
+                         className="flex items-center gap-1.5 text-[11.5px] font-bold hover:underline text-[#3B82F6] dark:text-[#60A5FA]">
                         <Video size={12} /> Join meeting
                       </a>
                     ) : (
@@ -163,18 +137,18 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                   </div>
                 </div>
 
-                {/* Avatars */}
+                {/* Attendee avatars */}
                 {event.attendees && event.attendees.length > 0 && (
                   <div className="flex -space-x-2 shrink-0">
                     {event.attendees.slice(0, 3).map((att, i) => (
                       <div key={i} title={att.email}
-                           className="h-7 w-7 rounded-full border-2 border-card flex items-center justify-center text-[9px] font-bold uppercase text-white shadow-sm"
+                           className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] flex items-center justify-center text-[9px] font-bold uppercase text-white shadow-sm"
                            style={{ background: a.hex }}>
                         {(att.displayName ?? att.email ?? '??').slice(0, 2)}
                       </div>
                     ))}
                     {event.attendees.length > 3 && (
-                      <div className="h-7 w-7 rounded-full border-2 border-card bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">
+                      <div className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">
                         +{event.attendees.length - 3}
                       </div>
                     )}
@@ -185,8 +159,8 @@ export default function DayView({ currentDate, events }: DayViewProps) {
           );
         }) : (
           <div className="flex flex-col items-center py-16 text-center">
-            <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 dark:bg-[#C98A2E]/10 flex items-center justify-center mb-4">
-              <CalendarDays className="h-7 w-7 text-[#B7792B] dark:text-[#C98A2E]" />
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+              <CalendarDays className="h-7 w-7 text-primary" />
             </div>
             <p className="font-bold text-foreground text-sm">Nothing scheduled</p>
             <p className="text-xs text-muted-foreground mt-1.5 max-w-xs">Sync your Google Calendar to import events.</p>
