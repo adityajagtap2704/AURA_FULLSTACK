@@ -1081,7 +1081,7 @@ function Testimonials() {
   };
 
   return (
-    <section className="py-40 md:py-48 bg-[#FFFDF9] relative overflow-hidden">
+    <section className="py-16 md:py-20 bg-[#FFFDF9] relative overflow-hidden">
       {/* Shared with the Integrations section's cards above — keeping these two
           keyframe sets defined here since Testimonials always renders on the page. */}
       <style dangerouslySetInnerHTML={{__html:`
@@ -1187,7 +1187,7 @@ function Testimonials() {
         </div>
 
         {/* Dots, then a standalone Play/Pause pill beneath */}
-        <div className="flex flex-col items-center gap-5 mt-14 relative z-20">
+        <div className="flex flex-col items-center gap-5 mt-6 relative z-20">
           <div className="flex items-center gap-2">
             {TESTIMONIALS.map((_, i) => (
               <motion.button
