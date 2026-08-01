@@ -56,10 +56,10 @@ export default function AgendaView({ events }: AgendaViewProps) {
         const { weekday, fullDate, monthShort, dayNum, tag } = getDayMeta(key);
 
         return (
-          <div key={key} className="rounded-2xl overflow-hidden border border-[#E8DDD2] dark:border-border bg-white dark:bg-card shadow-sm">
+          <div key={key} className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
 
             {/* ── Day header ── */}
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.025]">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border bg-muted/25">
               <div className="flex items-center gap-3">
                 {/* Date chip */}
                 <div className="h-10 w-10 rounded-xl border border-[#B7792B]/25 dark:border-[#C98A2E]/20 bg-[#B7792B]/8 dark:bg-[#C98A2E]/10 flex flex-col items-center justify-center shrink-0">
@@ -68,23 +68,23 @@ export default function AgendaView({ events }: AgendaViewProps) {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[13px] font-bold text-[#111827] dark:text-foreground">{weekday}</span>
+                    <span className="text-[13px] font-bold text-foreground">{weekday}</span>
                     {tag && (
                       <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest bg-[#F97316] text-white">
                         {tag}
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-[#6B7280] dark:text-muted-foreground">{fullDate}</span>
+                  <span className="text-[11px] text-muted-foreground">{fullDate}</span>
                 </div>
               </div>
-              <span className="text-[11px] font-semibold text-[#6B7280] dark:text-muted-foreground px-2.5 py-1 rounded-full bg-[#F3F4F6] dark:bg-white/[0.06]">
+              <span className="text-[11px] font-semibold text-muted-foreground px-2.5 py-1 rounded-full bg-muted">
                 {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
               </span>
             </div>
 
             {/* ── Event cards ── */}
-            <div className="p-3.5 space-y-2 bg-[#FDFBF8] dark:bg-card">
+            <div className="p-3.5 space-y-2 bg-background">
               {dayEvents.map(event => {
                 const a = getEventAccent(event.id, event.title, event.color);
                 const hasLink = !!event.meeting_link;
@@ -94,9 +94,9 @@ export default function AgendaView({ events }: AgendaViewProps) {
                   <div
                     key={event.id}
                     className="flex rounded-xl overflow-hidden transition-all duration-200
-                               hover:shadow-[0_2px_12px_rgba(0,0,0,0.07)] dark:hover:shadow-black/30
+                               hover:shadow-lg
                                border border-[#E8DDD2] dark:border-border
-                               bg-white dark:bg-[#1C1C1C]"
+                               bg-card"
                   >
                     {/* Stripe */}
                     <div className="w-[4px] shrink-0" style={{ backgroundColor: a.hex }} />
@@ -105,7 +105,7 @@ export default function AgendaView({ events }: AgendaViewProps) {
                     <div className="flex flex-1 items-center gap-3.5 px-4 py-3">
                       {/* Icon */}
                       <div
-                        className="h-9 w-9 rounded-lg shrink-0 flex items-center justify-center bg-white dark:bg-[#252525] border border-[#E8DDD2] dark:border-border"
+                        className="h-9 w-9 rounded-lg shrink-0 flex items-center justify-center bg-background border border-border"
                         style={{ boxShadow: `0 0 0 2px ${a.hex}1A` }}
                       >
                         {isGoogle ? <GoogleIcon /> : (
@@ -116,25 +116,21 @@ export default function AgendaView({ events }: AgendaViewProps) {
                       <div className="flex-1 min-w-0">
                         {/* Title + badge */}
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-[13.5px] font-bold text-[#111827] dark:text-foreground">{event.title}</span>
-                          <span
-                            className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
-                            style={{ backgroundColor: a.lightBg, color: a.lightText }}
-                          >
+                          <span className="text-[13.5px] font-bold text-foreground">{event.title}</span>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
+                            style={{ 
+                              backgroundColor: `${a.hex}1A`,
+                              color: a.hex
+                            }}>
                             {isGoogle ? 'Google' : 'Aura'}
                           </span>
                         </div>
 
                         {/* Meta */}
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1">
-                          {/* Time light */}
-                          <span className="flex items-center gap-1 text-[11px] font-semibold dark:hidden" style={{ color: a.lightText }}>
+                          {/* Time */}
+                          <span className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
                             <Clock size={11} className="shrink-0" style={{ color: a.hex }} />
-                            {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
-                          </span>
-                          {/* Time dark */}
-                          <span className="hidden dark:flex items-center gap-1 text-[11px] font-semibold" style={{ color: a.darkText }}>
-                            <Clock size={11} className="shrink-0" />
                             {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
                           </span>
 
@@ -147,14 +143,14 @@ export default function AgendaView({ events }: AgendaViewProps) {
                               <Video size={11} /> Join
                             </a>
                           ) : (
-                            <span className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-muted-foreground">
+                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                               <MapPin size={11} style={{ color: a.hex, opacity: 0.6 }} />
                               {isGoogle ? 'Google Calendar' : 'Local event'}
                             </span>
                           )}
 
                           {event.attendees && event.attendees.length > 0 && (
-                            <span className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-muted-foreground">
+                            <span className="flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Users size={11} /> {event.attendees.length}
                             </span>
                           )}
@@ -167,7 +163,7 @@ export default function AgendaView({ events }: AgendaViewProps) {
                           {event.attendees.slice(0, 3).map((att, i) => (
                             <div
                               key={i} title={att.email}
-                              className="h-6 w-6 rounded-full border-2 border-white dark:border-[#1C1C1C] text-[8px] font-bold uppercase text-white flex items-center justify-center"
+                              className="h-6 w-6 rounded-full border-2 border-white dark:border-card text-[8px] font-bold uppercase text-white flex items-center justify-center"
                               style={{ backgroundColor: a.hex }}
                             >
                               {(att.displayName ?? att.email ?? '??').slice(0, 2)}
@@ -183,12 +179,12 @@ export default function AgendaView({ events }: AgendaViewProps) {
           </div>
         );
       }) : (
-        <div className="flex flex-col items-center py-20 text-center border border-dashed border-[#E8DDD2] dark:border-border rounded-2xl bg-white dark:bg-card">
-          <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 flex items-center justify-center mb-4">
+        <div className="flex flex-col items-center py-20 text-center border border-dashed border-border rounded-2xl bg-card">
+          <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 dark:bg-[#C98A2E]/15 flex items-center justify-center mb-4">
             <CalendarDays className="h-7 w-7 text-[#B7792B] dark:text-[#C98A2E]" />
           </div>
-          <p className="font-bold text-[#111827] dark:text-foreground text-sm">No upcoming events</p>
-          <p className="text-xs text-[#6B7280] dark:text-muted-foreground mt-1.5">Sync your Google Calendar to see events here.</p>
+          <p className="font-bold text-foreground text-sm">No upcoming events</p>
+          <p className="text-xs text-muted-foreground mt-1.5">Sync your Google Calendar to see events here.</p>
         </div>
       )}
     </div>

@@ -46,11 +46,11 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
   };
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-[#E8DDD2] dark:border-border bg-white dark:bg-card shadow-sm flex flex-col">
+    <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm flex flex-col">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.02]">
-        <h3 className="text-[13px] font-black text-[#111827] dark:text-foreground tracking-tight">Upcoming Events</h3>
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-muted/25">
+        <h3 className="text-[13px] font-black text-foreground tracking-tight">Upcoming Events</h3>
         {upcoming.length > 0 && (
           <span className="h-5 min-w-[1.25rem] px-1.5 rounded-full flex items-center justify-center text-[10px] font-black bg-[#F97316] text-white">
             {upcoming.length}
@@ -59,7 +59,7 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
       </div>
 
       {/* List */}
-      <div className="flex-1 divide-y divide-[#E8DDD2]/60 dark:divide-border/50 overflow-y-auto">
+      <div className="flex-1 divide-y divide-border/50 overflow-y-auto">
         {upcoming.length > 0 ? upcoming.map(event => {
           const a = getEventAccent(event.id, event.title, event.color);
           const isGMeet = event.title.toLowerCase().includes('google meet') ||
@@ -70,12 +70,12 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
 
           return (
             <div key={event.id}
-                 className="flex items-center gap-3 px-4 py-3 hover:bg-[#FAF7F4] dark:hover:bg-white/[0.025]
+                 className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20
                             transition-colors cursor-default group">
               {/* Icon */}
               <div
                 className="h-9 w-9 rounded-xl shrink-0 flex items-center justify-center
-                           bg-white dark:bg-[#1E1E1E] border border-[#E8DDD2] dark:border-border
+                           bg-background border border-border
                            transition-transform group-hover:scale-105"
                 style={{ boxShadow: `0 0 0 2px ${a.hex}1A` }}
               >
@@ -86,13 +86,13 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
 
               {/* Details */}
               <div className="flex-1 min-w-0">
-                <p className="text-[12.5px] font-bold text-[#111827] dark:text-foreground truncate leading-snug
+                <p className="text-[12.5px] font-bold text-foreground truncate leading-snug
                                group-hover:text-[#B7792B] dark:group-hover:text-[#C98A2E] transition-colors">
                   {event.title}
                 </p>
                 <div className="flex items-center gap-1 mt-0.5">
-                  <Clock className="h-3 w-3 shrink-0 text-[#6B7280]/50 dark:text-muted-foreground/45" />
-                  <span className="text-[10.5px] text-[#6B7280] dark:text-muted-foreground">
+                  <Clock className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+                  <span className="text-[10.5px] text-muted-foreground">
                     <span className={`font-semibold ${isToday ? 'text-[#F97316]' : ''}`}>{day}</span>
                     {' · '}{fmtTime(event.start_time)}
                   </span>
@@ -100,11 +100,14 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span
                     className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded"
-                    style={{ backgroundColor: a.lightBg, color: a.lightText }}
+                    style={{ 
+                      backgroundColor: `${a.hex}1A`,
+                      color: a.hex
+                    }}
                   >
                     {event.source === 'google_calendar' ? 'Google' : 'Aura'}
                   </span>
-                  <span className="text-[10px] text-[#6B7280]/55 dark:text-muted-foreground/50">
+                  <span className="text-[10px] text-muted-foreground/50">
                     {hasLink ? (isGMeet ? '· Meet' : '· Video') : '· Calendar event'}
                   </span>
                 </div>
@@ -127,17 +130,17 @@ export default function UpcomingEventsPanel({ events, onViewAllClick }: Upcoming
           );
         }) : (
           <div className="flex flex-col items-center py-10 px-4 text-center">
-            <div className="h-12 w-12 rounded-2xl bg-[#F3F4F6] dark:bg-muted flex items-center justify-center mb-3">
-              <CalendarOff className="h-5 w-5 text-[#6B7280]/40 dark:text-muted-foreground/35" />
+            <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
+              <CalendarOff className="h-5 w-5 text-muted-foreground/40" />
             </div>
-            <p className="text-xs font-bold text-[#111827]/70 dark:text-foreground/70">No upcoming events</p>
-            <p className="text-[10.5px] text-[#6B7280]/55 dark:text-muted-foreground/50 mt-1">Sync Google Calendar to see events.</p>
+            <p className="text-xs font-bold text-foreground/70">No upcoming events</p>
+            <p className="text-[10.5px] text-muted-foreground/50 mt-1">Sync Google Calendar to see events.</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t border-[#E8DDD2] dark:border-border bg-[#FAF7F4]/50 dark:bg-white/[0.015]">
+      <div className="px-4 py-3 border-t border-border bg-muted/20">
         <button
           onClick={onViewAllClick}
           className="w-full flex items-center justify-center gap-1.5 text-[12px] font-bold

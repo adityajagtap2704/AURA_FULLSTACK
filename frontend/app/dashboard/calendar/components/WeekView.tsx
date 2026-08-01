@@ -67,7 +67,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
 
   return (
     <div className="flex flex-col rounded-2xl overflow-hidden select-none h-[580px] min-w-[720px] md:min-w-full
-                    border border-[#E8DDD2] dark:border-border bg-white dark:bg-card shadow-sm">
+                    border border-border bg-card shadow-sm">
       <style dangerouslySetInnerHTML={{ __html:`
         .wk-s::-webkit-scrollbar{width:4px}
         .wk-s::-webkit-scrollbar-track{background:transparent}
@@ -76,22 +76,22 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
       `}} />
 
       {/* ── Day headers ── */}
-      <div className="flex shrink-0 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.02]">
-        <div className="w-[68px] shrink-0 border-r border-[#E8DDD2] dark:border-border flex items-center justify-center">
-          <span className="text-[9px] font-black text-[#6B7280] dark:text-muted-foreground uppercase tracking-widest">{tzStr}</span>
+      <div className="flex shrink-0 border-b border-border bg-muted/25">
+        <div className="w-[68px] shrink-0 border-r border-border flex items-center justify-center">
+          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{tzStr}</span>
         </div>
         <div className="flex-1 grid grid-cols-7">
           {weekDays.map((day, i) => {
             const isT = today.toDateString() === day.toDateString();
             return (
-              <div key={i} className={`py-2.5 flex flex-col items-center border-r border-[#E8DDD2] dark:border-border last:border-r-0
+              <div key={i} className={`py-2.5 flex flex-col items-center border-r border-border last:border-r-0
                 ${isT ? 'bg-[#F97316]/[0.06] dark:bg-[#F97316]/[0.07]' : ''}`}>
                 <span className={`text-[9px] font-black uppercase tracking-widest
-                  ${isT ? 'text-[#F97316]' : 'text-[#6B7280] dark:text-muted-foreground'}`}>
+                  ${isT ? 'text-[#F97316]' : 'text-muted-foreground'}`}>
                   {day.toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
                 <span className={`mt-1 h-7 w-7 flex items-center justify-center rounded-full text-[14px] font-black
-                  ${isT ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/35' : 'text-[#111827] dark:text-foreground'}`}>
+                  ${isT ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/35' : 'text-foreground'}`}>
                   {day.getDate()}
                 </span>
               </div>
@@ -101,13 +101,13 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
       </div>
 
       {/* ── Scrollable grid ── */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto relative wk-s bg-white dark:bg-background">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto relative wk-s bg-background">
         <div className="flex relative" style={{ height: `${TOTAL * HH + 20}px` }}>
 
           {/* Time labels */}
-          <div className="w-[68px] shrink-0 border-r border-[#E8DDD2] dark:border-border relative bg-white dark:bg-background">
+          <div className="w-[68px] shrink-0 border-r border-border relative bg-background">
             {hours.map((h, i) => (
-              <div key={h} className="absolute right-3 text-[9px] font-bold text-[#6B7280]/60 dark:text-muted-foreground/55 select-none"
+              <div key={h} className="absolute right-3 text-[9px] font-bold text-muted-foreground/55 select-none"
                    style={{ top: `${i === 0 ? 6 : i * HH - 8}px` }}>
                 {h === 12 ? '12 PM' : h > 12 ? `${h-12} PM` : `${h} AM`}
               </div>
@@ -119,7 +119,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
             {/* Horizontal hour lines */}
             {hours.map((_, i) => (
               <div key={i}
-                   className="absolute w-full border-b border-[#E8DDD2]/60 dark:border-border/25"
+                   className="absolute w-full border-b border-border/25"
                    style={{ top: `${i * HH}px` }} />
             ))}
 
@@ -152,7 +152,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
 
                 return (
                   <div key={di}
-                       className={`relative border-r border-[#E8DDD2]/50 dark:border-border/30 last:border-r-0 h-full
+                       className={`relative border-r border-border/30 last:border-r-0 h-full
                          ${isT ? 'bg-[#F97316]/[0.025] dark:bg-[#F97316]/[0.03]' : ''}`}>
                     {cards.map(card => {
                       const a = getEventAccent(card.id, card.title, card.color);
@@ -169,65 +169,34 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                             height: `${card.height - 4}px`,
                             left: card.left,
                             width: card.width,
-                            /* Light mode: tinted bg */
-                            backgroundColor: a.lightBg,
+                            backgroundColor: `${a.hex}0D`,
                             borderLeft: `3px solid ${a.hex}`,
                             boxShadow: `0 1px 4px ${a.hex}20`,
                           }}
                         >
-                          {/* Dark mode overlay replaces background */}
-                          <div
-                            className="absolute inset-0 rounded-lg pointer-events-none hidden dark:block"
-                            style={{ backgroundColor: a.darkCardBg }}
-                          />
 
                           <div className="relative z-10 flex flex-col gap-0.5 min-w-0">
                             {/* Title */}
-                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1"
-                                  style={{ color: a.lightText }}>
-                              <span className="dark:hidden flex items-center gap-1 truncate min-w-0">
-                                {card.source === 'google_calendar' && (
-                                  <span className="h-3.5 w-3.5 bg-white/80 rounded flex items-center justify-center shrink-0">
-                                    <GoogleIcon />
-                                  </span>
-                                )}
-                                <span className="truncate">{card.title}</span>
-                              </span>
-                              <span className="hidden dark:flex items-center gap-1 truncate min-w-0" style={{ color: a.darkText }}>
-                                {card.source === 'google_calendar' && (
-                                  <span className="h-3.5 w-3.5 bg-white/10 rounded flex items-center justify-center shrink-0">
-                                    <GoogleIcon />
-                                  </span>
-                                )}
-                                <span className="truncate">{card.title}</span>
-                              </span>
+                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1 min-w-0" style={{ color: a.hex }}>
+                              {card.source === 'google_calendar' && (
+                                <span className="h-3.5 w-3.5 bg-background/80 rounded flex items-center justify-center shrink-0">
+                                  <GoogleIcon />
+                                </span>
+                              )}
+                              <span className="truncate">{card.title}</span>
                             </span>
                             {/* Time */}
-                            <span className="text-[9px] font-semibold dark:hidden"
-                                  style={{ color: a.lightText, opacity: 0.72 }}>
-                              {fmtTime(card.sDate)}
-                            </span>
-                            <span className="text-[9px] font-semibold hidden dark:block"
-                                  style={{ color: a.darkText, opacity: 0.72 }}>
+                            <span className="text-[9px] font-semibold text-muted-foreground">
                               {fmtTime(card.sDate)}
                             </span>
                           </div>
 
                           {card.height >= 52 && (
-                            <>
-                              <div className="relative z-10 flex items-center gap-1 text-[9px] overflow-hidden dark:hidden"
-                                   style={{ color: a.lightText, opacity: 0.6 }}>
-                                {hasMeet
-                                  ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">Calendar</span></>}
-                              </div>
-                              <div className="hidden dark:flex relative z-10 items-center gap-1 text-[9px] overflow-hidden"
-                                   style={{ color: a.darkText, opacity: 0.6 }}>
-                                {hasMeet
-                                  ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">Calendar</span></>}
-                              </div>
-                            </>
+                            <div className="relative z-10 flex items-center gap-1 text-[9px] overflow-hidden text-muted-foreground/60">
+                              {hasMeet
+                                ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
+                                : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">Calendar</span></>}
+                            </div>
                           )}
                         </div>
                       );
@@ -241,7 +210,7 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
             {timelinePos !== null && (
               <div className="absolute left-0 right-0 pointer-events-none z-20 flex items-center"
                    style={{ top: `${timelinePos}px` }}>
-                <div className="h-2.5 w-2.5 rounded-full bg-[#F97316] ring-2 ring-white dark:ring-background shadow absolute -left-[5px]" />
+                <div className="h-2.5 w-2.5 rounded-full bg-[#F97316] ring-2 ring-card shadow absolute -left-[5px]" />
                 <div className="w-full h-[1.5px] bg-gradient-to-r from-[#F97316] to-[#F97316]/20" />
               </div>
             )}

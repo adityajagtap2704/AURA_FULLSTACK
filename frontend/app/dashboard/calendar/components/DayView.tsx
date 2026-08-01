@@ -39,15 +39,15 @@ export default function DayView({ currentDate, events }: DayViewProps) {
   const isToday = new Date().toDateString() === currentDate.toDateString();
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-[#E8DDD2] dark:border-border bg-[#FFFFFF] dark:bg-card shadow-sm">
+    <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.025]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/25">
         <div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#B7792B] dark:text-[#C98A2E] mb-0.5">
             {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
           </p>
-          <h3 className="text-[22px] font-black text-[#111827] dark:text-foreground tracking-tight leading-none">
+          <h3 className="text-[22px] font-black text-foreground tracking-tight leading-none">
             {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </h3>
         </div>
@@ -64,7 +64,7 @@ export default function DayView({ currentDate, events }: DayViewProps) {
       </div>
 
       {/* ── Events ── */}
-      <div className="p-4 space-y-2.5 bg-[#FDFBF8] dark:bg-card">
+      <div className="p-4 space-y-2.5 bg-background">
         {dayEvents.length > 0 ? dayEvents.map(event => {
           const a = getEventAccent(event.id, event.title, event.color);
           const hasLink = !!event.meeting_link;
@@ -74,9 +74,9 @@ export default function DayView({ currentDate, events }: DayViewProps) {
             <div
               key={event.id}
               className="flex rounded-xl overflow-hidden transition-all duration-200
-                         hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] dark:hover:shadow-black/30
+                         hover:shadow-lg
                          border border-[#E8DDD2] dark:border-border
-                         bg-white dark:bg-[#1C1C1C]"
+                         bg-card"
             >
               {/* Coloured left stripe */}
               <div className="w-[4px] shrink-0" style={{ backgroundColor: a.hex }} />
@@ -87,7 +87,7 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                 {/* Icon — white box with coloured ring */}
                 <div
                   className="h-10 w-10 rounded-xl shrink-0 flex items-center justify-center
-                             bg-white dark:bg-[#252525] border border-[#E8DDD2] dark:border-border"
+                             bg-background border border-border"
                   style={{ boxShadow: `0 0 0 2px ${a.hex}22` }}
                 >
                   {isGoogle ? <GoogleIcon /> : (
@@ -99,19 +99,20 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                 <div className="flex-1 min-w-0">
                   {/* Title + badge row */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[14px] font-bold text-[#111827] dark:text-foreground tracking-tight">
+                    <span className="text-[14px] font-bold text-foreground tracking-tight">
                       {event.title}
                     </span>
-                    <span
-                      className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
-                      style={{ backgroundColor: a.lightBg, color: a.lightText }}
-                    >
+                    <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-opacity-10 dark:bg-opacity-15"
+                      style={{ 
+                        backgroundColor: `${a.hex}1A`,
+                        color: a.hex
+                      }}>
                       {isGoogle ? 'Google' : 'Aura'}
                     </span>
                   </div>
 
                   {event.description && (
-                    <p className="text-[11.5px] text-[#6B7280] dark:text-muted-foreground mt-0.5 line-clamp-1">
+                    <p className="text-[11.5px] text-muted-foreground mt-0.5 line-clamp-1">
                       {event.description}
                     </p>
                   )}
@@ -119,10 +120,9 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                   {/* Meta row */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1.5">
                     {/* Time */}
-                    <span className="flex items-center gap-1.5 text-[11.5px] font-semibold" style={{ color: a.lightText }}>
+                    <span className="flex items-center gap-1.5 text-[11.5px] font-semibold text-muted-foreground">
                       <Clock size={12} className="shrink-0" style={{ color: a.hex }} />
-                      <span className="dark:hidden">{fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}</span>
-                      <span className="hidden dark:inline" style={{ color: a.darkText }}>{fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}</span>
+                      {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
                     </span>
 
                     {hasLink ? (
@@ -134,14 +134,14 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                         <Video size={12} /> Join meeting
                       </a>
                     ) : (
-                      <span className="flex items-center gap-1.5 text-[11.5px] text-[#6B7280] dark:text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
                         <MapPin size={12} style={{ color: a.hex, opacity: 0.7 }} />
                         {isGoogle ? 'Google Calendar' : 'Local event'}
                       </span>
                     )}
 
                     {event.attendees && event.attendees.length > 0 && (
-                      <span className="flex items-center gap-1.5 text-[11.5px] text-[#6B7280] dark:text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
                         <Users size={12} />
                         {event.attendees.length} attendee{event.attendees.length !== 1 ? 's' : ''}
                       </span>
@@ -173,11 +173,11 @@ export default function DayView({ currentDate, events }: DayViewProps) {
           );
         }) : (
           <div className="flex flex-col items-center py-16 text-center">
-            <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 flex items-center justify-center mb-4">
+            <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 dark:bg-[#C98A2E]/15 flex items-center justify-center mb-4">
               <CalendarDays className="h-7 w-7 text-[#B7792B] dark:text-[#C98A2E]" />
             </div>
-            <p className="font-bold text-[#111827] dark:text-foreground text-sm">Nothing scheduled</p>
-            <p className="text-xs text-[#6B7280] dark:text-muted-foreground mt-1.5 max-w-xs">
+            <p className="font-bold text-foreground text-sm">Nothing scheduled</p>
+            <p className="text-xs text-muted-foreground mt-1.5 max-w-xs">
               Sync your Google Calendar to import events.
             </p>
           </div>
