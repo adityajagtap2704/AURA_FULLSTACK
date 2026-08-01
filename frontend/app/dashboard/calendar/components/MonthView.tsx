@@ -87,7 +87,8 @@ export default function MonthView({ currentDate, events }: MonthViewProps) {
                 {dayEvts.length > 0 && <span className="md:hidden h-1.5 w-1.5 rounded-full bg-primary" />}
               </div>
 
-            <div className="flex items-center gap-3 md:hidden" style={{ maxHeight: 80 }}>
+              {/* Event pills — desktop */}
+              <div className="hidden md:flex flex-col gap-0.5 overflow-hidden" style={{ maxHeight: 80 }}>
                 {dayEvts.slice(0, 3).map(ev => {
                   const a = getEventAccent(ev.id, ev.title, ev.color);
                   return (
