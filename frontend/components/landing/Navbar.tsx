@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, type Transition } from 'framer-motion';
 import Link from 'next/link';
 
+import { AuraLogoIcon } from '@/components/icons/ServiceIcons';
+
 const SPRING: Transition = { type: 'spring', stiffness: 180, damping: 24, mass: 0.8 };
 const MotionLink = motion.create(Link);
 
@@ -285,13 +287,8 @@ export default function Navbar() {
           transition={SPRING}
           className="flex items-center gap-2 shrink-0 pl-1 group"
         >
-          <div className="w-8 h-8 rounded-full border-2 border-[#C17817] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none">
-              <circle cx="10" cy="10" r="7" stroke="#C17817" strokeWidth="1.5"/>
-              <path d="M10 3C10 3 7 6.5 7 10C7 13.5 10 17 10 17" stroke="#C17817" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M10 3C10 3 13 6.5 13 10C13 13.5 10 17 10 17" stroke="#C17817" strokeWidth="1.5" strokeLinecap="round"/>
-              <path d="M3 10H17" stroke="#C17817" strokeWidth="1.2" strokeLinecap="round" opacity="0.5"/>
-            </svg>
+          <div className="w-8 h-8 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <AuraLogoIcon className="w-full h-full text-[#C17817]" />
           </div>
           <span className={`text-[16px] font-extrabold tracking-tight ${logoTextClass}`}>AURA</span>
         </MotionLink>

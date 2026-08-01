@@ -68,6 +68,7 @@ export default function DocumentsPage() {
   alt="Notion"
   width={26}
   height={26}
+  style={{ width: "auto", height: "auto" }}
 />
 
 Notion Documents
@@ -138,6 +139,7 @@ Notion Documents
     alt="Notion"
     width={22}
     height={22}
+    style={{ width: "auto", height: "auto" }}
   />
 </div>
                 <h4 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">

@@ -165,37 +165,48 @@ export class NotionConnector implements ConnectorInterface {
   async fetch(userId: string): Promise<NotionFetchResult> {
     const notion = await this.getClientForUser(userId);
 
-    // Only databases/pages the user explicitly shared during the OAuth
-    // consent screen are visible to this token. Take the first shared
-    // database as the Tasks source — same "pulls one connected DB" design
-    // as Phase 1's original shared-token version, just scoped per-user now.
-    const dbSearch = await notion.search({
-      filter: { property: 'object', value: 'database' },
-      page_size: 5,
-    });
-
     let databaseItems: NotionDatabaseItem[] = [];
-    const firstDb = dbSearch.results[0];
-    if (firstDb) {
-      // No status filter here — unlike the old fixed demo database, we
-      // can't assume an arbitrary user's database has a "Status" property
-      // at all, let alone one shaped like Notion's status/select type.
-      const dbResponse = await notion.databases.query({
-        database_id: firstDb.id,
-        page_size: 50,
-      });
-      databaseItems = dbResponse.results as unknown as NotionDatabaseItem[];
-    }
+    let pages: NotionPage[] = [];
 
-    const pageSearch = await notion.search({
-      filter: { property: 'object', value: 'page' },
-      sort: { direction: 'descending', timestamp: 'last_edited_time' },
-      page_size: 20,
-    });
+    try {
+      // Only databases/pages the user explicitly shared during the OAuth
+      // consent screen are visible to this token. Take the first shared
+      // database as the Tasks source — same "pulls one connected DB" design
+      // as Phase 1's original shared-token version, just scoped per-user now.
+      const dbSearch = await notion.search({
+        filter: { property: 'object', value: 'database' },
+        page_size: 5,
+      });
+
+      const firstDb = dbSearch.results[0];
+      if (firstDb) {
+        // No status filter here — unlike the old fixed demo database, we
+        // can't assume an arbitrary user's database has a "Status" property
+        // at all, let alone one shaped like Notion's status/select type.
+        const dbResponse = await notion.databases.query({
+          database_id: firstDb.id,
+          page_size: 50,
+        });
+        databaseItems = dbResponse.results as unknown as NotionDatabaseItem[];
+      }
+
+      const pageSearch = await notion.search({
+        filter: { property: 'object', value: 'page' },
+        sort: { direction: 'descending', timestamp: 'last_edited_time' },
+        page_size: 20,
+      });
+
+      pages = pageSearch.results as unknown as NotionPage[];
+    } catch (err: any) {
+      if (err?.code === 'unauthorized' || err?.status === 401) {
+        throw err;
+      }
+      console.warn(`[Notion fetch] Failed to fetch data from Notion (network error or other failure): ${err.message}`);
+    }
 
     return {
       databaseItems,
-      pages: pageSearch.results as unknown as NotionPage[],
+      pages,
     };
   }
 
