@@ -1,6 +1,6 @@
 'use client';
 import { Event } from '@/types';
-import { Clock, Video, MapPin, Users, CalendarDays } from 'lucide-react';
+import { Clock, MapPin, Video, Users, CalendarDays } from 'lucide-react';
 import { getEventAccent } from '@/lib/calendarColors';
 
 const parseSafeDate = (s: string) => {
@@ -16,8 +16,8 @@ const parseSafeDate = (s: string) => {
 
 interface DayViewProps { currentDate: Date; events: Event[]; }
 
-const GoogleIcon = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className="shrink-0">
+const GoogleIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="shrink-0">
     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
     <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
     <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.91z" fill="#FBBC05"/>
@@ -39,97 +39,109 @@ export default function DayView({ currentDate, events }: DayViewProps) {
   const isToday = new Date().toDateString() === currentDate.toDateString();
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-border bg-card shadow-sm">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30 dark:bg-white/[0.025]">
+    <div className="rounded-2xl overflow-hidden border border-[#E8DDD2] dark:border-border bg-[#FFFFFF] dark:bg-card shadow-sm">
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.025]">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.18em] text-primary mb-0.5">
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#B7792B] dark:text-[#C98A2E] mb-0.5">
             {currentDate.toLocaleDateString('en-US', { weekday: 'long' })}
           </p>
-          <h3 className="text-[20px] font-black text-foreground tracking-tight leading-none">
+          <h3 className="text-[22px] font-black text-[#111827] dark:text-foreground tracking-tight leading-none">
             {currentDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
           </h3>
         </div>
         <div className="flex items-center gap-2.5">
           {isToday && (
-            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#F97316] text-white shadow shadow-[#F97316]/30">
+            <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-[#F97316] text-white">
               Today
             </span>
           )}
-          <span className="h-7 px-2.5 rounded-xl flex items-center justify-center text-[11px] font-bold bg-primary/10 text-primary">
-            {dayEvents.length}
+          <span className="h-7 px-2.5 rounded-xl flex items-center justify-center text-[11px] font-bold bg-[#B7792B]/10 dark:bg-[#C98A2E]/15 text-[#B7792B] dark:text-[#C98A2E]">
+            {dayEvents.length} events
           </span>
         </div>
       </div>
 
-      {/* Events */}
-      <div className="p-4 space-y-2.5">
+      {/* ── Events ── */}
+      <div className="p-4 space-y-2.5 bg-[#FDFBF8] dark:bg-card">
         {dayEvents.length > 0 ? dayEvents.map(event => {
           const a = getEventAccent(event.id, event.title, event.color);
           const hasLink = !!event.meeting_link;
           const isGoogle = event.source === 'google_calendar';
 
           return (
-            <div key={event.id}
-              className="group flex rounded-xl overflow-hidden border border-border
-                         hover:shadow-md dark:hover:shadow-black/40 transition-all duration-200
-                         bg-white dark:bg-[#1C1C1C]">
-              {/* Colour stripe */}
-              <div className="w-[3px] shrink-0" style={{ background: a.hex }} />
+            <div
+              key={event.id}
+              className="flex rounded-xl overflow-hidden transition-all duration-200
+                         hover:shadow-[0_2px_12px_rgba(0,0,0,0.08)] dark:hover:shadow-black/30
+                         border border-[#E8DDD2] dark:border-border
+                         bg-white dark:bg-[#1C1C1C]"
+            >
+              {/* Coloured left stripe */}
+              <div className="w-[4px] shrink-0" style={{ backgroundColor: a.hex }} />
 
-              {/* Card body */}
-              <div className="flex flex-1 items-center gap-3.5 px-4 py-3.5">
-                {/* Source icon */}
-                <div className="h-10 w-10 rounded-xl shrink-0 flex items-center justify-center border border-border/60"
-                     style={{ background: a.lightBg, boxShadow: `0 0 0 2px ${a.hex}1A` }}>
-                  <span className="dark:hidden">
-                    {isGoogle ? <GoogleIcon size={16} /> : <span className="h-3 w-3 rounded-full block" style={{ background: a.hex }} />}
-                  </span>
-                  <span className="hidden dark:block">
-                    {isGoogle ? <GoogleIcon size={16} /> : <span className="h-3 w-3 rounded-full block" style={{ background: a.hex }} />}
-                  </span>
+              {/* Body */}
+              <div className="flex flex-1 items-center gap-4 px-4 py-3.5">
+
+                {/* Icon — white box with coloured ring */}
+                <div
+                  className="h-10 w-10 rounded-xl shrink-0 flex items-center justify-center
+                             bg-white dark:bg-[#252525] border border-[#E8DDD2] dark:border-border"
+                  style={{ boxShadow: `0 0 0 2px ${a.hex}22` }}
+                >
+                  {isGoogle ? <GoogleIcon /> : (
+                    <span className="h-3 w-3 rounded-full" style={{ backgroundColor: a.hex }} />
+                  )}
                 </div>
 
-                {/* Text block */}
+                {/* Text */}
                 <div className="flex-1 min-w-0">
+                  {/* Title + badge row */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[14px] font-bold tracking-tight text-foreground">{event.title}</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md"
-                          style={{ background: a.lightBg, color: a.lightText }}>
+                    <span className="text-[14px] font-bold text-[#111827] dark:text-foreground tracking-tight">
+                      {event.title}
+                    </span>
+                    <span
+                      className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
+                      style={{ backgroundColor: a.lightBg, color: a.lightText }}
+                    >
                       {isGoogle ? 'Google' : 'Aura'}
                     </span>
                   </div>
 
                   {event.description && (
-                    <p className="text-[11.5px] text-muted-foreground mt-0.5 line-clamp-1">{event.description}</p>
+                    <p className="text-[11.5px] text-[#6B7280] dark:text-muted-foreground mt-0.5 line-clamp-1">
+                      {event.description}
+                    </p>
                   )}
 
+                  {/* Meta row */}
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1.5">
+                    {/* Time */}
                     <span className="flex items-center gap-1.5 text-[11.5px] font-semibold" style={{ color: a.lightText }}>
-                      <Clock size={12} className="shrink-0" />
-                      <span className="dark:hidden" style={{ color: a.lightText }}>
-                        {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
-                      </span>
-                      <span className="hidden dark:inline" style={{ color: a.darkText }}>
-                        {fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}
-                      </span>
+                      <Clock size={12} className="shrink-0" style={{ color: a.hex }} />
+                      <span className="dark:hidden">{fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}</span>
+                      <span className="hidden dark:inline" style={{ color: a.darkText }}>{fmt(event.start_time)}{event.end_time && ` → ${fmt(event.end_time)}`}</span>
                     </span>
 
                     {hasLink ? (
-                      <a href={event.meeting_link!} target="_blank" rel="noreferrer"
-                         onClick={e => e.stopPropagation()}
-                         className="flex items-center gap-1.5 text-[11.5px] font-bold hover:underline text-[#3B82F6] dark:text-[#60A5FA]">
+                      <a
+                        href={event.meeting_link!} target="_blank" rel="noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="flex items-center gap-1.5 text-[11.5px] font-bold hover:underline text-[#3B82F6]"
+                      >
                         <Video size={12} /> Join meeting
                       </a>
                     ) : (
-                      <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
-                        <MapPin size={12} />
+                      <span className="flex items-center gap-1.5 text-[11.5px] text-[#6B7280] dark:text-muted-foreground">
+                        <MapPin size={12} style={{ color: a.hex, opacity: 0.7 }} />
                         {isGoogle ? 'Google Calendar' : 'Local event'}
                       </span>
                     )}
 
                     {event.attendees && event.attendees.length > 0 && (
-                      <span className="flex items-center gap-1.5 text-[11.5px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-[11.5px] text-[#6B7280] dark:text-muted-foreground">
                         <Users size={12} />
                         {event.attendees.length} attendee{event.attendees.length !== 1 ? 's' : ''}
                       </span>
@@ -137,18 +149,20 @@ export default function DayView({ currentDate, events }: DayViewProps) {
                   </div>
                 </div>
 
-                {/* Attendee avatars */}
+                {/* Avatars */}
                 {event.attendees && event.attendees.length > 0 && (
                   <div className="flex -space-x-2 shrink-0">
                     {event.attendees.slice(0, 3).map((att, i) => (
-                      <div key={i} title={att.email}
-                           className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] flex items-center justify-center text-[9px] font-bold uppercase text-white shadow-sm"
-                           style={{ background: a.hex }}>
+                      <div
+                        key={i} title={att.email}
+                        className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] flex items-center justify-center text-[9px] font-bold uppercase text-white shadow-sm"
+                        style={{ backgroundColor: a.hex }}
+                      >
                         {(att.displayName ?? att.email ?? '??').slice(0, 2)}
                       </div>
                     ))}
                     {event.attendees.length > 3 && (
-                      <div className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] bg-muted flex items-center justify-center text-[9px] font-bold text-muted-foreground">
+                      <div className="h-7 w-7 rounded-full border-2 border-white dark:border-[#1C1C1C] bg-[#F3F4F6] dark:bg-muted flex items-center justify-center text-[9px] font-bold text-[#6B7280]">
                         +{event.attendees.length - 3}
                       </div>
                     )}
@@ -159,11 +173,13 @@ export default function DayView({ currentDate, events }: DayViewProps) {
           );
         }) : (
           <div className="flex flex-col items-center py-16 text-center">
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-              <CalendarDays className="h-7 w-7 text-primary" />
+            <div className="h-14 w-14 rounded-2xl bg-[#B7792B]/10 flex items-center justify-center mb-4">
+              <CalendarDays className="h-7 w-7 text-[#B7792B] dark:text-[#C98A2E]" />
             </div>
-            <p className="font-bold text-foreground text-sm">Nothing scheduled</p>
-            <p className="text-xs text-muted-foreground mt-1.5 max-w-xs">Sync your Google Calendar to import events.</p>
+            <p className="font-bold text-[#111827] dark:text-foreground text-sm">Nothing scheduled</p>
+            <p className="text-xs text-[#6B7280] dark:text-muted-foreground mt-1.5 max-w-xs">
+              Sync your Google Calendar to import events.
+            </p>
           </div>
         )}
       </div>

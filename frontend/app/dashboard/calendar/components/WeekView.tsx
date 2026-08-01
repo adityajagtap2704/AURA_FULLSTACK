@@ -41,7 +41,9 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
 
   const sun = new Date(currentDate);
   sun.setDate(currentDate.getDate() - currentDate.getDay());
-  const weekDays = Array.from({ length: 7 }, (_, i) => { const d = new Date(sun); d.setDate(sun.getDate() + i); return d; });
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(sun); d.setDate(sun.getDate() + i); return d;
+  });
 
   const getDayEvts = (d: Date) => events.filter(e => {
     const s = parseSafeDate(e.start_time);
@@ -64,32 +66,32 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
   })();
 
   return (
-    <div className="flex flex-col rounded-2xl overflow-hidden border border-border bg-card shadow-sm
-                    select-none h-[580px] min-w-[720px] md:min-w-full">
+    <div className="flex flex-col rounded-2xl overflow-hidden select-none h-[580px] min-w-[720px] md:min-w-full
+                    border border-[#E8DDD2] dark:border-border bg-white dark:bg-card shadow-sm">
       <style dangerouslySetInnerHTML={{ __html:`
         .wk-s::-webkit-scrollbar{width:4px}
         .wk-s::-webkit-scrollbar-track{background:transparent}
-        .wk-s::-webkit-scrollbar-thumb{background:rgba(183,121,43,0.25);border-radius:9999px}
-        .wk-s::-webkit-scrollbar-thumb:hover{background:rgba(183,121,43,0.45)}
+        .wk-s::-webkit-scrollbar-thumb{background:rgba(183,121,43,0.3);border-radius:9999px}
+        .wk-s::-webkit-scrollbar-thumb:hover{background:rgba(183,121,43,0.5)}
       `}} />
 
-      {/* Day headers */}
-      <div className="flex shrink-0 border-b border-border bg-muted/25 dark:bg-white/[0.02]">
-        <div className="w-[68px] shrink-0 border-r border-border flex items-center justify-center">
-          <span className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{tzStr}</span>
+      {/* ── Day headers ── */}
+      <div className="flex shrink-0 border-b border-[#E8DDD2] dark:border-border bg-[#FAF7F4] dark:bg-white/[0.02]">
+        <div className="w-[68px] shrink-0 border-r border-[#E8DDD2] dark:border-border flex items-center justify-center">
+          <span className="text-[9px] font-black text-[#6B7280] dark:text-muted-foreground uppercase tracking-widest">{tzStr}</span>
         </div>
         <div className="flex-1 grid grid-cols-7">
           {weekDays.map((day, i) => {
             const isT = today.toDateString() === day.toDateString();
             return (
-              <div key={i} className={`py-2.5 flex flex-col items-center border-r border-border last:border-r-0
+              <div key={i} className={`py-2.5 flex flex-col items-center border-r border-[#E8DDD2] dark:border-border last:border-r-0
                 ${isT ? 'bg-[#F97316]/[0.06] dark:bg-[#F97316]/[0.07]' : ''}`}>
                 <span className={`text-[9px] font-black uppercase tracking-widest
-                  ${isT ? 'text-[#F97316]' : 'text-muted-foreground'}`}>
+                  ${isT ? 'text-[#F97316]' : 'text-[#6B7280] dark:text-muted-foreground'}`}>
                   {day.toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
                 <span className={`mt-1 h-7 w-7 flex items-center justify-center rounded-full text-[14px] font-black
-                  ${isT ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/40' : 'text-foreground'}`}>
+                  ${isT ? 'bg-[#F97316] text-white shadow shadow-[#F97316]/35' : 'text-[#111827] dark:text-foreground'}`}>
                   {day.getDate()}
                 </span>
               </div>
@@ -98,29 +100,30 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
         </div>
       </div>
 
-      {/* Scrollable body */}
+      {/* ── Scrollable grid ── */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto relative wk-s bg-white dark:bg-background">
         <div className="flex relative" style={{ height: `${TOTAL * HH + 20}px` }}>
 
           {/* Time labels */}
-          <div className="w-[68px] shrink-0 border-r border-border relative bg-white dark:bg-background">
+          <div className="w-[68px] shrink-0 border-r border-[#E8DDD2] dark:border-border relative bg-white dark:bg-background">
             {hours.map((h, i) => (
-              <div key={h} className="absolute right-3 text-[9px] font-bold text-muted-foreground/55 select-none"
+              <div key={h} className="absolute right-3 text-[9px] font-bold text-[#6B7280]/60 dark:text-muted-foreground/55 select-none"
                    style={{ top: `${i === 0 ? 6 : i * HH - 8}px` }}>
                 {h === 12 ? '12 PM' : h > 12 ? `${h-12} PM` : `${h} AM`}
               </div>
             ))}
           </div>
 
-          {/* Grid */}
+          {/* Grid body */}
           <div className="flex-1 relative">
-            {/* Hour lines */}
+            {/* Horizontal hour lines */}
             {hours.map((_, i) => (
-              <div key={i} className="absolute w-full border-b border-border/35 dark:border-border/20"
+              <div key={i}
+                   className="absolute w-full border-b border-[#E8DDD2]/60 dark:border-border/25"
                    style={{ top: `${i * HH}px` }} />
             ))}
 
-            {/* Columns */}
+            {/* Day columns */}
             <div className="absolute inset-0 grid grid-cols-7">
               {weekDays.map((day, di) => {
                 const isT = today.toDateString() === day.toDateString();
@@ -136,7 +139,6 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                   return { ...e, top, height, sh, eh: sh + dur, sDate: s, eDate: en };
                 }).filter(e => e.sh < EH + 1 && e.eh > SH);
 
-                // overlap grouping
                 const groups: typeof mapped[] = [];
                 mapped.forEach(ev => {
                   let placed = false;
@@ -149,42 +151,49 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                 groups.forEach(g => g.forEach((ev, i) => cards.push({ ...ev, left: `${i*100/g.length}%`, width: `${100/g.length - 2}%` })));
 
                 return (
-                  <div key={di} className={`relative border-r border-border/30 last:border-r-0 h-full
-                    ${isT ? 'bg-[#F97316]/[0.02] dark:bg-[#F97316]/[0.025]' : ''}`}>
+                  <div key={di}
+                       className={`relative border-r border-[#E8DDD2]/50 dark:border-border/30 last:border-r-0 h-full
+                         ${isT ? 'bg-[#F97316]/[0.025] dark:bg-[#F97316]/[0.03]' : ''}`}>
                     {cards.map(card => {
                       const a = getEventAccent(card.id, card.title, card.color);
                       const hasMeet = !!card.meeting_link;
 
                       return (
-                        <div key={card.id}
-                             style={{
-                               top: `${card.top + 2}px`,
-                               height: `${card.height - 4}px`,
-                               left: card.left,
-                               width: card.width,
-                               background: a.lightBg,
-                               borderLeftColor: a.hex,
-                               boxShadow: `0 1px 3px ${a.hex}18`,
-                             } as React.CSSProperties}
-                             className="absolute rounded-lg px-2 py-1.5 flex flex-col justify-between
-                                        cursor-default overflow-hidden transition-all duration-150
-                                        hover:-translate-y-px hover:shadow-md border-l-[2.5px]">
-
-                          {/* Dark overlay */}
-                          <div className="absolute inset-0 rounded-lg pointer-events-none hidden dark:block"
-                               style={{ background: a.darkCardBg }} />
+                        <div
+                          key={card.id}
+                          className="absolute rounded-lg px-2 py-1.5 flex flex-col justify-between
+                                     cursor-default overflow-hidden transition-all duration-150
+                                     hover:-translate-y-px hover:shadow-md"
+                          style={{
+                            top: `${card.top + 2}px`,
+                            height: `${card.height - 4}px`,
+                            left: card.left,
+                            width: card.width,
+                            /* Light mode: tinted bg */
+                            backgroundColor: a.lightBg,
+                            borderLeft: `3px solid ${a.hex}`,
+                            boxShadow: `0 1px 4px ${a.hex}20`,
+                          }}
+                        >
+                          {/* Dark mode overlay replaces background */}
+                          <div
+                            className="absolute inset-0 rounded-lg pointer-events-none hidden dark:block"
+                            style={{ backgroundColor: a.darkCardBg }}
+                          />
 
                           <div className="relative z-10 flex flex-col gap-0.5 min-w-0">
-                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1">
-                              <span className="dark:hidden flex items-center gap-1 truncate" style={{ color: a.lightText }}>
+                            {/* Title */}
+                            <span className="text-[10px] font-extrabold truncate leading-tight flex items-center gap-1"
+                                  style={{ color: a.lightText }}>
+                              <span className="dark:hidden flex items-center gap-1 truncate min-w-0">
                                 {card.source === 'google_calendar' && (
-                                  <span className="h-3.5 w-3.5 bg-white/70 rounded flex items-center justify-center shrink-0">
+                                  <span className="h-3.5 w-3.5 bg-white/80 rounded flex items-center justify-center shrink-0">
                                     <GoogleIcon />
                                   </span>
                                 )}
                                 <span className="truncate">{card.title}</span>
                               </span>
-                              <span className="hidden dark:flex items-center gap-1 truncate" style={{ color: a.darkText }}>
+                              <span className="hidden dark:flex items-center gap-1 truncate min-w-0" style={{ color: a.darkText }}>
                                 {card.source === 'google_calendar' && (
                                   <span className="h-3.5 w-3.5 bg-white/10 rounded flex items-center justify-center shrink-0">
                                     <GoogleIcon />
@@ -193,10 +202,13 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                                 <span className="truncate">{card.title}</span>
                               </span>
                             </span>
-                            <span className="text-[9px] font-semibold dark:hidden" style={{ color: a.lightText, opacity: 0.7 }}>
+                            {/* Time */}
+                            <span className="text-[9px] font-semibold dark:hidden"
+                                  style={{ color: a.lightText, opacity: 0.72 }}>
                               {fmtTime(card.sDate)}
                             </span>
-                            <span className="text-[9px] font-semibold hidden dark:block" style={{ color: a.darkText, opacity: 0.7 }}>
+                            <span className="text-[9px] font-semibold hidden dark:block"
+                                  style={{ color: a.darkText, opacity: 0.72 }}>
                               {fmtTime(card.sDate)}
                             </span>
                           </div>
@@ -204,14 +216,16 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                           {card.height >= 52 && (
                             <>
                               <div className="relative z-10 flex items-center gap-1 text-[9px] overflow-hidden dark:hidden"
-                                   style={{ color: a.lightText, opacity: 0.65 }}>
-                                {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
+                                   style={{ color: a.lightText, opacity: 0.6 }}>
+                                {hasMeet
+                                  ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
+                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">Calendar</span></>}
                               </div>
-                              <div className="relative z-10 hidden dark:flex items-center gap-1 text-[9px] overflow-hidden"
-                                   style={{ color: a.darkText, opacity: 0.65 }}>
-                                {hasMeet ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
-                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">{card.source === 'google_calendar' ? 'Calendar' : 'Local'}</span></>}
+                              <div className="hidden dark:flex relative z-10 items-center gap-1 text-[9px] overflow-hidden"
+                                   style={{ color: a.darkText, opacity: 0.6 }}>
+                                {hasMeet
+                                  ? <><Video className="h-2.5 w-2.5 shrink-0" /><span className="font-bold truncate">Meet</span></>
+                                  : <><MapPin className="h-2.5 w-2.5 shrink-0" /><span className="truncate">Calendar</span></>}
                               </div>
                             </>
                           )}
