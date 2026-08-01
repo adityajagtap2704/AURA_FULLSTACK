@@ -162,15 +162,13 @@ export default function WeekView({ currentDate, events }: WeekViewProps) {
                                height: `${card.height - 4}px`,
                                left: card.left,
                                width: card.width,
-                             }}
-                             className="absolute rounded-lg px-2 py-1.5 flex flex-col justify-between
-                                        cursor-default overflow-hidden transition-all duration-150
-                                        hover:-translate-y-px hover:shadow-md border-l-[2.5px]"
-                             style={{
                                background: a.lightBg,
                                borderLeftColor: a.hex,
                                boxShadow: `0 1px 3px ${a.hex}18`,
-                             } as React.CSSProperties}>
+                             } as React.CSSProperties}
+                             className="absolute rounded-lg px-2 py-1.5 flex flex-col justify-between
+                                        cursor-default overflow-hidden transition-all duration-150
+                                        hover:-translate-y-px hover:shadow-md border-l-[2.5px]">
 
                           {/* Dark overlay */}
                           <div className="absolute inset-0 rounded-lg pointer-events-none hidden dark:block"
