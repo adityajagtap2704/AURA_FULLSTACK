@@ -579,13 +579,13 @@ const STEPS = [
 ];
 const STEP_ICONS = [
   // Link
-  <Link2 key="link" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  <Link2 key="link" className="w-6 h-6 text-[#C99A3D]" strokeWidth={1.8} />,
   // Sync
-  <RefreshCw key="sync" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  <RefreshCw key="sync" className="w-6 h-6 text-[#C99A3D]" strokeWidth={1.8} />,
   // Sparkles
-  <Sparkles key="ai" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  <Sparkles key="ai" className="w-6 h-6 text-[#C99A3D]" strokeWidth={1.8} />,
   // CheckCircle2
-  <CheckCircle2 key="done" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  <CheckCircle2 key="done" className="w-6 h-6 text-[#C99A3D]" strokeWidth={1.8} />,
 ];
 
 const STATS = [
@@ -616,11 +616,12 @@ function HowItWorks() {
   const sectionInView = useInView(sectionRef, { once: true, margin: '-100px' });
   const [statsActive, setStatsActive] = useState(false);
 
-  useEffect(() => {
-    if (sectionInView) {
-      setStatsActive(true);
-    }
-  }, [sectionInView]);
+  // sectionInView only ever flips false → true (viewport `once: true`), so
+  // this is safe to derive during render instead of an effect that calls
+  // setState synchronously.
+  if (sectionInView && !statsActive) {
+    setStatsActive(true);
+  }
 
 
   return (
@@ -692,7 +693,7 @@ function HowItWorks() {
           <span className="inline-flex items-center gap-2 px-4.5 py-1.5 rounded-full bg-[#FDF6EC] border border-[#E8C98A]/40 text-[#D4A017] text-[11px] font-bold uppercase tracking-widest mb-5">
             How AURA works
           </span>
-          <h2 className="text-[36px] md:text-[48px] font-black text-[#1F1B16] tracking-tight mb-4">
+          <h2 className="text-[28px] md:text-[36px] font-black text-[#1F1B16] tracking-tight mb-4">
             Your productivity, powered by AI in <span className="bg-gradient-to-r from-[#D4A017] to-[#E8A422] bg-clip-text text-transparent">4 simple steps</span>
           </h2>
           <p className="text-[#6B6258] text-base md:text-lg max-w-xl mx-auto leading-relaxed">
@@ -779,7 +780,7 @@ function HowItWorks() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.8, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  className="group relative bg-white border border-[#F1F1F1] rounded-[20px] p-8 flex flex-col items-center text-center shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-500 ease-out hover:-translate-y-2.5 hover:border-[#C99A3D]/30 hover:shadow-[0_20px_45px_rgba(201,154,61,0.12),0_0_20px_rgba(201,154,61,0.02)] card-shine-effect select-none overflow-hidden h-full flex-1"
+                  className="group relative bg-white border border-[#F1F1F1] rounded-[20px] p-6 flex flex-col items-center text-center shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-500 ease-out hover:-translate-y-2.5 hover:border-[#C99A3D]/30 hover:shadow-[0_20px_45px_rgba(201,154,61,0.12),0_0_20px_rgba(201,154,61,0.02)] card-shine-effect select-none overflow-hidden h-full flex-1"
                 >
                   {/* Subtle inner radial gold glow that fades in on hover */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,154,61,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
@@ -800,7 +801,7 @@ function HowItWorks() {
                   <motion.div 
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
-                    className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#FFF9F0] to-[#FDF0D5] border border-[#EDD9A3]/85 flex items-center justify-center mt-6 mb-6 relative z-10 transition-all duration-500 ease-out group-hover:scale-110 group-hover:shadow-[0_8px_25px_rgba(201,154,61,0.25)] group-hover:border-[#C99A3D]"
+                    className="w-[58px] h-[58px] rounded-full bg-gradient-to-br from-[#FFF9F0] to-[#FDF0D5] border border-[#EDD9A3]/85 flex items-center justify-center mt-4 mb-5 relative z-10 transition-all duration-500 ease-out group-hover:scale-110 group-hover:shadow-[0_8px_25px_rgba(201,154,61,0.25)] group-hover:border-[#C99A3D]"
                   >
                     <div className="transform transition-transform duration-500 group-hover:rotate-6">
                       {STEP_ICONS[i]}
@@ -808,10 +809,10 @@ function HowItWorks() {
                   </motion.div>
 
                   {/* Text Details */}
-                  <h3 className="text-[20px] font-bold text-[#111] mb-3 leading-snug tracking-tight relative z-10 group-hover:text-[#C17817] transition-all duration-500 ease-out group-hover:-translate-y-1">
+                  <h3 className="text-[17px] font-bold text-[#111] mb-2.5 leading-snug tracking-tight relative z-10 group-hover:text-[#C17817] transition-all duration-500 ease-out group-hover:-translate-y-1">
                     {s.label}
                   </h3>
-                  <p className="text-[15px] text-[#777] leading-[1.7] font-normal relative z-10 transition-all duration-500 ease-out group-hover:-translate-y-0.5 group-hover:text-[#5B5248]">
+                  <p className="text-[13.5px] text-[#777] leading-[1.6] font-normal relative z-10 transition-all duration-500 ease-out group-hover:-translate-y-0.5 group-hover:text-[#5B5248]">
                     {s.desc}
                   </p>
                 </motion.div>
@@ -1366,7 +1367,7 @@ function Footer() {
       <div className="absolute bottom-0 left-10 w-[250px] h-[250px] bg-[#E8A422]/3 rounded-full blur-3xl pointer-events-none" />
 
       {/* Large low-opacity AURA watermark in the bottom-right */}
-      <div className="absolute -bottom-[250px] -right-[150px] md:-bottom-[350px] md:-right-[200px] w-[700px] h-[700px] md:w-[850px] md:h-[850px] text-[#C17817] opacity-[0.05] lg:opacity-[0.06] pointer-events-none select-none">
+      <div className="absolute -bottom-[110px] -right-[85px] md:-bottom-[150px] md:-right-[120px] w-[400px] h-[400px] md:w-[500px] md:h-[500px] text-[#C17817] opacity-[0.05] lg:opacity-[0.06] pointer-events-none select-none">
         <AuraLogoIcon className="w-full h-full stroke-[1.5px]" />
       </div>
 
@@ -1395,13 +1396,15 @@ function Footer() {
             <div className="flex gap-2.5">
               {[
                 { name: 'X', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, href: '#' },
-                { name: 'LinkedIn', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2" fill="currentColor"/></svg>, href: '#' },
-                { name: 'GitHub', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>, href: '#' },
-                { name: 'Instagram', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8}><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>, href: '#' },
+                { name: 'LinkedIn', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2" fill="currentColor"/></svg>, href: 'https://www.linkedin.com/company/kalnet-technology/posts/?feedView=all' },
+                { name: 'GitHub', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>, href: 'https://github.com/adityajagtap2704/AURA_FULLSTACK' },
+                { name: 'Instagram', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8}><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>, href: 'https://www.instagram.com/kalnet_global/' },
               ].map((s, idx) => (
-                <motion.a 
+                <motion.a
                   key={s.name}
                   href={s.href}
+                  target={s.href === '#' ? undefined : '_blank'}
+                  rel={s.href === '#' ? undefined : 'noopener noreferrer'}
                   whileHover={{ scale: 1.1, y: -2 }}
                   className="w-10 h-10 rounded-[12px] bg-white border border-[#F0EBE0] flex items-center justify-center text-[#1F1B16] hover:text-[#C17817] hover:border-[#C17817]/30 transition-all shadow-sm hover:shadow-md"
                   aria-label={s.name}
@@ -1452,7 +1455,7 @@ function Footer() {
               {[
                 {
                   name: 'Google',
-                  href: '#',
+                  href: 'https://www.google.com/search?q=what+is+kalnet&sca_esv=a64f8b6be24e5a42&sxsrf=APpeQnsQ1H7ZdogTGTh6kes2HUTExNVo_Q%3A1785578547673&ei=M8RtaoTTKK-dseMPuaP64A0&ved=0ahUKEwjEuLW4lv-VAxWvTmwGHbmRHtwQ4dUDCBA&uact=5&oq=what+is+kalnet&gs_lp=Egxnd3Mtd2l6LXNlcnAiDndoYXQgaXMga2FsbmV0MgUQIRifBTIFECEYnwUyBRAhGJ8FSNMpULMJWIEhcA94AJABAJgBaqABaqoBAzAuMbgBA8gBAPgBAZgCD6ACb8ICChAAGEcY1gQYsAPCAgsQABiABBixAxiDAcICDhAAGIAEGIoFGI0GGLEDwgIREC4YgAQYsQMYgwEYxwEY0QPCAggQABiABBixA8ICERAuGIAEGIoFGJECGMcBGK8BwgILEAAYgAQYigUYkQLCAg4QABiABBiKBRixAxiDAcICBRAAGIAEwgIgEC4YgAQYigUYkQIYxwEYrwEYlwUY3AQY3gQY4ATYAQHCAhEQLhiABBiKBRiRAhjHARjRA8ICEBAAGIAEGIoFGLEDGIMBGArCAgkQABiABBgKGAvCAgYQABgWGB7CAggQABiABBiiBMICBRAAGO8FmAMAiAYBkAYDugYGCAEQARgUkgcCMTWgB8MBsgcAuAcAwgcIMC4xLjEyLjLIB1qACAE&sclient=gws-wiz-serp',
                   icon: (
                     <svg viewBox="0 0 24 24" className="w-5 h-5">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -1464,7 +1467,7 @@ function Footer() {
                 },
                 {
                   name: 'Instagram',
-                  href: '#',
+                  href: 'https://www.instagram.com/kalnet_global/',
                   icon: (
                     <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#E1306C]" fill="none" stroke="currentColor" strokeWidth={2}>
                       <rect x="2" y="2" width="20" height="20" rx="5"/>
@@ -1475,7 +1478,7 @@ function Footer() {
                 },
                 {
                   name: 'LinkedIn',
-                  href: '#',
+                  href: 'https://www.linkedin.com/company/kalnet-technology/posts/?feedView=all',
                   icon: (
                     <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#0077B5]">
                       <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
@@ -1492,9 +1495,11 @@ function Footer() {
                   )
                 }
               ].map(s => (
-                <motion.a 
-                  key={s.name} 
-                  href={s.href} 
+                <motion.a
+                  key={s.name}
+                  href={s.href}
+                  target={s.href === '#' ? undefined : '_blank'}
+                  rel={s.href === '#' ? undefined : 'noopener noreferrer'}
                   title={s.name}
                   aria-label={s.name}
                   whileHover={{ scale: 1.08, y: -2 }}
