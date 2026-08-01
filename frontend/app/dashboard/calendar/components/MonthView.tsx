@@ -70,10 +70,10 @@ export default function MonthView({ currentDate, events }: MonthViewProps) {
           return (
             <div key={idx}
               className={`p-2 flex flex-col min-h-[95px] transition-colors duration-100
-                ${!isCur ? 'bg-muted/15 dark:bg-white/[0.01]'
-                  : isWknd ? 'bg-[#FDFAF6] dark:bg-[#161616]'
-                  : 'bg-white dark:bg-card'}
-                hover:bg-muted/20 dark:hover:bg-white/[0.02]
+                ${!isCur ? 'bg-muted/15'
+                  : isWknd ? 'bg-muted/5'
+                  : 'bg-background'}
+                hover:bg-muted/20
                 ${isToday ? 'ring-1 ring-inset ring-primary/30' : ''}`}>
 
               {/* Day number */}
@@ -87,22 +87,24 @@ export default function MonthView({ currentDate, events }: MonthViewProps) {
                 {dayEvts.length > 0 && <span className="md:hidden h-1.5 w-1.5 rounded-full bg-primary" />}
               </div>
 
-              {/* Event pills — desktop */}
-              <div className="hidden md:flex flex-col gap-0.5 overflow-hidden" style={{ maxHeight: 80 }}>
+            <div className="flex items-center gap-3 md:hidden" style={{ maxHeight: 80 }}>
                 {dayEvts.slice(0, 3).map(ev => {
                   const a = getEventAccent(ev.id, ev.title, ev.color);
                   return (
                     <div key={ev.id}
                          title={`${ev.title} · ${fmtTime(ev.start_time)}`}
-                         className="flex items-center gap-1 px-1.5 py-[3px] rounded-[5px] overflow-hidden cursor-default hover:brightness-95 transition-all"
-                         style={{ background: a.lightBg, borderLeft: `2.5px solid ${a.hex}` }}>
+                         className="flex items-center gap-1 px-1.5 py-[3px] rounded-[5px] overflow-hidden cursor-default hover:brightness-95 transition-all border border-border"
+                         style={{ 
+                           background: `${a.hex}0D`,
+                           borderLeft: `2.5px solid ${a.hex}` 
+                         }}>
                       {ev.source === 'google_calendar' ? <GoogleGIcon /> : (
                         <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: a.hex }} />
                       )}
-                      <span className="text-[10.5px] font-bold truncate" style={{ color: a.lightText }}>
+                      <span className="text-[10.5px] font-bold truncate" style={{ color: a.hex }}>
                         {ev.title}
                       </span>
-                      <span className="ml-auto shrink-0 pl-1 text-[9px] font-medium" style={{ color: a.lightText, opacity: 0.55 }}>
+                      <span className="ml-auto shrink-0 pl-1 text-[9px] font-medium text-muted-foreground">
                         {fmtTime(ev.start_time)}
                       </span>
                     </div>
