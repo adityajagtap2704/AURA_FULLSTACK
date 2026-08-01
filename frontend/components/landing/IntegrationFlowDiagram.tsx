@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useAnimationFrame } from 'framer-motion';
+import { useAnimationFrame, motion } from 'framer-motion';
 import {
   AuraLogoIcon,
   GmailIcon,
@@ -140,25 +140,31 @@ export default function IntegrationFlowDiagram() {
       {/* connecting curves + flowing dots */}
       <svg className="absolute inset-0 pointer-events-none" width={size.width} height={size.height} viewBox={`0 0 ${size.width} ${size.height}`}>
         {LEFT.map((item, i) => (
-          <path
+          <motion.path
             key={`left-line-${item.key}`}
             ref={(el) => { leftPathRefs[i].current = el; }}
             d={leftPaths[i]}
             stroke="#E8C98A"
             strokeWidth="1.5"
             fill="none"
-            opacity="0.6"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 0.6 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, ease: "easeInOut", delay: i * 0.15 }}
           />
         ))}
         {RIGHT.map((item, i) => (
-          <path
+          <motion.path
             key={`right-line-${item.key}`}
             ref={(el) => { rightPathRefs[i].current = el; }}
             d={rightPaths[i]}
             stroke="#E8C98A"
             strokeWidth="1.5"
             fill="none"
-            opacity="0.6"
+            initial={{ pathLength: 0, opacity: 0 }}
+            whileInView={{ pathLength: 1, opacity: 0.6 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.5, ease: "easeInOut", delay: i * 0.15 }}
           />
         ))}
         {leftPaths.every(Boolean) &&
@@ -187,41 +193,79 @@ export default function IntegrationFlowDiagram() {
         <div className="flex flex-col gap-9">
           {LEFT.map((item, i) => (
             <div key={item.key} className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-xl bg-white border border-[#F0EBE3] shadow-sm flex items-center justify-center shrink-0">
-                <item.Icon className="w-8 h-8" />
-              </div>
-              <span className="text-sm font-bold text-[#4A3F35] w-[110px] shrink-0">{item.label}</span>
-              <span
+              <motion.div 
+                className="flex items-center gap-3"
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
+              >
+                <div 
+                  className="w-14 h-14 rounded-xl bg-white border border-[#F0EBE3] shadow-sm flex items-center justify-center shrink-0 transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-[#E8D5B5] group cursor-pointer"
+                >
+                  <item.Icon className="w-8 h-8 group-hover:rotate-3 transition-transform duration-300" />
+                </div>
+                <span className="text-sm font-bold text-[#4A3F35] w-[110px] shrink-0">{item.label}</span>
+              </motion.div>
+              <motion.span
                 ref={(el) => { leftDotRefs.current[i] = el; }}
-                className="w-2 h-2 rounded-full bg-[#C17817] shrink-0"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="w-2 h-2 rounded-full bg-[#C17817] shrink-0 shadow-[0_0_8px_rgba(193,120,23,0.6)]"
               />
             </div>
           ))}
         </div>
 
         {/* center logo */}
-        <div ref={centerRef} className="relative w-[232px] h-[232px] flex items-center justify-center shrink-0">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FBEBCF]/70 to-transparent" />
-          <div className="absolute inset-[18px] rounded-full border border-[#F0DDBB]" />
-          <div className="absolute inset-[34px] rounded-full border border-[#F0DDBB]" />
-          <div className="absolute inset-[50px] rounded-full bg-white border border-[#E8D5B5] shadow-[0_8px_30px_rgba(193,120,23,0.15)] flex flex-col items-center justify-center gap-1.5">
-            <AuraLogoIcon className="w-11 h-11 text-[#C17817]" />
+        <motion.div 
+          ref={centerRef} 
+          initial={{ opacity: 0, scale: 0.8 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="relative w-[232px] h-[232px] flex items-center justify-center shrink-0"
+        >
+          <motion.div animate={{ scale: [1, 1.05, 1], opacity: [0.7, 0.4, 0.7] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-0 rounded-full bg-gradient-to-br from-[#FBEBCF]/70 to-transparent" />
+          <motion.div animate={{ scale: [1, 1.1, 1], opacity: [1, 0.5, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }} className="absolute inset-[18px] rounded-full border border-[#F0DDBB]" />
+          <motion.div animate={{ scale: [1, 1.15, 1], opacity: [1, 0.3, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute inset-[34px] rounded-full border border-[#F0DDBB]" />
+          
+          <div 
+            className="absolute inset-[50px] rounded-full bg-white border border-[#E8D5B5] shadow-[0_8px_30px_rgba(193,120,23,0.15)] flex flex-col items-center justify-center gap-1.5 transition-all duration-500 hover:scale-105 hover:shadow-[0_15px_45px_rgba(193,120,23,0.25)] hover:border-[#C17817] cursor-pointer group"
+          >
+            <AuraLogoIcon className="w-11 h-11 text-[#C17817] group-hover:scale-110 transition-transform duration-500" />
             <span className="text-lg font-black tracking-wide text-[#C17817]">AURA</span>
           </div>
-        </div>
+        </motion.div>
 
         {/* right column */}
         <div className="flex flex-col gap-9">
           {RIGHT.map((item, i) => (
             <div key={item.key} className="flex items-center gap-3 justify-end">
-              <span
+              <motion.span
                 ref={(el) => { rightDotRefs.current[i] = el; }}
-                className="w-2 h-2 rounded-full bg-[#C17817]"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="w-2 h-2 rounded-full bg-[#C17817] shadow-[0_0_8px_rgba(193,120,23,0.6)] shrink-0"
               />
-              <span className="text-sm font-bold text-[#4A3F35] w-[110px] shrink-0 text-right">{item.label}</span>
-              <div className="w-14 h-14 rounded-xl bg-white border border-[#F0EBE3] shadow-sm flex items-center justify-center shrink-0">
-                <item.Icon className="w-8 h-8" />
-              </div>
+              <motion.div 
+                className="flex items-center gap-3 justify-end"
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: i * 0.15, ease: "easeOut" }}
+              >
+                <span className="text-sm font-bold text-[#4A3F35] w-[110px] shrink-0 text-right">{item.label}</span>
+                <div 
+                  className="w-14 h-14 rounded-xl bg-white border border-[#F0EBE3] shadow-sm flex items-center justify-center shrink-0 transition-all duration-300 hover:scale-110 hover:shadow-md hover:border-[#E8D5B5] group cursor-pointer"
+                >
+                  <item.Icon className="w-8 h-8 group-hover:-rotate-3 transition-transform duration-300" />
+                </div>
+              </motion.div>
             </div>
           ))}
         </div>

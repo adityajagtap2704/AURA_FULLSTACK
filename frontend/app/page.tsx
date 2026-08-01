@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
-import { motion, AnimatePresence, useInView, useMotionValue, useTransform, animate, useAnimation } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useMotionValue, useTransform, animate, useAnimation, useAnimationFrame } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/landing/Navbar';
 import AIAssistantWidget from '@/components/landing/AIAssistantWidget';
 import IntegrationFlowDiagram from '@/components/landing/IntegrationFlowDiagram';
 import IntegrationsOrbitSection from '@/components/landing/IntegrationsOrbitSection';
+import { AuraLogoIcon } from '@/components/icons/ServiceIcons';
+import { Link2, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
 
 /* --------------------------------- HERO --------------------------------- */
 function Hero() {
@@ -85,12 +87,8 @@ function Hero() {
             {/* Topbar */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-[#F0EBE3] bg-white">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 rounded-full border border-[#C17817] flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none">
-                    <circle cx="8" cy="8" r="5.5" stroke="#C17817" strokeWidth="1.2"/>
-                    <path d="M8 2.5C8 2.5 5.5 5 5.5 8S8 13.5 8 13.5" stroke="#C17817" strokeWidth="1.1" strokeLinecap="round"/>
-                    <path d="M8 2.5C8 2.5 10.5 5 10.5 8S8 13.5 8 13.5" stroke="#C17817" strokeWidth="1.1" strokeLinecap="round"/>
-                  </svg>
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <AuraLogoIcon className="w-full h-full text-[#C17817]" />
                 </div>
                 <span className="text-[13px] font-bold text-[#1F1B16]">AURA</span>
               </div>
@@ -574,33 +572,20 @@ function AISection() {
 
 /* ----------------------------- HOW IT WORKS ----------------------------- */
 const STEPS = [
-  {label:'Connect your tools',desc:'One-click OAuth with all major apps.'},
-  {label:'We sync your data securely',desc:'Real-time sync across all connected tools.'},
-  {label:'AI organizes everything',desc:'Smart summaries and priority queues daily.'},
-  {label:'You get clarity and get things done',desc:'Start every day with a clear action plan.'},
+  { label: 'Connect your tools', desc: 'One-click OAuth with all major apps and services.' },
+  { label: 'We sync your data securely', desc: 'Real-time sync across all your connected tools.' },
+  { label: 'AI organizes everything', desc: 'Smart summaries and priority queues daily.' },
+  { label: 'You get clarity and get things done', desc: 'Start every day with a clear action plan.' },
 ];
 const STEP_ICONS = [
-  // Link - Connect
-  <svg key="link" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#C17817" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path className="neural-stroke" d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
-    <path className="neural-stroke" d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
-  </svg>,
-  // Refresh - Sync
-  <svg key="sync" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#C17817" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path className="neural-stroke" d="M23 4v6h-6"/>
-    <path className="neural-stroke" d="M1 20v-6h6"/>
-    <path className="neural-stroke" d="M3.51 9a9 9 0 0114.85-3.36L23 10"/>
-    <path className="neural-stroke" d="M20.49 15a9 9 0 01-14.85 3.36L1 14"/>
-  </svg>,
-  // Star - AI
-  <svg key="ai" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#C17817" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path className="neural-stroke" d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
-  </svg>,
-  // Check circle - Done
-  <svg key="done" className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="#C17817" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <path className="neural-stroke" d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-    <polyline className="neural-stroke" points="22 4 12 14.01 9 11.01"/>
-  </svg>,
+  // Link
+  <Link2 key="link" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  // Sync
+  <RefreshCw key="sync" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  // Sparkles
+  <Sparkles key="ai" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
+  // CheckCircle2
+  <CheckCircle2 key="done" className="w-7 h-7 text-[#C99A3D]" strokeWidth={1.8} />,
 ];
 
 const STATS = [
@@ -629,169 +614,254 @@ function AnimatedCounter({ target, suffix = '', start }: { target: number; suffi
 function HowItWorks() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const sectionInView = useInView(sectionRef, { once: true, margin: '-100px' });
-  const [pulseProgress, setPulseProgress] = useState(0);
   const [statsActive, setStatsActive] = useState(false);
 
-  // Pulse timing: each step gets ~0.25 of the total duration
-  const PULSE_DURATION = 2.0;
-  const STEP_DELAY = 0.5;
-
   useEffect(() => {
-    if (!sectionInView) return;
-    // Start pulse animation
-    const controls = animate(0, 1, {
-      duration: PULSE_DURATION,
-      ease: [0.22, 1, 0.36, 1],
-      onUpdate(v) { setPulseProgress(v); },
-      onComplete() { setStatsActive(true); },
-    });
-    return () => controls.stop();
+    if (sectionInView) {
+      setStatsActive(true);
+    }
   }, [sectionInView]);
 
+
   return (
-    <section id="how-it-works" ref={sectionRef} className="py-24 bg-[#FDFAF6]">
-      <div className="max-w-[1100px] mx-auto px-6">
-        <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
-          transition={{duration:0.5,ease:'easeOut'}}
-          className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FDF6EC] border border-[#E8C98A]/50 text-[#C17817] text-xs font-bold uppercase tracking-widest mb-5">
+    <section id="how-it-works" ref={sectionRef} className="py-28 bg-gradient-to-b from-[#FDFAF6] via-white to-[#FDFAF6] relative overflow-hidden">
+      {/* Inject custom style tag for card shine sweep animation */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes cardShine {
+          0% { left: -100%; }
+          100% { left: 150%; }
+        }
+        .card-shine-effect::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 50%;
+          height: 100%;
+          background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
+          transform: skewX(-25deg);
+          transition: none;
+        }
+        .card-shine-effect:hover::after {
+          animation: cardShine 0.85s ease-in-out;
+        }
+      `}} />
+
+      {/* Floating Background Particles */}
+      {[...Array(4)].map((_, idx) => (
+        <motion.div
+          key={idx}
+          className="absolute w-2 h-2 rounded-full bg-[#D4A017]/25 blur-[1px] pointer-events-none hidden md:block"
+          style={{
+            top: `${20 + idx * 22}%`,
+            left: `${15 + idx * 23}%`,
+          }}
+          animate={{
+            y: [0, -15, 0],
+            x: [0, idx % 2 === 0 ? 10 : -10, 0],
+            opacity: [0.3, 0.7, 0.3],
+          }}
+          transition={{
+            duration: 6 + idx * 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: idx * 0.5,
+          }}
+        />
+      ))}
+
+      {/* Background glow effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-radial from-[#D4A017]/8 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{backgroundImage:'radial-gradient(#D4A017 1px, transparent 1px)',backgroundSize:'28px 28px'}} />
+
+      <div className="max-w-[1200px] mx-auto px-6 relative z-10">
+        
+        {/* Header Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, ease: 'easeOut' }}
+          className="text-center mb-20"
+        >
+          <span className="inline-flex items-center gap-2 px-4.5 py-1.5 rounded-full bg-[#FDF6EC] border border-[#E8C98A]/40 text-[#D4A017] text-[11px] font-bold uppercase tracking-widest mb-5">
             How AURA works
           </span>
-          <h2 className="text-[34px] md:text-[40px] font-black text-[#1F1B16] tracking-tight mb-4">
-            Your day, simplified in <span className="text-[#C17817]">4 steps</span>
+          <h2 className="text-[36px] md:text-[48px] font-black text-[#1F1B16] tracking-tight mb-4">
+            Your productivity, powered by AI in <span className="bg-gradient-to-r from-[#D4A017] to-[#E8A422] bg-clip-text text-transparent">4 simple steps</span>
           </h2>
-          <p className="text-[#6B6258] text-base max-w-xl mx-auto">
-            AURA connects your tools, organizes your data and helps you focus on what matters.
+          <p className="text-[#6B6258] text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+            Connect your apps, organize your work, and let AURA handle the busy work.
           </p>
         </motion.div>
 
-        {/* Steps */}
-        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Connector line with golden pulse */}
-          <div className="hidden md:block absolute top-[15px] left-[16%] right-[16%] h-0">
-            {/* Base dashed line */}
-            <div className="absolute inset-0 border-t border-dashed border-[#DDD5C8]"/>
-            {/* Golden pulse traveling left to right */}
-            <motion.div
-              className="absolute top-[-2px] left-0 h-[5px] rounded-full"
-              style={{
-                width: `${Math.min(pulseProgress * 110, 100)}%`,
-                background: 'linear-gradient(90deg, transparent 0%, #C17817 20%, #E8A422 50%, #C17817 80%, transparent 100%)',
-                boxShadow: pulseProgress > 0 && pulseProgress < 1 ? '0 0 20px rgba(193,120,23,0.6), 0 0 40px rgba(193,120,23,0.3)' : 'none',
-                transition: 'box-shadow 0.3s ease',
-              }}
+        {/* Steps Grid */}
+        <div className="relative">
+          
+          {/* Desktop Straight Horizontal Timeline */}
+          <motion.svg 
+            className="hidden md:block absolute top-[44px] left-0 w-full h-[80px] pointer-events-none overflow-visible z-20" 
+            viewBox="0 0 1000 80" 
+            fill="none"
+            animate={{ y: [0, -3, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <defs>
+              {/* Linear gradient that fades out at both ends */}
+              <linearGradient id="single-wave-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#C99A3D" stopOpacity="0" />
+                <stop offset="10%" stopColor="#C99A3D" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#F3C96B" stopOpacity="0.8" />
+                <stop offset="90%" stopColor="#C99A3D" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#C99A3D" stopOpacity="0" />
+              </linearGradient>
+
+              {/* Linear gradient for the flowing/traveling light pulse */}
+              <linearGradient id="pulse-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#C99A3D" stopOpacity="0" />
+                <stop offset="50%" stopColor="#FFF" stopOpacity="1" />
+                <stop offset="100%" stopColor="#C99A3D" stopOpacity="0" />
+              </linearGradient>
+              
+              {/* Stacking context mask to hide lines/dots inside the icon circles */}
+              <mask id="timeline-mask" maskUnits="userSpaceOnUse">
+                <rect x="-100" y="-100" width="1200" height="280" fill="white" />
+                <circle cx="125" cy="40" r="30" fill="black" />
+                <circle cx="375" cy="40" r="30" fill="black" />
+                <circle cx="625" cy="40" r="30" fill="black" />
+                <circle cx="875" cy="40" r="30" fill="black" />
+              </mask>
+            </defs>
+
+            {/* Clean, thin horizontal straight line (masked to skip icon wrapper interiors) */}
+            <line 
+              x1="65" 
+              y1="40" 
+              x2="935" 
+              y2="40" 
+              stroke="url(#single-wave-grad)" 
+              strokeWidth="1.2" 
+              mask="url(#timeline-mask)"
             />
-            {/* Pulse head glow */}
-            {pulseProgress > 0 && pulseProgress < 1 && (
-              <div
-                className="absolute top-[-6px] w-[17px] h-[17px] rounded-full pointer-events-none"
-                style={{
-                  left: `calc(${Math.min(pulseProgress * 110, 100)}% - 8px)`,
-                  background: 'radial-gradient(circle, rgba(232,164,34,0.8) 0%, rgba(193,120,23,0.4) 40%, transparent 70%)',
-                  filter: 'blur(2px)',
-                }}
-              />
-            )}
-          </div>
 
-          {STEPS.map((s,i)=>{
-            const stepThreshold = i / 4;
-            const isActivated = pulseProgress > stepThreshold;
-            const activationProgress = isActivated ? Math.min((pulseProgress - stepThreshold) * 4, 1) : 0;
+            {/* Traveling Light Pulse Line (masked to skip icon wrapper interiors) */}
+            <motion.line 
+              x1="65" 
+              y1="40" 
+              x2="935" 
+              y2="40" 
+              stroke="url(#pulse-grad)" 
+              strokeWidth="1.8" 
+              strokeLinecap="round"
+              strokeDasharray="80 300"
+              mask="url(#timeline-mask)"
+              animate={{ strokeDashoffset: [380, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+            />
+          </motion.svg>
 
-            return (
-              <motion.div key={s.label}
-                className="relative flex flex-col items-center text-center group">
-                {/* Step number badge */}
-                <div className="absolute top-0 left-0 w-8 h-8 rounded-full border border-[#E8C98A] bg-[#FDF6EC] flex items-center justify-center text-[11px] font-bold text-[#C17817]">
-                  {String(i + 1).padStart(2, '0')}
-                </div>
 
-                {/* Icon container */}
-                <motion.div
-                  initial={{opacity:0,y:20,scale:0.8}}
-                  animate={isActivated ? {opacity:1,y:0,scale:1} : {opacity:0,y:20,scale:0.8}}
-                  transition={{duration:0.5,ease:[0.22,1,0.36,1]}}
-                  whileHover={{scale:1.1,rotate:5}}
-                  className={`w-[68px] h-[68px] rounded-[18px] flex items-center justify-center mt-9 mb-4 shadow-sm relative z-10 transition-all duration-500 ${
-                    isActivated
-                      ? 'bg-[#FDF4E7] border border-[#EDD9A3] shadow-[0_0_20px_rgba(193,120,23,0.15)]'
-                      : 'bg-[#F5F0E8]/60 border border-[#E5DED5] opacity-40'
-                  }`}
-                  style={{
-                    animation: isActivated ? `neural-breathe 3s ease-in-out ${i * 0.3}s infinite` : 'none',
-                  }}>
-                  {/* Breathing glow overlay */}
-                  {isActivated && (
-                    <div className="absolute inset-0 rounded-[18px] pointer-events-none"
-                      style={{
-                        background: 'radial-gradient(circle at center, rgba(193,120,23,0.1), transparent 70%)',
-                        animation: `neural-glow-pulse 3s ease-in-out ${i * 0.3}s infinite`,
-                      }}
-                    />
-                  )}
-                  {/* SVG with stroke draw animation */}
-                  <div style={{
-                    opacity: activationProgress,
-                    transform: `scale(${0.5 + activationProgress * 0.5})`,
-                    transition: 'transform 0.4s ease',
-                  }}>
-                    {STEP_ICONS[i]}
-                  </div>
+          {/* Mobile Vertical Timeline Line */}
+          <div className="block md:hidden absolute left-[34px] top-12 bottom-12 w-0.5 border-l border-dashed border-[#EDD9A3] z-0" />
+
+          {/* Grid Container */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+            {STEPS.map((s, i) => {
+              return (
+                <motion.div 
+                  key={s.label}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-50px" }}
+                  transition={{ duration: 0.8, delay: i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  className="group relative bg-white border border-[#F1F1F1] rounded-[20px] p-8 flex flex-col items-center text-center shadow-[0_10px_30px_rgba(0,0,0,0.02)] transition-all duration-500 ease-out hover:-translate-y-2.5 hover:border-[#C99A3D]/30 hover:shadow-[0_20px_45px_rgba(201,154,61,0.12),0_0_20px_rgba(201,154,61,0.02)] card-shine-effect select-none overflow-hidden h-full flex-1"
+                >
+                  {/* Subtle inner radial gold glow that fades in on hover */}
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(201,154,61,0.05),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
+
+                  {/* Top Accent Line on Hover */}
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#D4A017] to-[#C17817] scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100 z-20" />
+
+                  {/* Step Number Badge with breathing scale animation */}
+                  <motion.div 
+                    animate={{ scale: [1, 1.06, 1] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.3 }}
+                    className="absolute top-6 left-6 w-8 h-8 rounded-full border border-[#C99A3D]/40 bg-white flex items-center justify-center text-[12px] font-bold text-[#C99A3D] shadow-sm select-none transition-all duration-500 ease-out group-hover:border-[#C99A3D] group-hover:bg-[#FFFDF9] group-hover:scale-105 z-10"
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </motion.div>
+
+                  {/* Icon Wrapper with floating bobbing animation & rotate on hover */}
+                  <motion.div 
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+                    className="w-[72px] h-[72px] rounded-full bg-gradient-to-br from-[#FFF9F0] to-[#FDF0D5] border border-[#EDD9A3]/85 flex items-center justify-center mt-6 mb-6 relative z-10 transition-all duration-500 ease-out group-hover:scale-110 group-hover:shadow-[0_8px_25px_rgba(201,154,61,0.25)] group-hover:border-[#C99A3D]"
+                  >
+                    <div className="transform transition-transform duration-500 group-hover:rotate-6">
+                      {STEP_ICONS[i]}
+                    </div>
+                  </motion.div>
+
+                  {/* Text Details */}
+                  <h3 className="text-[20px] font-bold text-[#111] mb-3 leading-snug tracking-tight relative z-10 group-hover:text-[#C17817] transition-all duration-500 ease-out group-hover:-translate-y-1">
+                    {s.label}
+                  </h3>
+                  <p className="text-[15px] text-[#777] leading-[1.7] font-normal relative z-10 transition-all duration-500 ease-out group-hover:-translate-y-0.5 group-hover:text-[#5B5248]">
+                    {s.desc}
+                  </p>
                 </motion.div>
-
-                {/* Text */}
-                <motion.h3
-                  initial={{opacity:0,y:10}}
-                  animate={isActivated ? {opacity:1,y:0} : {opacity:0,y:10}}
-                  transition={{duration:0.4,delay:0.1,ease:'easeOut'}}
-                  className="text-[13px] font-bold text-[#1F1B16] mb-2 leading-snug">
-                  {s.label}
-                </motion.h3>
-                <motion.p
-                  initial={{opacity:0,y:10}}
-                  animate={isActivated ? {opacity:1,y:0} : {opacity:0,y:10}}
-                  transition={{duration:0.4,delay:0.2,ease:'easeOut'}}
-                  className="text-[12px] text-[#9B8F85] leading-relaxed">
-                  {s.desc}
-                </motion.p>
-              </motion.div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
 
-        {/* Integrations flow diagram */}
+        {/* Integrations Flow Diagram */}
         <motion.div
-          initial={{opacity:0,y:24}}
-          whileInView={{opacity:1,y:0}}
-          viewport={{once:true}}
-          transition={{duration:0.6,ease:'easeOut'}}
-          className="mt-16">
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, ease: 'easeOut' }}
+          className="mt-20"
+        >
           <IntegrationFlowDiagram />
         </motion.div>
 
-        {/* Stats - activate after pulse completes */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16">
-          {STATS.map((s,i)=>(
-            <motion.div key={s.label}
-              initial={{opacity:0,y:24,scale:0.96}}
-              animate={statsActive ? {opacity:1,y:0,scale:1} : {opacity:0,y:24,scale:0.96}}
-              transition={{delay:i*0.12,duration:0.5,ease:[0.22,1,0.36,1]}}
-              whileHover={{y:-5,boxShadow:'0 16px 40px rgba(31,27,22,0.08)'}}
-              className="bg-white rounded-[20px] p-6 border border-[#EDE8E0] shadow-sm hover:shadow-md transition-all duration-300 group">
-              <div className="flex items-center gap-4">
+        {/* Stats Column Section (Glassmorphic Redesign) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-16 relative z-10">
+          {STATS.map((s, i) => (
+            <motion.div 
+              key={s.label}
+              initial={{ opacity: 0, y: 30, scale: 0.96 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-white/70 backdrop-blur-md rounded-[24px] p-6 border border-[#EDE8E0] shadow-sm transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_15px_35px_rgba(201,154,61,0.1),0_0_15px_rgba(201,154,61,0.03)] hover:border-[#C99A3D]/30 group relative overflow-hidden"
+            >
+              {/* Subtle inner radial gold glow that fades in on hover */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(201,154,61,0.08),transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none z-0" />
+              
+              {/* Top Accent Line on Hover */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#D4A017] to-[#C17817] scale-x-0 origin-left transition-transform duration-500 ease-out group-hover:scale-x-100 z-20" />
+
+              <div className="flex items-center gap-4 relative z-10">
                 <motion.div
-                  whileHover={{scale:1.1,rotate:-5}}
-                  transition={{duration:0.3}}
-                  className="w-12 h-12 rounded-xl bg-[#FDF4E7] flex items-center justify-center text-2xl shrink-0 group-hover:shadow-md transition-shadow duration-300">
-                  {s.icon}
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+                  className="w-12 h-12 rounded-xl bg-[#FDF4E7] border border-[#EDD9A3]/50 flex items-center justify-center text-2xl shrink-0 transition-all duration-500 ease-out group-hover:scale-110 group-hover:-rotate-3 group-hover:shadow-[0_8px_20px_rgba(201,154,61,0.22)] group-hover:border-[#C99A3D]/70 group-hover:bg-[#FFFDF9]"
+                >
+                  <span className="text-xl text-[#D4A017] leading-none select-none">{s.icon}</span>
                 </motion.div>
-                <div>
+                <div className="transition-all duration-500 ease-out group-hover:translate-x-1">
                   <AnimatedCounter target={s.num} suffix={s.suffix} start={statsActive} />
-                  <div className="text-[13px] font-bold text-[#1F1B16] mt-0.5">{s.label}</div>
+                  <div className="text-[13px] font-extrabold text-[#1F1B16] mt-0.5 tracking-tight group-hover:text-[#C17817] transition-colors duration-300">{s.label}</div>
                 </div>
               </div>
-              <p className="text-[12px] text-[#9B8F85] mt-3 leading-relaxed">{s.desc}</p>
+              <p className="text-[12.5px] text-[#6B6258] mt-3 leading-relaxed font-medium relative z-10 transition-all duration-500 ease-out group-hover:translate-x-0.5">{s.desc}</p>
             </motion.div>
           ))}
         </div>
@@ -862,7 +932,7 @@ function TestimonialCard({ t, distance }: { t: typeof TESTIMONIALS[0]; distance:
       whileHover={isActive ? { y: tier.y - 6 } : undefined}
       transition={{ duration: 0.8, ease: 'easeInOut' }}
       style={{ zIndex: tier.zIndex, willChange: 'transform, opacity, box-shadow' }}
-      className={`w-[85vw] sm:w-[380px] md:w-[260px] lg:w-[320px] xl:w-[340px] shrink-0 transform-gpu ${isActive ? '' : 'pointer-events-none'}`}
+      className={`w-[85vw] sm:w-[380px] md:w-[260px] lg:w-[320px] xl:w-[340px] shrink-0 transform-gpu rounded-3xl ${isActive ? '' : 'pointer-events-none'}`}
     >
       <div className={`relative h-full bg-white rounded-3xl border p-8 flex flex-col overflow-hidden ${isActive ? 'border-[#D89B1D]/35' : 'border-neutral-200'}`}>
         {/* Soft gold glow, active card only */}
@@ -1152,28 +1222,109 @@ function Testimonials() {
 /* ------------------------------ CTA BANNER ------------------------------ */
 function CTABanner() {
   return (
-  <section
-  className="py-10 bg-white"
-  data-navbar-theme="dark"
->
-      <div className="max-w-[1100px] mx-auto px-6">
-        <motion.div initial={{opacity:0,y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}}
-          className="relative rounded-[28px] overflow-hidden bg-gradient-to-br from-[#1C1814] via-[#2A2018] to-[#1A1612] py-16 lg:py-20 px-10 text-center" style={{boxShadow:'0 24px 48px -12px rgba(28,24,20,0.25)'}}>
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#C17817]/15 rounded-full blur-3xl"/>
-            <div className="absolute bottom-0 left-10 w-48 h-48 bg-[#E8A422]/8 rounded-full blur-3xl"/>
-            <div className="absolute bottom-0 right-10 w-64 h-64 bg-[#C17817]/8 rounded-full blur-3xl"/>
-            <div className="absolute inset-0 opacity-[0.03]" style={{backgroundImage:'radial-gradient(#E8A422 1px, transparent 1px)',backgroundSize:'24px 24px'}}/>
+    <section id="final-cta" className="py-16 bg-[#FDFAF6] relative overflow-hidden" data-navbar-theme="dark">
+      <div className="max-w-[1200px] mx-auto px-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          whileHover={{ y: -4 }}
+          className="relative rounded-[36px] overflow-hidden bg-gradient-to-br from-[#1C1814] via-[#2D231A] to-[#14110E] py-20 px-10 text-center border border-[#C17817]/20 shadow-[0_30px_60px_rgba(20,17,14,0.35)]"
+        >
+          {/* Inject style tag for shine and floating animations */}
+          <style dangerouslySetInnerHTML={{__html: `
+            @keyframes shine {
+              0% { left: -100%; }
+              100% { left: 150%; }
+            }
+            .shine-effect::after {
+              content: '';
+              position: absolute;
+              top: 0;
+              left: -100%;
+              width: 50%;
+              height: 100%;
+              background: linear-gradient(
+                to right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0) 100%
+              );
+              transform: skewX(-25deg);
+              transition: none;
+            }
+            .shine-effect:hover::after {
+              animation: shine 0.85s ease-in-out;
+            }
+            
+            @keyframes glowPulse {
+              0%, 100% { opacity: 0.15; transform: translate(-50%, -50%) scale(1); }
+              50% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.1); }
+            }
+            .glow-backdrop {
+              animation: glowPulse 8s ease-in-out infinite;
+            }
+          `}} />
+
+          {/* Background glowing effects */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {/* Pulsing center glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[550px] h-[300px] bg-[#C17817]/20 rounded-full blur-3xl glow-backdrop" />
+            
+            {/* Left and Right side glows */}
+            <motion.div 
+              animate={{ y: [0, -15, 0], x: [0, 10, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -bottom-10 left-10 w-60 h-60 bg-[#E8A422]/10 rounded-full blur-3xl" 
+            />
+            <motion.div 
+              animate={{ y: [0, 15, 0], x: [0, -10, 0] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute -top-10 right-10 w-72 h-72 bg-[#C17817]/10 rounded-full blur-3xl" 
+            />
+            
+            {/* Luxurious dot grid */}
+            <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#E8A422 1.2px, transparent 1.2px)', backgroundSize: '28px 28px' }} />
           </div>
-          <div className="relative z-10">
-            <h2 className="text-[34px] lg:text-[42px] font-black text-white mb-3 tracking-tight">Ready to simplify your workday?</h2>
-            <p className="text-[14px] text-[#9B8F85] mb-8 max-w-md mx-auto">Bring Gmail, Calendar, Notion and Meet together in one intelligent workspace.</p>
-            <Link href="/signup"
-              className="inline-flex items-center gap-2.5 px-10 py-4 bg-[#C17817] hover:bg-[#A86510] text-white font-bold text-[14px] rounded-xl shadow-lg shadow-[#C17817]/40 hover:-translate-y-0.5 hover:shadow-xl transition-all">
-              Start for Free
-              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            </Link>
-            <p className="text-[12px] text-[#6B6258] mt-3">No credit card required</p>
+
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <motion.h2 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="text-[36px] md:text-[46px] font-black text-white mb-4 tracking-tight leading-tight"
+            >
+              Ready to simplify your workday?
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-[#B5A89C] text-[15px] md:text-[16px] mb-10 max-w-lg mx-auto leading-relaxed"
+            >
+              Bring Gmail, Calendar, Notion and Meet together in one intelligent workspace.
+            </motion.p>
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-col items-center gap-3.5"
+            >
+              <Link href="/signup"
+                className="shine-effect relative overflow-hidden inline-flex items-center gap-2.5 px-10 py-4.5 bg-gradient-to-r from-[#C17817] via-[#D4942A] to-[#E8A422] hover:from-[#A86510] hover:to-[#C17817] text-white font-bold text-[15px] rounded-2xl shadow-xl shadow-[#C17817]/35 hover:shadow-[0_20px_35px_rgba(193,120,23,0.5)] hover:-translate-y-1 transition-all duration-300 active:translate-y-0"
+              >
+                <span>Start for Free</span>
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8H13M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+              <p className="text-[12px] font-medium text-[#8F8173] tracking-wide">No credit card required</p>
+            </motion.div>
           </div>
         </motion.div>
       </div>
@@ -1183,56 +1334,127 @@ function CTABanner() {
 
 /* ------------------------------- FOOTER -------------------------------- */
 function Footer() {
-  const col = (title: string, links: string[]) => (
-    <div>
-      <h4 className="text-[11px] font-bold text-[#1F1B16] mb-4 uppercase tracking-[0.1em]">{title}</h4>
-      <ul className="space-y-2.5">
-        {links.map(l=><li key={l}><a href="#" className="text-[13px] text-[#6B6258] hover:text-[#C17817] transition-colors">{l}</a></li>)}
+  const col = (title: string, links: { name: string; href: string }[]) => (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="flex flex-col gap-5"
+    >
+      <div className="flex flex-col gap-2">
+        <h4 className="text-[11px] font-bold text-[#1F1B16] uppercase tracking-[0.15em]">{title}</h4>
+        <div className="w-6 h-0.5 bg-[#C17817]/40" />
+      </div>
+      <ul className="space-y-3.5">
+        {links.map(l => (
+          <li key={l.name}>
+            <a href={l.href} className="text-[13.5px] text-[#6B6258] hover:text-[#C17817] transition-all duration-200 hover:pl-1 flex items-center">
+              <span className="w-1 h-1 bg-[#C17817] rounded-full mr-2 opacity-0 hover:opacity-100 transition-opacity" />
+              {l.name}
+            </a>
+          </li>
+        ))}
       </ul>
-    </div>
+    </motion.div>
   );
+
   return (
-    <footer id="resources" className="bg-[#FDFAF6]">
-      <div className="max-w-[1200px] mx-auto px-6 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-10 pb-10">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-full border-2 border-[#C17817] flex items-center justify-center">
-                <svg viewBox="0 0 20 20" className="w-4 h-4" fill="none">
-                  <circle cx="10" cy="10" r="7" stroke="#C17817" strokeWidth="1.5"/>
-                  <path d="M10 3C10 3 7 6.5 7 10C7 13.5 10 17 10 17" stroke="#C17817" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M10 3C10 3 13 6.5 13 10C13 13.5 10 17 10 17" stroke="#C17817" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span className="text-[17px] font-bold text-[#1F1B16]">AURA</span>
+    <footer id="resources" className="bg-[#FDFBF7] border-t border-[#F0EBE0] relative overflow-hidden">
+      {/* Absolute Glow Background Decoration */}
+      <div className="absolute top-0 right-1/4 w-[350px] h-[350px] bg-[#C17817]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-10 w-[250px] h-[250px] bg-[#E8A422]/3 rounded-full blur-3xl pointer-events-none" />
+
+      {/* Large low-opacity AURA watermark in the bottom-right */}
+      <div className="absolute -bottom-[250px] -right-[150px] md:-bottom-[350px] md:-right-[200px] w-[700px] h-[700px] md:w-[850px] md:h-[850px] text-[#C17817] opacity-[0.05] lg:opacity-[0.06] pointer-events-none select-none">
+        <AuraLogoIcon className="w-full h-full stroke-[1.5px]" />
+      </div>
+
+      <div className="max-w-[1200px] mx-auto px-6 pt-20 pb-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr_1fr_1fr_1.2fr] gap-12 md:gap-8 pb-16 border-b border-[#F0EBE0]">
+          
+          {/* Brand & Socials on the left */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex flex-col gap-6"
+          >
+            <div className="flex items-center gap-3">
+              <AuraLogoIcon className="w-11 h-11 text-[#C17817]" />
+              <span className="text-[20px] font-black tracking-tight text-[#1F1B16]">AURA</span>
             </div>
-            <p className="text-[13px] text-[#6B6258] leading-relaxed max-w-[200px]">Your all-in-one productivity hub, powered by AI.</p>
-            <div className="flex gap-2 mt-5">
+            
+            <p className="text-[13.5px] text-[#6B6258] leading-relaxed max-w-[260px]">
+              Your all-in-one productivity hub,<br />
+              powered by <span className="text-[#C17817] font-bold">AI.</span>
+            </p>
+            
+            {/* Social Icons row */}
+            <div className="flex gap-2.5">
               {[
-                <svg key="x" viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
-                <svg key="y" viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2" fill="currentColor"/></svg>,
-                <svg key="g" viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>,
-                <svg key="i" viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8}><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>,
-              ].map((svg,i)=>(
-                <a key={i} href="#" className="w-8 h-8 rounded-xl bg-white border border-[#EAE3DA] flex items-center justify-center text-[#6B6258] hover:text-[#C17817] hover:border-[#C17817]/30 transition-all shadow-sm">
-                  {svg}
-                </a>
+                { name: 'X', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>, href: '#' },
+                { name: 'LinkedIn', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2" fill="currentColor"/></svg>, href: '#' },
+                { name: 'GitHub', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>, href: '#' },
+                { name: 'Instagram', icon: <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8}><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg>, href: '#' },
+              ].map((s, idx) => (
+                <motion.a 
+                  key={s.name}
+                  href={s.href}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  className="w-10 h-10 rounded-[12px] bg-white border border-[#F0EBE0] flex items-center justify-center text-[#1F1B16] hover:text-[#C17817] hover:border-[#C17817]/30 transition-all shadow-sm hover:shadow-md"
+                  aria-label={s.name}
+                >
+                  {s.icon}
+                </motion.a>
               ))}
             </div>
-          </div>
-          {col('Product',['Features','Integrations','Dashboard','Pricing'])}
-          {col('Company',['About Us','Blog','Careers','Contact'])}
-          {col('Resources',['Help Center','Privacy Policy','Terms of Service','Status'])}
-          <div>
-            <h4 className="text-[11px] font-bold text-[#1F1B16] mb-4 uppercase tracking-[0.1em]">Follow us</h4>
-            <div className="grid grid-cols-2 gap-2.5">
+          </motion.div>
+
+          {/* Product Column */}
+          {col('Product', [
+            { name: 'Features', href: '#features' },
+            { name: 'Integrations', href: '#integrations' },
+            { name: 'Dashboard', href: '/dashboard' },
+            { name: 'Pricing', href: '#' }
+          ])}
+
+          {/* Company Column */}
+          {col('Company', [
+            { name: 'About Us', href: '#' },
+            { name: 'Blog', href: '#' },
+            { name: 'Careers', href: '#' },
+            { name: 'Contact', href: '#' }
+          ])}
+
+          {/* Resources Column */}
+          {col('Resources', [
+            { name: 'Help Center', href: '#' },
+            { name: 'Privacy Policy', href: '#' },
+            { name: 'Terms of Service', href: '#' },
+            { name: 'Status', href: '#' }
+          ])}
+
+          {/* Follow Us Column - 2x2 grid of modern card integrations */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="flex flex-col gap-5"
+          >
+            <div className="flex flex-col gap-2">
+              <h4 className="text-[11px] font-bold text-[#1F1B16] uppercase tracking-[0.15em]">Follow us</h4>
+              <div className="w-6 h-0.5 bg-[#C17817]/40" />
+            </div>
+            <div className="grid grid-cols-2 gap-3 max-w-[180px]">
               {[
                 {
-                  l: 'Google',
+                  name: 'Google',
                   href: '#',
                   icon: (
-                    <svg viewBox="0 0 24 24" className="w-4 h-4">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5">
                       <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                       <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                       <path d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -1241,10 +1463,10 @@ function Footer() {
                   )
                 },
                 {
-                  l: 'Instagram',
+                  name: 'Instagram',
                   href: '#',
                   icon: (
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#E1306C]" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 text-[#E1306C]" fill="none" stroke="currentColor" strokeWidth={2}>
                       <rect x="2" y="2" width="20" height="20" rx="5"/>
                       <circle cx="12" cy="12" r="4"/>
                       <circle cx="17.5" cy="6.5" r="0.8" fill="currentColor"/>
@@ -1252,43 +1474,59 @@ function Footer() {
                   )
                 },
                 {
-                  l: 'LinkedIn',
+                  name: 'LinkedIn',
                   href: '#',
                   icon: (
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#0077B5]">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#0077B5]">
                       <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
                     </svg>
                   )
                 },
                 {
-                  l: 'Telegram',
+                  name: 'Telegram',
                   href: '#',
                   icon: (
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 fill-[#0088cc]">
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 fill-[#0088cc]">
                       <path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.562 8.161c-.18.717-.962 4.084-1.362 5.441-.168.575-.38.767-.584.785-.444.041-.781-.293-1.211-.575-.672-.441-1.05-.714-1.703-1.144-.755-.498-.266-.773.165-1.22.113-.117 2.074-1.902 2.112-2.064.005-.021.01-.1-.037-.142-.047-.043-.117-.028-.168-.017-.072.016-1.225.779-3.46 2.29-.327.225-.623.336-.888.33-.292-.007-.854-.166-1.272-.302-.513-.167-.92-.255-.884-.539.019-.147.221-.298.607-.452 2.378-1.035 3.965-1.719 4.761-2.051 2.268-.946 2.74-1.111 3.047-1.116.068 0 .22.016.318.096.083.068.112.16.123.226.012.072.026.242.015.375z"/>
                     </svg>
                   )
                 }
               ].map(s => (
-                <a 
-                  key={s.l} 
+                <motion.a 
+                  key={s.name} 
                   href={s.href} 
-                  title={s.l}
-                  aria-label={s.l}
-                  className="w-10 h-10 rounded-xl bg-white border-0 flex items-center justify-center transition-all duration-500 shadow-[0_4px_14px_rgba(0,0,0,0.06)] hover:shadow-[0_10px_25px_rgba(193,120,23,0.2)] hover:-translate-y-1 group"
+                  title={s.name}
+                  aria-label={s.name}
+                  whileHover={{ scale: 1.08, y: -2 }}
+                  className="w-12 h-12 rounded-[18px] bg-white border border-[#F0EBE0] flex items-center justify-center transition-all duration-300 shadow-sm hover:shadow-md hover:border-[#C17817]/25"
                 >
-                  <span className="transition-transform duration-500 cubic-bezier(0.34,1.56,0.64,1) group-hover:scale-130 group-hover:rotate-[15deg]">
+                  <span>
                     {s.icon}
                   </span>
-                </a>
+                </motion.a>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[12px] text-[#9B8F85]">© 2026 AURA by Kalnet. All rights reserved.</p>
-          <div className="flex gap-5">
-            {['Privacy','Terms','Cookies'].map(l=><a key={l} href="#" className="text-[12px] text-[#9B8F85] hover:text-[#C17817] transition-colors">{l}</a>)}
+
+        {/* Bottom bar */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-[#9B8F85]">
+            © 2026 AURA by Kalnet. All rights reserved.
+          </p>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors relative group">
+              Privacy
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C17817] group-hover:w-full transition-all duration-300" />
+            </a>
+            <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors relative group">
+              Terms
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C17817] group-hover:w-full transition-all duration-300" />
+            </a>
+            <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors relative group">
+              Cookies
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#C17817] group-hover:w-full transition-all duration-300" />
+            </a>
           </div>
         </div>
       </div>

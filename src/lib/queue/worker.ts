@@ -518,7 +518,11 @@ syncWorker.on(
   },
 );
 
-syncWorker.on('error', (error) => {
+syncWorker.on('error', (error: any) => {
+  if (error?.code === 'ENOTFOUND' || error?.message?.includes('ENOTFOUND')) {
+    console.warn('[Sync Worker] Intermittent network issue reaching Redis queue. Worker will automatically reconnect when online.');
+    return;
+  }
   console.error(
     '[Sync Worker] Worker error:',
     error,

@@ -235,8 +235,8 @@ export default function IntegrationsOrbitSection() {
         }
 
         .aura-section { position: relative; width: 100%; overflow: hidden; background-color: #FDFAF6; padding: 80px 24px; }
-        .aura-container { position: relative; margin-left: auto; margin-right: auto; max-width: 64rem; }
-        .aura-heading { margin-left: auto; margin-right: auto; max-width: 42rem; text-align: center; }
+        .aura-container { position: relative; margin-left: auto; margin-right: auto; max-width: 76rem; }
+        .aura-heading { margin-left: auto; margin-right: auto; max-width: 48rem; text-align: center; }
         .aura-badge {
           display: inline-flex; align-items: center; gap: 8px; border-radius: 9999px;
           border: 1px solid rgba(232, 201, 138, 0.5); background-color: #FDF6EC;
@@ -256,7 +256,7 @@ export default function IntegrationsOrbitSection() {
         .aura-description.visible { animation: orbit-text-in 0.8s cubic-bezier(0.22,1,0.36,1) 0.18s both; }
         .aura-stage {
           position: relative; margin-left: auto; margin-right: auto; margin-top: 48px;
-          aspect-ratio: 73 / 62; width: 100%; max-width: 680px;
+          aspect-ratio: 73 / 62; width: 100%; max-width: 860px;
         }
         .aura-scene {
           position: absolute; inset: 0;

@@ -1,0 +1,4 @@
+- [x] Upgrade card wrapper entrance transition to custom bezier in `frontend/app/page.tsx`
+- [x] Animate number badges with scale breathing loop inside card mapping
+- [x] Animate icon wrapper elements with floating vertical loops inside card mapping
+- [x] Verify the build compiles successfully
