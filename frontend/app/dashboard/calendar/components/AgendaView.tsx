@@ -1,6 +1,6 @@
 'use client';
 import { Event } from '@/types';
-import { Clock, Video, MapPin, Users, Edit3, Trash2, Calendar } from 'lucide-react';
+import { Clock, Video, MapPin, Users, Calendar } from 'lucide-react';
 
 const parseSafeDate = (dateStr: string) => {
   if (!dateStr) return new Date();
@@ -24,162 +24,291 @@ interface AgendaViewProps {
   onDeleteEvent?: (id: string) => Promise<void>;
 }
 
-const COLOR_MAP: Record<string, { bg: string, text: string, timeText: string, border: string, dot: string }> = {
-  orange: { bg: 'bg-[#FFE8CC] dark:bg-[#F97316]/15', text: 'text-orange-800 dark:text-[#FFA366]', timeText: 'text-orange-700 dark:text-[#FFA366]/85', border: 'border-l-[6px] border-[#F97316] border-y-0 border-r-0', dot: 'bg-[#F97316]' },
-  blue:   { bg: 'bg-[#DBEAFE] dark:bg-[#3B82F6]/15', text: 'text-blue-800 dark:text-[#93C5FD]',   timeText: 'text-blue-700 dark:text-[#93C5FD]/85',   border: 'border-l-[6px] border-[#3B82F6] border-y-0 border-r-0', dot: 'bg-[#3B82F6]' },
-  green:  { bg: 'bg-[#DCFCE7] dark:bg-[#10B981]/15', text: 'text-green-800 dark:text-[#A7F3D0]',  timeText: 'text-green-700 dark:text-[#A7F3D0]/85',  border: 'border-l-[6px] border-[#10B981] border-y-0 border-r-0', dot: 'bg-[#10B981]' },
-  purple: { bg: 'bg-[#EDE9FE] dark:bg-[#8B5CF6]/15', text: 'text-purple-800 dark:text-[#C7D2FE]', timeText: 'text-purple-700 dark:text-[#C7D2FE]/85', border: 'border-l-[6px] border-[#8B5CF6] border-y-0 border-r-0', dot: 'bg-[#8B5CF6]' },
-  yellow: { bg: 'bg-[#FEF3C7] dark:bg-[#F59E0B]/15', text: 'text-yellow-800 dark:text-[#FDE68A]', timeText: 'text-yellow-700 dark:text-[#FDE68A]/85', border: 'border-l-[6px] border-[#F59E0B] border-y-0 border-r-0', dot: 'bg-[#F59E0B]' },
-  red:    { bg: 'bg-[#FEE2E2] dark:bg-[#EF4444]/15', text: 'text-red-800 dark:text-[#FCA5A5]',    timeText: 'text-red-700 dark:text-[#FCA5A5]/85',    border: 'border-l-[6px] border-[#EF4444] border-y-0 border-r-0', dot: 'bg-[#EF4444]' },
-  pink:   { bg: 'bg-[#FCE7F3] dark:bg-[#EC4899]/15', text: 'text-pink-800 dark:text-[#FBCFE8]',   timeText: 'text-pink-700 dark:text-[#FBCFE8]/85',   border: 'border-l-[6px] border-[#EC4899] border-y-0 border-r-0', dot: 'bg-[#EC4899]' },
-  grey:   { bg: 'bg-[#F1F5F9] dark:bg-[#6B7280]/15', text: 'text-gray-800 dark:text-[#D1D5DB]',   timeText: 'text-gray-600 dark:text-[#D1D5DB]/85',   border: 'border-l-[6px] border-[#6B7280] border-y-0 border-r-0', dot: 'bg-[#6B7280]' },
+/* ─── Premium colour palette ──────────────────────────────────────────────
+   Light: vivid-but-soft tinted surfaces, deep ink text on each colour.
+   Dark:  rich dark surface with a strong coloured left stripe + light text.
+   ──────────────────────────────────────────────────────────────────────── */
+const COLOR_MAP: Record<string, {
+  bg: string;
+  card: string;
+  title: string;
+  meta: string;
+  badge: string;
+  accent: string;
+  dot: string;
+  accentHex: string;
+}> = {
+  orange: {
+    bg:       'bg-gradient-to-r from-[#FFF3E6] to-[#FFF9F3] dark:from-[#1C1208] dark:to-[#1A1410]',
+    card:     'border-l-[4px] border-l-[#F97316] border border-[#F97316]/20 dark:border-[#F97316]/25 dark:border-l-[#F97316]',
+    title:    'text-[#7C2D00] dark:text-[#FDBA74]',
+    meta:     'text-[#9A4A1A] dark:text-[#FB923C]/80',
+    badge:    'bg-[#F97316]/12 text-[#C2410C] dark:bg-[#F97316]/20 dark:text-[#FED7AA]',
+    accent:   'text-[#EA580C] dark:text-[#FB923C]',
+    dot:      'bg-[#F97316]',
+    accentHex:'#F97316',
+  },
+  blue: {
+    bg:       'bg-gradient-to-r from-[#EFF6FF] to-[#F5F9FF] dark:from-[#060D1C] dark:to-[#080F1A]',
+    card:     'border-l-[4px] border-l-[#3B82F6] border border-[#3B82F6]/20 dark:border-[#3B82F6]/25 dark:border-l-[#3B82F6]',
+    title:    'text-[#1E3A8A] dark:text-[#93C5FD]',
+    meta:     'text-[#1D4ED8]/80 dark:text-[#60A5FA]/80',
+    badge:    'bg-[#3B82F6]/12 text-[#1D4ED8] dark:bg-[#3B82F6]/20 dark:text-[#BFDBFE]',
+    accent:   'text-[#2563EB] dark:text-[#60A5FA]',
+    dot:      'bg-[#3B82F6]',
+    accentHex:'#3B82F6',
+  },
+  green: {
+    bg:       'bg-gradient-to-r from-[#ECFDF5] to-[#F0FDF8] dark:from-[#041410] dark:to-[#061310]',
+    card:     'border-l-[4px] border-l-[#10B981] border border-[#10B981]/20 dark:border-[#10B981]/25 dark:border-l-[#10B981]',
+    title:    'text-[#064E3B] dark:text-[#6EE7B7]',
+    meta:     'text-[#047857]/80 dark:text-[#34D399]/75',
+    badge:    'bg-[#10B981]/12 text-[#065F46] dark:bg-[#10B981]/20 dark:text-[#A7F3D0]',
+    accent:   'text-[#059669] dark:text-[#34D399]',
+    dot:      'bg-[#10B981]',
+    accentHex:'#10B981',
+  },
+  purple: {
+    bg:       'bg-gradient-to-r from-[#F5F3FF] to-[#F8F6FF] dark:from-[#0E0A1C] dark:to-[#0C0A18]',
+    card:     'border-l-[4px] border-l-[#8B5CF6] border border-[#8B5CF6]/20 dark:border-[#8B5CF6]/25 dark:border-l-[#8B5CF6]',
+    title:    'text-[#3B0764] dark:text-[#C4B5FD]',
+    meta:     'text-[#6D28D9]/80 dark:text-[#A78BFA]/80',
+    badge:    'bg-[#8B5CF6]/12 text-[#5B21B6] dark:bg-[#8B5CF6]/20 dark:text-[#DDD6FE]',
+    accent:   'text-[#7C3AED] dark:text-[#A78BFA]',
+    dot:      'bg-[#8B5CF6]',
+    accentHex:'#8B5CF6',
+  },
+  yellow: {
+    bg:       'bg-gradient-to-r from-[#FFFBEB] to-[#FFFDF5] dark:from-[#1A1200] dark:to-[#181100]',
+    card:     'border-l-[4px] border-l-[#F59E0B] border border-[#F59E0B]/20 dark:border-[#F59E0B]/25 dark:border-l-[#F59E0B]',
+    title:    'text-[#78350F] dark:text-[#FDE68A]',
+    meta:     'text-[#B45309]/80 dark:text-[#FCD34D]/75',
+    badge:    'bg-[#F59E0B]/12 text-[#92400E] dark:bg-[#F59E0B]/20 dark:text-[#FEF3C7]',
+    accent:   'text-[#D97706] dark:text-[#FBBF24]',
+    dot:      'bg-[#F59E0B]',
+    accentHex:'#F59E0B',
+  },
+  red: {
+    bg:       'bg-gradient-to-r from-[#FFF1F1] to-[#FFF5F5] dark:from-[#1A0606] dark:to-[#180505]',
+    card:     'border-l-[4px] border-l-[#EF4444] border border-[#EF4444]/20 dark:border-[#EF4444]/25 dark:border-l-[#EF4444]',
+    title:    'text-[#7F1D1D] dark:text-[#FCA5A5]',
+    meta:     'text-[#B91C1C]/80 dark:text-[#F87171]/75',
+    badge:    'bg-[#EF4444]/12 text-[#991B1B] dark:bg-[#EF4444]/20 dark:text-[#FECACA]',
+    accent:   'text-[#DC2626] dark:text-[#F87171]',
+    dot:      'bg-[#EF4444]',
+    accentHex:'#EF4444',
+  },
+  pink: {
+    bg:       'bg-gradient-to-r from-[#FDF2F8] to-[#FEF5FA] dark:from-[#180610] dark:to-[#16050E]',
+    card:     'border-l-[4px] border-l-[#EC4899] border border-[#EC4899]/20 dark:border-[#EC4899]/25 dark:border-l-[#EC4899]',
+    title:    'text-[#701A75] dark:text-[#F9A8D4]',
+    meta:     'text-[#BE185D]/80 dark:text-[#F472B6]/75',
+    badge:    'bg-[#EC4899]/12 text-[#9D174D] dark:bg-[#EC4899]/20 dark:text-[#FBCFE8]',
+    accent:   'text-[#DB2777] dark:text-[#F472B6]',
+    dot:      'bg-[#EC4899]',
+    accentHex:'#EC4899',
+  },
+  grey: {
+    bg:       'bg-gradient-to-r from-[#F8FAFC] to-[#F9FAFB] dark:from-[#0F1115] dark:to-[#0E1012]',
+    card:     'border-l-[4px] border-l-[#6B7280] border border-[#6B7280]/20 dark:border-[#6B7280]/25 dark:border-l-[#6B7280]',
+    title:    'text-[#1F2937] dark:text-[#E5E7EB]',
+    meta:     'text-[#4B5563]/80 dark:text-[#9CA3AF]/75',
+    badge:    'bg-[#6B7280]/10 text-[#374151] dark:bg-[#6B7280]/20 dark:text-[#D1D5DB]',
+    accent:   'text-[#4B5563] dark:text-[#9CA3AF]',
+    dot:      'bg-[#6B7280]',
+    accentHex:'#6B7280',
+  },
 };
 
+const GoogleIcon = () => (
+  <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.22-.63-.35-1.3-.35-1.63z" fill="#FBBC05"/>
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+  </svg>
+);
 
-export default function AgendaView({
-  events,
-  onDeleteEvent
-}: AgendaViewProps) {
-  // Group events by day
+export default function AgendaView({ events, onDeleteEvent }: AgendaViewProps) {
   const groupedEvents = events.reduce((groups: Record<string, Event[]>, event) => {
     const dateStr = parseSafeDate(event.start_time).toDateString();
-    if (!groups[dateStr]) {
-      groups[dateStr] = [];
-    }
+    if (!groups[dateStr]) groups[dateStr] = [];
     groups[dateStr].push(event);
     return groups;
   }, {});
 
-  // Sort dates
   const sortedDateKeys = Object.keys(groupedEvents).sort(
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
 
   const formatTime = (dateStr: string) => {
-    const d = parseSafeDate(dateStr);
-    return d.toLocaleTimeString('en-US', {
+    return parseSafeDate(dateStr).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
-  const getWeekDayName = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long' });
-  };
+  const getHeaderLabel = (dateKey: string) => {
+    const d = new Date(dateKey);
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    const isToday = d.toDateString() === today.toDateString();
+    const isTomorrow = d.toDateString() === tomorrow.toDateString();
 
-  const getMonthAndDay = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const dayName = d.toLocaleDateString('en-US', { weekday: 'long' });
+    const fullDate = d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const tag = isToday ? 'Today' : isTomorrow ? 'Tomorrow' : null;
+    return { dayName, fullDate, tag };
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {sortedDateKeys.length > 0 ? (
         sortedDateKeys.map((dateKey) => {
           const dayEvents = groupedEvents[dateKey];
+          const { dayName, fullDate, tag } = getHeaderLabel(dateKey);
+
           return (
-            <div key={dateKey} className="bg-card border border-border rounded-2xl p-6 shadow-sm">
-              {/* Date Header */}
-              <div className="border-b border-border pb-4 mb-4">
-                <h3 className="text-sm font-bold text-foreground flex items-center gap-2 select-none">
-                  <span className="capitalize">{getWeekDayName(dateKey)}</span>
-                  <span className="text-muted-foreground font-semibold text-xs">— {getMonthAndDay(dateKey)}</span>
-                </h3>
+            <div
+              key={dateKey}
+              className="bg-card dark:bg-card border border-border rounded-2xl overflow-hidden shadow-sm dark:shadow-none"
+            >
+              {/* ── Date header ── */}
+              <div className="flex items-center justify-between px-5 py-3.5 bg-muted/40 dark:bg-white/[0.03] border-b border-border">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-[13px] font-bold text-foreground tracking-tight">
+                      {dayName}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground font-medium">{fullDate}</span>
+                  </div>
+                  {tag && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide bg-[#F97316]/15 text-[#C2410C] dark:bg-[#F97316]/20 dark:text-[#FDBA74] uppercase">
+                      {tag}
+                    </span>
+                  )}
+                </div>
+                <span className="text-[11px] font-semibold text-muted-foreground bg-muted dark:bg-white/[0.06] px-2.5 py-1 rounded-full">
+                  {dayEvents.length} event{dayEvents.length !== 1 ? 's' : ''}
+                </span>
               </div>
 
-              {/* Events under this day */}
-              <div className="space-y-4">
+              {/* ── Event cards ── */}
+              <div className="p-4 space-y-3">
                 {dayEvents.map((event) => {
-                  const colorMeta = COLOR_MAP[event.color || 'orange'] || COLOR_MAP.orange;
+                  const c = COLOR_MAP[event.color || 'orange'] || COLOR_MAP.orange;
                   const hasMeetingLink = !!event.meeting_link;
+                  const isGoogle = event.source === 'google_calendar';
 
                   return (
                     <div
                       key={event.id}
-                      className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 border-0 rounded-2xl transition-all shadow-sm ${colorMeta.bg} ${colorMeta.border}`}
+                      className={`
+                        group relative flex flex-col md:flex-row md:items-center justify-between
+                        gap-3 px-5 py-4 rounded-xl transition-all duration-200
+                        hover:shadow-md dark:hover:shadow-black/30
+                        ${c.bg} ${c.card}
+                      `}
                     >
-                      {/* Event Details */}
-                      <div className="flex items-start gap-4">
-                        {event.source === 'google_calendar' ? (
-                          <div className="h-4.5 w-4.5 rounded bg-white dark:bg-slate-800 flex items-center justify-center shrink-0 mt-0.5 shadow-sm border border-black/5 dark:border-slate-700/50">
-                            <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22c-.22-.63-.35-1.3-.35-1.63z" fill="#FBBC05"/>
-                              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
-                            </svg>
+                      {/* Left: icon + content */}
+                      <div className="flex items-start gap-4 min-w-0">
+                        {/* Source icon */}
+                        <div
+                          className="h-9 w-9 rounded-xl shrink-0 flex items-center justify-center
+                                     bg-white/80 dark:bg-white/[0.07] border border-black/[0.06]
+                                     dark:border-white/10 shadow-sm"
+                          style={{ boxShadow: `0 0 0 2px ${c.accentHex}22` }}
+                        >
+                          {isGoogle
+                            ? <GoogleIcon />
+                            : <span className={`h-2.5 w-2.5 rounded-full ${c.dot}`} />
+                          }
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          {/* Title row */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <h4 className={`text-[14px] font-bold leading-snug tracking-tight ${c.title}`}>
+                              {event.title}
+                            </h4>
+                            {isGoogle && (
+                              <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${c.badge}`}>
+                                Google
+                              </span>
+                            )}
                           </div>
-                        ) : (
-                          <span className={`h-3 w-3 rounded-full mt-1.5 shrink-0 ${colorMeta.dot}`} />
-                        )}
-                        
-                        <div className="space-y-1">
-                          <h4 className={`text-sm font-bold ${colorMeta.text}`}>
-                            {event.title}
-                          </h4>
-                          
+
+                          {/* Description */}
                           {event.description && (
-                            <p className={`text-xs opacity-85 line-clamp-1 max-w-xl ${colorMeta.text}`}>
+                            <p className={`text-xs mt-0.5 line-clamp-1 opacity-80 ${c.meta}`}>
                               {event.description}
                             </p>
                           )}
- 
-                          <div className={`flex flex-wrap items-center gap-4 text-[11px] ${colorMeta.timeText} pt-1`}>
-                            <span className="flex items-center gap-1">
-                              <Clock className={`h-3.5 w-3.5 shrink-0 ${colorMeta.text}`} />
-                              <span>
+
+                          {/* Meta row */}
+                          <div className={`flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-[11.5px] font-medium ${c.meta}`}>
+                            {/* Time */}
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                              <span className="font-semibold">
                                 {formatTime(event.start_time)}
-                                {event.end_time && ` - ${formatTime(event.end_time)}`}
+                                {event.end_time && (
+                                  <span className="font-normal opacity-75"> → {formatTime(event.end_time)}</span>
+                                )}
                               </span>
                             </span>
- 
+
+                            {/* Link or location */}
                             {hasMeetingLink ? (
                               <a
                                 href={event.meeting_link!}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(e) => e.stopPropagation()}
-                                className={`flex items-center gap-1 font-bold hover:underline ${colorMeta.text}`}
+                                className={`flex items-center gap-1.5 font-semibold hover:underline underline-offset-2 ${c.accent}`}
                               >
                                 <Video className="h-3.5 w-3.5 shrink-0" />
-                                Google Meet
+                                Join meeting
                               </a>
                             ) : (
-                              <span className="flex items-center gap-1">
-                                <MapPin className={`h-3.5 w-3.5 shrink-0 ${colorMeta.text}`} />
-                                <span>{event.source === 'google_calendar' ? 'Google Calendar Event' : 'Local Event'}</span>
+                              <span className="flex items-center gap-1.5 opacity-75">
+                                <MapPin className="h-3.5 w-3.5 shrink-0" />
+                                {isGoogle ? 'Google Calendar' : 'Local event'}
                               </span>
                             )}
- 
+
+                            {/* Attendees count */}
                             {event.attendees && event.attendees.length > 0 && (
-                              <span className="flex items-center gap-1">
-                                <Users className={`h-3.5 w-3.5 shrink-0 ${colorMeta.text}`} />
-                                <span>{event.attendees.length} attendees</span>
+                              <span className="flex items-center gap-1.5 opacity-75">
+                                <Users className="h-3.5 w-3.5 shrink-0" />
+                                {event.attendees.length} attendee{event.attendees.length !== 1 ? 's' : ''}
                               </span>
                             )}
                           </div>
                         </div>
                       </div>
- 
-                      {/* Event actions and attendees */}
-                      <div className="flex items-center gap-4 self-end md:self-center">
-                        {event.attendees && event.attendees.length > 0 && (
-                          <div className="flex -space-x-1 overflow-hidden">
-                            {event.attendees.slice(0, 3).map((att, idx) => (
-                              <div
-                                key={idx}
-                                title={att.email}
-                                className="h-6 w-6 rounded-full bg-white/70 dark:bg-slate-800/80 border border-black/5 dark:border-slate-700/30 flex items-center justify-center text-[9px] font-bold text-foreground/80 dark:text-slate-200 uppercase"
-                              >
-                                {att.displayName ? att.displayName.slice(0, 2) : att.email?.slice(0, 2)}
-                              </div>
-                            ))}
-                          </div>
-                        )}
- 
-                        <div className="flex gap-2">
-                          {/* Edit/Delete removed — calendar is read-only for synced events */}
+
+                      {/* Right: attendee avatars */}
+                      {event.attendees && event.attendees.length > 0 && (
+                        <div className="flex -space-x-1.5 shrink-0 self-end md:self-center">
+                          {event.attendees.slice(0, 4).map((att, idx) => (
+                            <div
+                              key={idx}
+                              title={att.email}
+                              className="h-7 w-7 rounded-full bg-white/80 dark:bg-white/10 border-2 border-white/70 dark:border-white/20 flex items-center justify-center text-[9px] font-bold uppercase shadow-sm"
+                              style={{ color: c.accentHex }}
+                            >
+                              {(att.displayName ?? att.email ?? '??').slice(0, 2)}
+                            </div>
+                          ))}
+                          {event.attendees.length > 4 && (
+                            <div className="h-7 w-7 rounded-full bg-white/70 dark:bg-white/10 border-2 border-white/70 dark:border-white/20 flex items-center justify-center text-[9px] font-bold text-muted-foreground shadow-sm">
+                              +{event.attendees.length - 4}
+                            </div>
+                          )}
                         </div>
-                      </div>
+                      )}
                     </div>
                   );
                 })}
@@ -189,9 +318,13 @@ export default function AgendaView({
         })
       ) : (
         <div className="text-center py-20 border border-dashed border-border rounded-2xl bg-card">
-          <Calendar className="h-10 w-10 text-muted-foreground/35 mx-auto mb-3" />
-          <h4 className="font-bold text-foreground">No upcoming events scheduled</h4>
-          <p className="text-xs text-muted-foreground mt-1">Schedule an event or sync from Google Calendar.</p>
+          <div className="h-14 w-14 rounded-2xl bg-[#F97316]/10 dark:bg-[#F97316]/15 flex items-center justify-center mx-auto mb-4">
+            <Calendar className="h-7 w-7 text-[#F97316]" />
+          </div>
+          <h4 className="font-bold text-foreground text-sm">No upcoming events</h4>
+          <p className="text-xs text-muted-foreground mt-1.5 max-w-xs mx-auto">
+            Schedule an event or sync your Google Calendar to see events here.
+          </p>
         </div>
       )}
     </div>
