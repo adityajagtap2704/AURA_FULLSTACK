@@ -1,3 +1,5 @@
+import os from "node:os";
+import path from "node:path";
 import {
   env,
   pipeline,
@@ -15,10 +17,13 @@ export { EMBEDDING_MODEL };
 env.allowLocalModels = false;
 
 /*
- * In Docker, mount this folder as a persistent volume.
- * Otherwise the model may download again after container recreation.
+ * Serverless runtimes (e.g. Vercel functions) ship a read-only filesystem
+ * except for os.tmpdir(), so default there. In Docker deployments, set
+ * TRANSFORMERS_CACHE to a mounted volume so the model isn't re-downloaded
+ * after every container recreation.
  */
-env.cacheDir = process.env.TRANSFORMERS_CACHE ?? ".cache/transformers";
+env.cacheDir =
+  process.env.TRANSFORMERS_CACHE ?? path.join(os.tmpdir(), "transformers-cache");
 
 const QUERY_INSTRUCTION =
   "Represent this sentence for searching relevant passages: ";
