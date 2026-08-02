@@ -18,6 +18,9 @@ import { AuthProvider } from "@/providers/AuthProvider";
 export const metadata: Metadata = {
   title: "AURA - Unified Productivity Space",
   description: "Your daily focus, calendar, communication, and notes aggregated into one elegant SaaS workspace.",
+  verification: {
+    google: "Q5rqUD9F3qba3VScpCgmLmB0Wd8pSNOGtuwg1oUIjxY",
+  },
 };
 
 export default function RootLayout({
