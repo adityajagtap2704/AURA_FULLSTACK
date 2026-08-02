@@ -11,7 +11,6 @@ import { connection } from './index';
 import { GoogleConnector } from '@/lib/connectors/google';
 import { NotionConnector } from '@/lib/connectors/notion';
 import { supabaseServer } from '@/lib/supabase/server';
-import { generateEmbeddingsForRecord } from '../../../aiml/search_embedding/pipeline';
 
 interface SyncJobData {
   userId: string;
@@ -459,13 +458,6 @@ export const syncWorker = new Worker<SyncJobData>(
         throw new Error(
           completionError.message,
         );
-      }
-
-      // Auto-generate embeddings in background for semantic search
-      try {
-        await generateEmbeddingsForRecord({ userId, tenantId, connector });
-      } catch (embErr) {
-        console.warn('[Sync Worker] Background embedding generation skipped:', embErr);
       }
 
       return { success: true, itemsSynced };

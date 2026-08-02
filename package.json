@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "worker": "tsx src/lib/queue/worker.ts",
+    "prefetch:model": "tsx scripts/prefetch-embedding-model.ts",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",

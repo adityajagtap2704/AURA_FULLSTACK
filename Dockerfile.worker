@@ -11,6 +11,12 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+ENV TRANSFORMERS_CACHE=/app/.cache/transformers
+
+# Pre-download the embedding model (BAAI/bge-base-en-v1.5) at build time so
+# the worker never depends on runtime network access to huggingface.co
+RUN npm run prefetch:model
+
 # Run the worker directly with tsx (same as `npm run worker` in dev — no separate compile step)
 CMD ["npx", "tsx", "src/lib/queue/worker.ts"]
 
