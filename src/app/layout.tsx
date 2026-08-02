@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AURA API",
   description: "AURA backend API — see the frontend/ app for the product UI.",
+  verification: {
+    google: "Q5rqUD9F3qba3VScpCgmLmB0Wd8pSNOGtuwg1oUIjxY",
+  },
 };
 
 export default function RootLayout({
