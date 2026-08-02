@@ -16,8 +16,8 @@ const COMPANY_LINKS = [
 ];
 const RESOURCE_LINKS = [
   { label: 'Help Center', href: '#' },
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Terms of Service', href: '#' },
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
   { label: 'Status', href: '#' },
 ];
 const SOCIAL_LINKS = [
@@ -131,8 +131,8 @@ export default function Footer() {
             © 2026 AURA by Kalnet. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Privacy</a>
-            <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Terms</a>
+            <a href="/privacy" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Privacy</a>
+            <a href="/terms" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Terms</a>
             <a href="#" className="text-xs text-[#9B8F85] hover:text-[#C17817] transition-colors">Cookies</a>
           </div>
         </div>
