@@ -1434,8 +1434,8 @@ function Footer() {
           {/* Resources Column */}
           {col('Resources', [
             { name: 'Help Center', href: '#' },
-            { name: 'Privacy Policy', href: '#' },
-            { name: 'Terms of Service', href: '#' },
+            { name: 'Privacy Policy', href: '/privacy' },
+            { name: 'Terms of Service', href: '/terms' },
             { name: 'Status', href: '#' }
           ])}
 
