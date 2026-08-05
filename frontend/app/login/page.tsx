@@ -1,6 +1,6 @@
 'use client';
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -32,6 +32,14 @@ export default function LoginPage() {
       password: '',
     }
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'not_authorized') {
+      setError("This account isn't authorized to access AURA yet.");
+      window.history.replaceState(null, '', '/login');
+    }
+  }, []);
 
   const onSubmit = async (values: LoginFormValues) => {
     setLoading(true);

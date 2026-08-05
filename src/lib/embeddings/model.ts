@@ -28,19 +28,31 @@ env.cacheDir =
 const QUERY_INSTRUCTION =
   "Represent this sentence for searching relevant passages: ";
 
+/*
+ * The official BAAI/bge-base-en-v1.5 repo only publishes a full-precision
+ * onnx/model.onnx, so a "q8" dtype request 404s looking for
+ * onnx/model_quantized.onnx. Xenova/bge-base-en-v1.5 is the same weights
+ * re-exported to ONNX with the full set of quantized variants. EMBEDDING_MODEL
+ * stays "BAAI/bge-base-en-v1.5" everywhere it's used as the stored label
+ * (Supabase embedding_model column, RPC calls) — only the download source
+ * changes here.
+ */
+const ONNX_MODEL_ID = "Xenova/bge-base-en-v1.5";
+
 let modelPromise: Promise<FeatureExtractionPipeline> | null = null;
 
 async function getModel(): Promise<FeatureExtractionPipeline> {
   if (!modelPromise) {
     modelPromise = pipeline(
       "feature-extraction",
-      EMBEDDING_MODEL,
+      ONNX_MODEL_ID,
       {
         /*
-         * fp32 is larger but reliable.
-         * Change to "q8" later only after testing search quality.
+         * q8 (8-bit quantized) keeps memory usage low enough to run on
+         * memory-constrained hosts (e.g. Railway free tier). Revert to
+         * "fp32" if search quality proves insufficient.
          */
-        dtype: "fp32",
+        dtype: "q8",
       },
     );
   }

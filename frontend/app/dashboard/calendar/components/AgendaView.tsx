@@ -26,7 +26,16 @@ const GoogleIcon = () => (
 );
 
 export default function AgendaView({ events }: AgendaViewProps) {
-  const grouped = events.reduce((g: Record<string, Event[]>, e) => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events.filter(e => {
+    const d = parseSafeDate(e.start_time);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime() >= todayStart.getTime();
+  });
+
+  const grouped = upcomingEvents.reduce((g: Record<string, Event[]>, e) => {
     const k = parseSafeDate(e.start_time).toDateString();
     (g[k] ??= []).push(e);
     return g;

@@ -34,6 +34,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
+  const checkAllowed = useCallback(async (email: string | undefined) => {
+    if (!email) return false;
+    try {
+      const allowedQuery = supabase
+        .from('allowed_emails')
+        .select('email')
+        .ilike('email', email)
+        .maybeSingle();
+      const { data } = await withTimeout(
+        Promise.resolve(allowedQuery),
+        AUTH_TIMEOUT_MS
+      );
+      return !!data;
+    } catch {
+      // Fail closed: if we can't verify access, don't grant it.
+      return false;
+    }
+  }, []);
+
+  const rejectUnauthorized = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setRole(null);
+    try { sessionStorage.removeItem(ROLE_CACHE_KEY); } catch {}
+    router.push('/login?error=not_authorized');
+  }, [router]);
+
   const fetchRole = useCallback(async (userId: string) => {
     try {
       const profileQuery = supabase.from('profiles').select('role').eq('id', userId).maybeSingle();
@@ -59,6 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         );
 
         if (session?.user) {
+          if (!(await checkAllowed(session.user.email))) {
+            await rejectUnauthorized();
+            return;
+          }
           setUser(session.user);
           fetchRole(session.user.id);
         } else {
@@ -79,6 +110,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
+        if (!(await checkAllowed(session.user.email))) {
+          await rejectUnauthorized();
+          setLoading(false);
+          return;
+        }
         setUser(session.user);
         fetchRole(session.user.id);
       } else {
@@ -99,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [router, fetchRole]);
+  }, [router, fetchRole, checkAllowed, rejectUnauthorized]);
 
   // Handle protected routing
   useEffect(() => {
