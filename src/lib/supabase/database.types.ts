@@ -200,24 +200,6 @@ export type Database = {
         }
         Relationships: []
       }
-      allowed_emails: {
-        Row: {
-          added_by: string | null
-          created_at: string
-          email: string
-        }
-        Insert: {
-          added_by?: string | null
-          created_at?: string
-          email: string
-        }
-        Update: {
-          added_by?: string | null
-          created_at?: string
-          email?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string | null
