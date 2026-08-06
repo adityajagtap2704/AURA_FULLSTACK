@@ -32,19 +32,5 @@ export async function getAuthContext(request: NextRequest): Promise<AuthContext>
     throw new AuthError('Invalid or expired session');
   }
 
-  if (!data.user.email) {
-    throw new AuthError('Account has no email on file.', 403);
-  }
-
-  const { data: allowedRow } = await supabaseServer
-    .from('allowed_emails')
-    .select('email')
-    .ilike('email', data.user.email)
-    .maybeSingle();
-
-  if (!allowedRow) {
-    throw new AuthError('This account is not authorized to access AURA.', 403);
-  }
-
   return { userId: data.user.id, tenantId: data.user.id };
 }

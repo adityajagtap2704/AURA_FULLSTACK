@@ -87,32 +87,6 @@ CREATE POLICY "Admins can read all profiles" ON public.profiles
     FOR SELECT USING (public.is_admin(auth.uid()));
 
 -- -------------------------------------------------------------------------
--- ALLOWED EMAILS (pre-launch access gate)
--- -------------------------------------------------------------------------
--- Any Google account can complete Supabase OAuth — this table is the
--- actual gate on who's allowed into the app while it's unpublished. No
--- SELECT/INSERT policy for the public/anon role: rows are only ever read
--- by (a) the signed-in user checking their own email, or (b) the backend's
--- service-role client, which bypasses RLS entirely.
-CREATE TABLE IF NOT EXISTS public.allowed_emails (
-    email TEXT PRIMARY KEY,
-    added_by UUID REFERENCES auth.users(id),
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-ALTER TABLE public.allowed_emails ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Users can check their own email is allowed" ON public.allowed_emails;
-CREATE POLICY "Users can check their own email is allowed" ON public.allowed_emails
-    FOR SELECT USING (lower(email) = lower(auth.jwt() ->> 'email'));
-
--- Seed with your team's emails, e.g.:
---   INSERT INTO public.allowed_emails (email) VALUES
---     ('teammate1@gmail.com'),
---     ('teammate2@gmail.com')
---   ON CONFLICT (email) DO NOTHING;
-
--- -------------------------------------------------------------------------
 -- CANONICAL TABLES
 -- -------------------------------------------------------------------------
 
