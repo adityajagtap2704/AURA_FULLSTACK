@@ -303,7 +303,10 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
     }
     setJumping(true);
     setBlinkSignal((n) => (n ?? 0) + 1);
-    window.setTimeout(onOpen, 260);
+    window.setTimeout(() => {
+      setJumping(false);
+      onOpen();
+    }, 260);
   };
 
   return (
@@ -319,7 +322,6 @@ function FloatingLauncher({ onOpen }: { onOpen: () => void }) {
       <motion.button
         type="button"
         aria-label="Open AURA Assistant"
-        layoutId="aura-assistant-shell"
         onClick={handleClick}
         onHoverStart={() => setHovered(true)}
         onHoverEnd={() => {
@@ -502,11 +504,10 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <motion.div
-      layoutId="aura-assistant-shell"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={PANEL_SPRING}
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 12, scale: 0.98 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
       style={{ transformOrigin: 'bottom right' }}
       className="fixed bottom-6 right-6 z-50 flex h-[min(600px,calc(100vh-3rem))] w-[calc(100vw-3rem)] max-w-[380px] flex-col overflow-hidden rounded-3xl border border-[#F0EBE3] bg-white shadow-[0_24px_60px_rgba(31,27,22,0.28)]"
     >
@@ -636,15 +637,42 @@ function ChatPanel({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function AIAssistantWidget() {
+export default function AIAssistantWidget({ openAssistant = false }: { openAssistant?: boolean }) {
   const reduceMotion = useReducedMotion();
-  const [ready, setReady] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [ready, setReady] = useState(openAssistant);
+  const [isOpen, setIsOpen] = useState(openAssistant);
+  const [pendingOpen, setPendingOpen] = useState(openAssistant);
 
   useEffect(() => {
+    if (openAssistant) {
+      setReady(true);
+      setPendingOpen(true);
+      return;
+    }
+
     const timer = window.setTimeout(() => setReady(true), 1200);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [openAssistant]);
+
+  useEffect(() => {
+    if (ready && pendingOpen) {
+      setIsOpen(true);
+      setPendingOpen(false);
+    }
+  }, [ready, pendingOpen]);
+
+  useEffect(() => {
+    const handleOpenAssistant = () => {
+      if (ready) {
+        setIsOpen(true);
+      } else {
+        setPendingOpen(true);
+      }
+    };
+
+    window.addEventListener('aura:open-assistant', handleOpenAssistant);
+    return () => window.removeEventListener('aura:open-assistant', handleOpenAssistant);
+  }, [ready]);
 
   return (
     <>
@@ -662,7 +690,7 @@ export default function AIAssistantWidget() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
+      <AnimatePresence mode="wait" initial={false}>
         {ready &&
           (!isOpen ? (
             <FloatingLauncher key="launcher" onOpen={() => setIsOpen(true)} />

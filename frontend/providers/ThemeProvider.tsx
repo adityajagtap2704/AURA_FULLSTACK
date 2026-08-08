@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useState, ReactNode } from 'react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -12,18 +12,26 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+const getInitialTheme = (): Theme => {
+  if (typeof window === 'undefined') return 'light';
+  const savedTheme = localStorage.getItem('aura-theme') as Theme | null;
+  return savedTheme ?? 'light';
+};
+
+const getInitialResolvedTheme = (theme: Theme): 'light' | 'dark' => {
+  if (typeof window === 'undefined') return 'light';
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  if (theme === 'system') {
+    return mediaQuery.matches ? 'dark' : 'light';
+  }
+  return theme;
+};
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => getInitialResolvedTheme(getInitialTheme()));
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('aura-theme') as Theme | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 

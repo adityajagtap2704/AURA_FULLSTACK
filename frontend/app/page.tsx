@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { motion, AnimatePresence, useInView, useMotionValue, useTransform, animate, useAnimation, useAnimationFrame } from 'framer-motion';
 import Link from 'next/link';
@@ -1543,7 +1543,18 @@ function Footer() {
 export default function Home() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  useEffect(() => { if (!loading && user) router.replace('/dashboard'); }, [user, loading, router]);
+  const searchParams = useSearchParams();
+  const openAssistant = searchParams.get('assistant') === '1';
+
+  useEffect(() => {
+    if (!loading && user) router.replace('/dashboard');
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!loading && !user && openAssistant) {
+      window.dispatchEvent(new CustomEvent('aura:open-assistant'));
+    }
+  }, [loading, user, openAssistant]);
 
   if (loading) return (
     <div className="flex h-screen w-screen items-center justify-center bg-[#FDFAF6]">
@@ -1568,7 +1579,7 @@ export default function Home() {
         <CTABanner/>
       </main>
       <Footer/>
-      <AIAssistantWidget/>
+      <AIAssistantWidget openAssistant={openAssistant} />
     </div>
   );
 }

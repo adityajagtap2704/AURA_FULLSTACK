@@ -5,7 +5,16 @@ dotenv.config();
 import { Queue, QueueEvents, ConnectionOptions } from 'bullmq';
 import { Redis } from 'ioredis';
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+const localRedisUrl = process.env.REDIS_URL_LOCAL || 'redis://localhost:6379';
+const redisUrl = process.env.NODE_ENV === 'development'
+  ? localRedisUrl
+  : process.env.REDIS_URL || 'redis://localhost:6379';
+
+if (process.env.NODE_ENV === 'development') {
+  console.info('Using local Redis for development:', redisUrl);
+}
+
+const connection = new Redis(redisUrl, {
   maxRetriesPerRequest: null,
   family: 4,
 });

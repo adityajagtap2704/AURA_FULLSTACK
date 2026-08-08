@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   turbopack: {
-    root: process.cwd(),
+    root: ".",
   },
   async rewrites() {
     const backendUrl =
@@ -22,4 +22,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-
