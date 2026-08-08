@@ -1,12 +1,12 @@
 'use client';
+import { Suspense, useState, useEffect } from 'react';
 import Image from "next/image";
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Mail, Search, Star, AlertCircle, RefreshCw, ChevronRight, Inbox, Eye, Link2 } from 'lucide-react';
 
-export default function GmailPage() {
+function GmailPageContent() {
   const { data, isLoading, isError, refetch, syncGoogle, isSyncingGoogle, connectorStatus, isLoadingConnectorStatus } = useDashboard();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
@@ -320,5 +320,13 @@ const getAvatarColor = (sender: string) => {
         )}
       </div>
     </div>
+  );
+}
+
+export default function GmailPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-sm text-muted-foreground">Loading Gmail…</div>}>
+      <GmailPageContent />
+    </Suspense>
   );
 }

@@ -18,7 +18,7 @@ const TAB_CONFIG: { id: FilterTab; icon: typeof List }[] = [
   { id: 'Completed', icon: CheckCircle },
 ];
 
-export default function TasksPage() {
+function TasksPageContent() {
   const { tasks, isLoading, isError } = useTasks();
   const searchParams = useSearchParams();
 
@@ -234,5 +234,13 @@ export default function TasksPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-sm text-muted-foreground">Loading tasks…</div>}>
+      <TasksPageContent />
+    </Suspense>
   );
 }
