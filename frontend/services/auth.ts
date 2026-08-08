@@ -32,13 +32,16 @@ export const authService = {
 
   async logout() {
     try {
-      await api.post('/api/auth/logout');
-    } catch (err) {
-      console.warn('[authService] Backend logout failed, proceeding with client signOut:', err);
-    } finally {
-      // Always clear client-side Supabase session
+      // Clear client-side session immediately for a faster logout experience.
       await supabase.auth.signOut();
+    } catch (err) {
+      console.warn('[authService] Client logout failed:', err);
     }
+
+    // Fire-and-forget backend cleanup if required by server state, but do not block logout.
+    api.post('/api/auth/logout').catch((err) => {
+      console.warn('[authService] Backend logout cleanup failed:', err);
+    });
   },
 
   async getGoogleAuthUrl() {

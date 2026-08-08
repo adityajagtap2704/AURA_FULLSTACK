@@ -1,7 +1,8 @@
 'use client';
 import Image from "next/image";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
 import { FileText, Search, ExternalLink, RefreshCw, AlertCircle, Calendar, Link2 } from 'lucide-react';
 
@@ -9,6 +10,7 @@ export default function DocumentsPage() {
   const { data, isLoading, isError, refetch, syncNotion, isSyncingNotion, connectorStatus, isLoadingConnectorStatus } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
+  const searchParams = useSearchParams();
 
   if (isLoading || isLoadingConnectorStatus) {
     return (
@@ -32,6 +34,11 @@ export default function DocumentsPage() {
   const notionConnected = connectorStatus.notion;
 
   // Filter documents
+  useEffect(() => {
+    const query = searchParams.get('search') ?? '';
+    setSearchQuery(query);
+  }, [searchParams]);
+
   const filteredDocs = data.documents.filter((doc) => {
     return doc.title.toLowerCase().includes(searchQuery.toLowerCase());
   });

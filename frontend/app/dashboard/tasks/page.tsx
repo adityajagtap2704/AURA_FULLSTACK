@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTasks } from '@/hooks/useTasks';
 import { Task } from '@/types';
 import { CheckSquare, Search, Loader2, LayoutGrid, List, CheckCircle, User } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { KanbanBoard } from './components/KanbanBoard';
 import { TaskListView } from './components/TaskListView';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,11 +20,17 @@ const TAB_CONFIG: { id: FilterTab; icon: typeof List }[] = [
 
 export default function TasksPage() {
   const { tasks, isLoading, isError } = useTasks();
+  const searchParams = useSearchParams();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FilterTab>('Kanban');
 
   // Compute filtered task sets for each tab (search applied to all)
+  useEffect(() => {
+    const query = searchParams.get('search') ?? '';
+    setSearchQuery(query);
+  }, [searchParams]);
+
   const searchFiltered = useMemo(() => {
     if (!searchQuery.trim()) return tasks;
     const q = searchQuery.toLowerCase();

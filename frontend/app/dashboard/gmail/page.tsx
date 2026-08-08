@@ -1,12 +1,14 @@
 'use client';
 import Image from "next/image";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Mail, Search, Star, AlertCircle, RefreshCw, ChevronRight, Inbox, Eye, Link2 } from 'lucide-react';
 
 export default function GmailPage() {
   const { data, isLoading, isError, refetch, syncGoogle, isSyncingGoogle, connectorStatus, isLoadingConnectorStatus } = useDashboard();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
 
@@ -32,6 +34,11 @@ export default function GmailPage() {
   const googleConnected = connectorStatus.google;
 
   // Filter messages
+  useEffect(() => {
+    const query = searchParams.get('search') ?? '';
+    setSearchQuery(query);
+  }, [searchParams]);
+
   const filteredMessages = data.messages.filter((msg) => {
     const query = searchQuery.toLowerCase();
     const senderMatch = msg.sender.toLowerCase().includes(query);

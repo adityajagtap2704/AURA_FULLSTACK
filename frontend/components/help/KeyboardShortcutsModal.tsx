@@ -11,7 +11,8 @@ type KeyboardShortcutsModalProps = {
 };
 
 const shortcuts = [
-  { key: 'Ctrl + K', action: 'Open global search' },
+  { key: 'Ctrl/Cmd + K', action: 'Open Command Center' },
+  { key: 'Ctrl/Cmd + /', action: 'Keyboard Shortcuts' },
   { key: 'G → T', action: 'Go to Tasks' },
   { key: 'G → C', action: 'Go to Calendar' },
   { key: 'G → M', action: 'Go to Messages' },
@@ -19,6 +20,8 @@ const shortcuts = [
   { key: 'G → A', action: 'Go to AI Assistant' },
   { key: 'G → I', action: 'Go to AI Digest' },
   { key: 'G → N', action: 'Go to Integrations' },
+  { key: 'G → S', action: 'Go to Settings' },
+  { key: 'Esc', action: 'Close modals/dialogs' },
 ];
 
 export default function KeyboardShortcutsModal({

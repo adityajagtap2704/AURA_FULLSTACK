@@ -127,6 +127,26 @@ const [reportBugOpen, setReportBugOpen] = useState(false);
 const [helpCenterOpen, setHelpCenterOpen] = useState(false);
 const [contactSupportOpen, setContactSupportOpen] = useState(false);
 
+  // Listen for command palette events
+  useEffect(() => {
+    const handleOpenShortcuts = () => setShortcutsOpen(true);
+    const handleOpenAbout = () => setAboutOpen(true);
+    const handleOpenReportBug = () => setReportBugOpen(true);
+    const handleOpenContactSupport = () => setContactSupportOpen(true);
+
+    window.addEventListener('aura:open-shortcuts', handleOpenShortcuts);
+    window.addEventListener('aura:open-about', handleOpenAbout);
+    window.addEventListener('aura:open-report-bug', handleOpenReportBug);
+    window.addEventListener('aura:open-contact-support', handleOpenContactSupport);
+
+    return () => {
+      window.removeEventListener('aura:open-shortcuts', handleOpenShortcuts);
+      window.removeEventListener('aura:open-about', handleOpenAbout);
+      window.removeEventListener('aura:open-report-bug', handleOpenReportBug);
+      window.removeEventListener('aura:open-contact-support', handleOpenContactSupport);
+    };
+  }, []);
+
   useEffect(() => {
     setMobileMenuOpen(false);
     setProfileMenuOpen(false);
@@ -139,11 +159,16 @@ const [contactSupportOpen, setContactSupportOpen] = useState(false);
 
       // ── Global shortcuts (work regardless of focus) ──────────────
 
-      // Ctrl + K or Cmd + K → Focus Search
+      // Ctrl + K or Cmd + K is now handled by CommandPaletteProvider
+      // But we keep the fallback for the search input
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        const input = document.getElementById("global-search") as HTMLInputElement | null;
-        input?.focus();
+        // Only focus search if command palette is not open
+        const commandPaletteOpen = document.querySelector('[data-command-palette-open]');
+        if (!commandPaletteOpen) {
+          e.preventDefault();
+          const input = document.getElementById("global-search") as HTMLInputElement | null;
+          input?.focus();
+        }
         return;
       }
 

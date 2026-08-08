@@ -1,5 +1,6 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDashboard } from '@/hooks/useDashboard';
 import { useEvents } from '@/hooks/useEvents';
@@ -33,6 +34,7 @@ export default function CalendarPage() {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day' | 'agenda'>('day');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSyncingOutlook, setIsSyncingOutlook] = useState(false);
+  const searchParams = useSearchParams();
 
   const userName = getDisplayName(user);
   const avatarUrl = getAvatarUrl(user);
@@ -41,6 +43,11 @@ export default function CalendarPage() {
   const googleConnected = connectorStatus?.google ?? false;
 
   // Filter events based on Search Query
+  useEffect(() => {
+    const query = searchParams.get('search') ?? '';
+    setSearchQuery(query);
+  }, [searchParams]);
+
   const filteredEvents = useMemo(() => {
     if (!searchQuery.trim()) return events;
     const q = searchQuery.toLowerCase();

@@ -31,10 +31,14 @@ api.interceptors.request.use(
 // Response interceptor to handle common errors like 401 Unauthorized
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       console.warn('API returned 401 Unauthorized.');
-      // Optional: perform redirect to login or clear session
+      try {
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        console.warn('Failed to clear session after 401:', signOutError);
+      }
     }
     return Promise.reject(error);
   }
