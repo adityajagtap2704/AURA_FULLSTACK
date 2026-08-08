@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo, useEffect } from 'react';
 import { useTasks } from '@/hooks/useTasks';
 import { Task } from '@/types';
 import { CheckSquare, Search, Loader2, LayoutGrid, List, CheckCircle, User } from 'lucide-react';
