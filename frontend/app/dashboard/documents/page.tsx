@@ -1,12 +1,12 @@
 'use client';
+import { Suspense, useState, useEffect } from 'react';
 import Image from "next/image";
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useDashboard } from '@/hooks/useDashboard';
 import { FileText, Search, ExternalLink, RefreshCw, AlertCircle, Calendar, Link2 } from 'lucide-react';
 
-export default function DocumentsPage() {
+function DocumentsPageContent() {
   const { data, isLoading, isError, refetch, syncNotion, isSyncingNotion, connectorStatus, isLoadingConnectorStatus } = useDashboard();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'title'>('date');
@@ -189,5 +189,13 @@ Notion Documents
         </div>
       )}
     </div>
+  );
+}
+
+export default function DocumentsPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-sm text-muted-foreground">Loading documents…</div>}>
+      <DocumentsPageContent />
+    </Suspense>
   );
 }

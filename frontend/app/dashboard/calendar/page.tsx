@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo, useEffect } from 'react';
+import { Suspense, useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDashboard } from '@/hooks/useDashboard';
@@ -11,7 +11,7 @@ import { getDisplayName, getAvatarUrl } from '@/lib/userDisplay';
 import { useRouter } from 'next/navigation';
 import { CalendarDays } from "lucide-react";
 
-export default function CalendarPage() {
+function CalendarPageContent() {
   const { user } = useAuth();
   const router = useRouter();
 
@@ -179,5 +179,13 @@ export default function CalendarPage() {
 
       {/* Add / Edit Event Modal */}
     </div>
+  );
+}
+
+export default function CalendarPage() {
+  return (
+    <Suspense fallback={<div className="py-20 text-center text-sm text-muted-foreground">Loading calendar…</div>}>
+      <CalendarPageContent />
+    </Suspense>
   );
 }
